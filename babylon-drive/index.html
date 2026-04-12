@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+  <meta name="theme-color" content="#1a0e04"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>Strážce Pokladu</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --gold:#F5A623; --dgold:#C8860A; --lgold:#FFD700;
+      --sand:#F5E6C3; --brown:#8B5E3C; --dbrown:#3d1a00;
+      --bg1:#1a0e04; --bg2:#3d2008; --bg3:#7a4a1a;
+      --teal:#2A9BB5; --lteal:#80D4E8;
+      --green:#4CAF50; --red:#E53935;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overscroll-behavior:none;}
+    body{
+      font-family:'Nunito',sans-serif;
+      background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 35%,var(--bg3) 75%,#c8860a 100%);
+      min-height:100dvh; color:#fff; overflow-x:hidden;
+    }
+
+    /* ═══════════════════════════════════════
+       SETUP SCREEN
+    ═══════════════════════════════════════ */
+    #setup-screen {
+      position:fixed; inset:0; z-index:1000;
+      background:linear-gradient(180deg,#0d0700 0%,#1a0e04 40%,#2d1508 100%);
+      overflow-y:auto; padding:0 0 40px;
+    }
+    #setup-screen.hidden{display:none;}
+
+    .setup-header{
+      text-align:center; padding:36px 20px 24px;
+      background:linear-gradient(180deg,rgba(0,0,0,0.4),transparent);
+    }
+    .setup-header .badge{
+      display:inline-block;
+      background:linear-gradient(135deg,var(--gold),var(--dgold));
+      color:var(--dbrown); font-family:'Cinzel',serif; font-weight:700;
+      font-size:10px; letter-spacing:3px; padding:5px 14px;
+      border-radius:20px; margin-bottom:12px;
+    }
+    .setup-header h1{
+      font-family:'Cinzel Decorative',cursive;
+      font-size:clamp(22px,7vw,34px);
+      background:linear-gradient(135deg,#FFD700,#F5A623,#FFD700);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text; filter:drop-shadow(0 2px 8px rgba(245,166,35,0.5));
+      margin-bottom:8px;
+    }
+    .setup-header p{font-size:13px;color:var(--sand);opacity:0.8;line-height:1.55;}
+
+    .setup-card{
+      margin:0 16px 16px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(245,166,35,0.25);
+      border-radius:18px; padding:18px 16px;
+    }
+    .setup-step-num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:26px; height:26px; border-radius:50%;
+      background:linear-gradient(135deg,var(--gold),var(--dgold));
+      color:var(--dbrown); font-family:'Cinzel',serif;
+      font-weight:700; font-size:12px; margin-right:8px; flex-shrink:0;
+    }
+    .setup-step{display:flex; align-items:flex-start; gap:4px; margin-bottom:14px;}
+    .setup-step:last-child{margin-bottom:0;}
+    .setup-step-content{}
+    .setup-step-title{
+      font-family:'Cinzel',serif; font-weight:700;
+      font-size:13px; color:var(--gold); margin-bottom:4px;
+      display:flex; align-items:center;
+    }
+    .setup-step-text{font-size:12px;color:var(--sand);opacity:0.75;line-height:1.55;}
+    .setup-step-text a{color:var(--lteal);text-decoration:underline;}
+    .setup-step-text code{
+      background:rgba(245,166,35,0.15); border:1px solid rgba(245,166,35,0.3);
+      border-radius:5px; padding:1px 6px; font-size:11px; color:#FFD700;
+      word-break:break-all;
+    }
+    .setup-note{
+      background:rgba(42,155,181,0.12); border:1px solid rgba(42,155,181,0.3);
+      border-radius:12px; padding:11px 13px; margin-top:12px;
+      font-size:11px; color:var(--lteal); line-height:1.5;
+    }
+    .setup-divider{
+      display:flex;align-items:center;gap:10px;margin:20px 16px;
+    }
+    .setup-divider::before,.setup-divider::after{
+      content:'';flex:1;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(245,166,35,0.3),transparent);
+    }
+    .setup-divider span{font-size:15px;}
+
+    .client-id-section{margin:0 16px;}
+    .client-id-label{
+      font-family:'Cinzel',serif;font-size:12px;letter-spacing:1.5px;
+      color:var(--gold);text-transform:uppercase;margin-bottom:10px;
+      display:block;
+    }
+    #client-id-input{
+      width:100%; padding:13px 14px;
+      background:rgba(0,0,0,0.4); border:2px solid rgba(245,166,35,0.5);
+      border-radius:12px; color:var(--sand);
+      font-family:'Nunito',sans-serif;font-size:13px;
+      outline:none; margin-bottom:12px; word-break:break-all;
+    }
+    #client-id-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,0.15);}
+    #client-id-input::placeholder{color:rgba(245,166,35,0.3);}
+
+    .connect-btn{
+      width:100%; padding:15px;
+      background:linear-gradient(135deg,var(--gold),var(--dgold));
+      border:none; border-radius:14px;
+      color:var(--dbrown);font-family:'Cinzel',serif;
+      font-weight:700;font-size:15px;
+      cursor:pointer;letter-spacing:1px;
+      box-shadow:0 6px 20px rgba(245,166,35,0.3);
+      transition:transform 0.15s,box-shadow 0.15s;
+    }
+    .connect-btn:active{transform:scale(0.97);}
+
+    .skip-btn{
+      display:block;width:100%;margin-top:10px;padding:12px;
+      background:transparent;border:1px solid rgba(245,166,35,0.25);
+      border-radius:12px;color:rgba(245,166,35,0.5);
+      font-family:'Nunito',sans-serif;font-size:13px;
+      cursor:pointer;transition:all 0.2s;
+    }
+
+    /* ═══════════════════════════════════════
+       MAIN APP
+    ═══════════════════════════════════════ */
+    #stars-canvas{
+      position:fixed;top:0;left:0;width:100%;height:40vh;
+      pointer-events:none;z-index:0;
+    }
+    .app{
+      position:relative;z-index:1;
+      max-width:480px;margin:0 auto;
+      padding:0 14px 80px;
+    }
+
+    /* DRIVE STATUS BAR */
+    #drive-bar{
+      display:flex;align-items:center;gap:8px;
+      background:rgba(0,0,0,0.35);
+      border-bottom:1px solid rgba(245,166,35,0.15);
+      padding:8px 14px; font-size:11px;
+      position:sticky;top:0;z-index:10;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+    }
+    .drive-dot{
+      width:8px;height:8px;border-radius:50%;flex-shrink:0;
+      transition:background 0.3s;
+    }
+    .drive-dot.ok     {background:var(--green);box-shadow:0 0 6px var(--green);}
+    .drive-dot.syncing{background:var(--gold);box-shadow:0 0 6px var(--gold);animation:pulse 0.8s infinite alternate;}
+    .drive-dot.offline{background:#888;}
+    .drive-dot.error  {background:var(--red);box-shadow:0 0 6px var(--red);}
+    @keyframes pulse{from{opacity:0.5}to{opacity:1}}
+    #drive-status-text{flex:1;color:var(--sand);opacity:0.75;}
+    .drive-action-btn{
+      background:transparent;border:1px solid rgba(245,166,35,0.3);
+      border-radius:8px;color:rgba(245,166,35,0.7);
+      font-size:10px;font-family:'Cinzel',serif;
+      padding:4px 10px;cursor:pointer;transition:all 0.2s;
+    }
+    .drive-action-btn:active{opacity:0.7;}
+
+    /* HEADER */
+    .header{text-align:center;padding:20px 0 16px;}
+    .header-badge{
+      display:inline-block;
+      background:linear-gradient(135deg,var(--gold),var(--dgold));
+      color:var(--dbrown);font-family:'Cinzel',serif;font-weight:700;
+      font-size:10px;letter-spacing:3px;text-transform:uppercase;
+      padding:5px 14px;border-radius:20px;margin-bottom:10px;
+    }
+    .header h1{
+      font-family:'Cinzel Decorative',cursive;
+      font-size:clamp(24px,7vw,36px);line-height:1.15;
+      background:linear-gradient(135deg,#FFD700 0%,#F5A623 50%,#FFD700 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      filter:drop-shadow(0 2px 8px rgba(245,166,35,0.5));
+      margin-bottom:6px;
+    }
+    .header p{font-size:13px;color:var(--sand);opacity:0.82;line-height:1.55;}
+
+    /* SUMMARY */
+    .summary-row{display:flex;gap:8px;margin-bottom:18px;}
+    .summary-card{
+      flex:1;background:rgba(0,0,0,0.22);
+      border:1px solid rgba(245,166,35,0.28);
+      border-radius:14px;padding:10px 8px;text-align:center;
+    }
+    .s-label{font-size:9px;color:var(--gold);font-family:'Cinzel',serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+    .s-val{font-family:'Cinzel',serif;font-weight:700;font-size:15px;color:#FFD700;}
+    .s-sub{font-size:9px;color:var(--sand);opacity:0.55;margin-top:2px;}
+
+    /* INPUT */
+    .input-section{
+      background:linear-gradient(135deg,rgba(139,94,60,0.55),rgba(42,26,8,0.8));
+      border:2px solid var(--gold);border-radius:20px;
+      padding:17px 15px;margin-bottom:16px;
+      box-shadow:0 4px 20px rgba(245,166,35,0.12),inset 0 1px 0 rgba(255,255,255,0.07);
+    }
+    .input-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:12px;}
+    .input-row{display:flex;gap:10px;align-items:center;}
+    .input-wrap{flex:1;position:relative;}
+    .input-wrap::before{
+      content:'Kč';position:absolute;left:12px;top:50%;transform:translateY(-50%);
+      color:var(--gold);font-family:'Cinzel',serif;font-size:12px;font-weight:700;
+      pointer-events:none;z-index:1;
+    }
+    #amount-input{
+      width:100%;padding:13px 12px 13px 38px;
+      background:rgba(0,0,0,0.35);border:2px solid var(--gold);
+      border-radius:12px;color:#FFD700;
+      font-family:'Cinzel',serif;font-size:22px;font-weight:700;
+      outline:none;-webkit-appearance:none;
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    #amount-input:focus{border-color:#FFD700;box-shadow:0 0 0 3px rgba(245,166,35,0.2);}
+    #amount-input::placeholder{color:rgba(245,166,35,0.25);}
+    .add-btn{
+      background:linear-gradient(135deg,var(--gold),var(--dgold));
+      border:none;border-radius:12px;
+      color:var(--dbrown);font-family:'Cinzel',serif;font-weight:700;
+      font-size:13px;padding:13px 15px;cursor:pointer;
+      white-space:nowrap;
+      box-shadow:0 4px 12px rgba(245,166,35,0.28);
+      transition:transform 0.15s;
+    }
+    .add-btn:active{transform:scale(0.95);}
+
+    /* GOLDEN RULE */
+    .golden-rule{
+      background:linear-gradient(90deg,rgba(245,166,35,0.07),rgba(245,166,35,0.2),rgba(245,166,35,0.07));
+      border-top:1px solid rgba(245,166,35,0.35);
+      border-bottom:1px solid rgba(245,166,35,0.35);
+      padding:10px 14px;text-align:center;margin-bottom:18px;
+      font-size:12px;color:#FFD700;font-weight:700;line-height:1.55;
+    }
+
+    /* JARS */
+    .jars-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:12px;}
+    .jars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+    .jar-card{
+      background:linear-gradient(160deg,rgba(139,94,60,0.42),rgba(42,26,8,0.72));
+      border:2px solid rgba(245,166,35,0.32);
+      border-radius:18px;padding:13px 7px 13px;
+      text-align:center;position:relative;overflow:hidden;
+      transition:transform 0.2s;
+    }
+    .jar-card::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.04) 0%,transparent 60%);pointer-events:none;}
+    .jar-card.ted  {border-color:rgba(255,130,60,0.42);}
+    .jar-card.potom{border-color:rgba(80,180,255,0.42);}
+    .jar-card.navzdy{border-color:rgba(245,166,35,0.62);}
+    .jar-svg-wrap{margin:0 auto 7px;width:56px;height:76px;}
+    svg.jar{width:56px;height:76px;}
+    .jar-fill-rect{transition:height 0.9s cubic-bezier(0.34,1.56,0.64,1),y 0.9s cubic-bezier(0.34,1.56,0.64,1);}
+    .jar-label{font-family:'Cinzel',serif;font-weight:700;font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:1px;}
+    .jar-sublabel{font-size:8px;color:var(--sand);opacity:0.55;letter-spacing:0.5px;margin-bottom:5px;}
+    .jar-amount{font-family:'Cinzel',serif;font-weight:700;font-size:15px;color:#FFD700;margin-bottom:2px;}
+    .jar-pct{font-size:9px;color:var(--sand);opacity:0.6;margin-bottom:4px;}
+    .jar-desc{font-size:9px;color:var(--sand);opacity:0.5;line-height:1.4;}
+
+    /* TREE */
+    .tree-section{text-align:center;padding:5px 0 16px;}
+    .tree-icon{font-size:50px;display:block;animation:treePulse 3s ease-in-out infinite alternate;filter:drop-shadow(0 4px 14px rgba(245,166,35,0.5));}
+    @keyframes treePulse{from{transform:scale(0.94);}to{transform:scale(1.06);}}
+    .tree-msg{font-size:13px;color:var(--gold);font-weight:700;margin-top:7px;}
+
+    /* DIVIDER */
+    .divider{display:flex;align-items:center;gap:10px;margin:5px 0 18px;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(245,166,35,0.38),transparent);}
+
+    /* PYRAMID */
+    .pyramid-section{
+      background:linear-gradient(160deg,rgba(42,107,124,0.25),rgba(42,26,8,0.62));
+      border:2px solid rgba(80,180,200,0.32);
+      border-radius:20px;padding:17px 13px 15px;margin-bottom:18px;
+    }
+    .pyramid-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:var(--lteal);text-transform:uppercase;text-align:center;margin-bottom:3px;}
+    .pyramid-sub{font-size:11px;color:var(--sand);opacity:0.62;text-align:center;margin-bottom:13px;}
+    .pyramid-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:11px;}
+    .p-step{
+      display:flex;align-items:center;justify-content:center;
+      border-radius:8px;height:27px;
+      font-family:'Cinzel',serif;font-size:10px;font-weight:700;
+      color:rgba(255,255,255,0.35);
+      border:1px solid rgba(245,166,35,0.1);
+      transition:all 0.5s ease;position:relative;
+    }
+    .p-step.active{color:#3d1a00;border:none;box-shadow:0 3px 10px rgba(245,166,35,0.3);}
+    .p-step.active::after{content:'⭐';position:absolute;right:8px;font-size:11px;}
+    .pyramid-progress{text-align:center;font-size:12px;color:var(--sand);opacity:0.75;line-height:1.5;}
+
+    /* TABS */
+    .tabs{display:flex;gap:8px;margin-bottom:12px;}
+    .tab-btn{
+      flex:1;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(245,166,35,0.22);
+      border-radius:10px;color:rgba(245,166,35,0.5);
+      font-family:'Cinzel',serif;font-size:10px;
+      letter-spacing:1px;padding:8px 6px;cursor:pointer;
+      transition:all 0.2s;text-transform:uppercase;
+    }
+    .tab-btn.active{
+      background:linear-gradient(135deg,rgba(245,166,35,0.18),rgba(200,134,10,0.28));
+      border-color:var(--gold);color:var(--gold);
+    }
+
+    /* HISTORY */
+    .panel{
+      background:linear-gradient(160deg,rgba(139,94,60,0.26),rgba(42,26,8,0.58));
+      border:2px solid rgba(245,166,35,0.25);
+      border-radius:20px;padding:17px 13px;margin-bottom:18px;
+    }
+    .history-empty{text-align:center;font-size:13px;color:var(--sand);opacity:0.4;padding:18px 0;}
+    .history-list{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;}
+    .h-item{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.18);border-radius:10px;padding:8px 10px;}
+    .h-coin{font-size:16px;}
+    .h-amount{font-family:'Cinzel',serif;font-weight:700;color:#FFD700;font-size:13px;min-width:52px;}
+    .h-breakdown{flex:1;color:var(--sand);opacity:0.62;font-size:10px;line-height:1.5;}
+    .h-date{font-size:9px;color:var(--sand);opacity:0.38;}
+
+    /* TIPS */
+    .tip-item{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(245,166,35,0.08);}
+    .tip-item:last-child{border-bottom:none;}
+    .tip-icon{font-size:21px;flex-shrink:0;margin-top:2px;}
+    .tip-title{font-family:'Cinzel',serif;font-weight:700;font-size:12px;color:var(--gold);margin-bottom:3px;}
+    .tip-text{font-size:12px;color:var(--sand);opacity:0.72;line-height:1.5;}
+
+    /* SETTINGS PANEL */
+    .settings-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(245,166,35,0.08);}
+    .settings-row:last-child{border-bottom:none;}
+    .settings-icon{font-size:20px;flex-shrink:0;}
+    .settings-label{flex:1;font-size:13px;color:var(--sand);opacity:0.8;}
+    .settings-btn{
+      background:linear-gradient(135deg,rgba(245,166,35,0.2),rgba(200,134,10,0.3));
+      border:1px solid var(--gold);border-radius:9px;
+      color:var(--gold);font-family:'Cinzel',serif;
+      font-size:11px;padding:7px 12px;cursor:pointer;
+      transition:all 0.2s;white-space:nowrap;
+    }
+    .settings-btn:active{opacity:0.7;}
+    .settings-btn.danger{
+      background:rgba(229,57,53,0.12);border-color:rgba(229,57,53,0.4);
+      color:rgba(229,57,53,0.8);
+    }
+
+    /* RESET */
+    .reset-btn{
+      display:block;margin:0 auto 10px;
+      background:transparent;border:1px solid rgba(245,166,35,0.22);
+      border-radius:10px;color:rgba(245,166,35,0.42);
+      font-family:'Nunito',sans-serif;font-size:12px;
+      padding:8px 18px;cursor:pointer;transition:all 0.2s;
+    }
+
+    /* TOAST */
+    #toast{
+      position:fixed;bottom:28px;left:50%;
+      transform:translateX(-50%) translateY(0);
+      background:linear-gradient(135deg,var(--gold),var(--dgold));
+      color:var(--dbrown);font-family:'Cinzel',serif;
+      font-weight:700;font-size:13px;
+      padding:11px 22px;border-radius:30px;
+      box-shadow:0 6px 20px rgba(245,166,35,0.4);
+      z-index:999;transition:opacity 0.4s,transform 0.4s;
+      white-space:nowrap;max-width:90vw;text-align:center;
+    }
+    #toast.hidden{opacity:0;transform:translateX(-50%) translateY(16px);pointer-events:none;}
+
+    /* COIN ANIM */
+    @keyframes coinFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}100%{opacity:0;transform:translateY(80px) rotate(720deg) scale(0.3);}}
+    .coin-anim{position:fixed;font-size:22px;pointer-events:none;z-index:500;animation:coinFall 0.8s ease-in forwards;}
+
+    /* SCROLL */
+    .history-list::-webkit-scrollbar{width:4px;}
+    .history-list::-webkit-scrollbar-track{background:rgba(255,255,255,0.04);border-radius:4px;}
+    .history-list::-webkit-scrollbar-thumb{background:rgba(245,166,35,0.28);border-radius:4px;}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════════ -->
+<div id="setup-screen">
+  <div class="setup-header">
+    <div class="badge">⚜️ Babylonský trénink ⚜️</div>
+    <h1>Strážce Pokladu</h1>
+    <p>Připoj Google Drive, aby se tvůj poklad<br>ukládal bezpečně do cloudu.</p>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-step">
+      <div>
+        <div class="setup-step-title"><span class="setup-step-num">1</span> Otevři Google Cloud Console</div>
+        <div class="setup-step-text">
+          Jdi na <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a>
+          a přihlas se svým Google účtem.
+        </div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div>
+        <div class="setup-step-title"><span class="setup-step-num">2</span> Vytvoř nový projekt</div>
+        <div class="setup-step-text">
+          Klikni na <strong>„Vybrat projekt" → „Nový projekt"</strong>.
+          Název: <code>strazce-pokladu</code> → Vytvořit.
+        </div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div>
+        <div class="setup-step-title"><span class="setup-step-num">3</span> Povol Google Drive API</div>
+        <div class="setup-step-text">
+          V menu vlevo: <strong>API a služby → Knihovna</strong>.
+          Vyhledej <code>Google Drive API</code> → Klikni → <strong>Povolit</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div>
+        <div class="setup-step-title"><span class="setup-step-num">4</span> Vytvořit OAuth přihlašovací údaje</div>
+        <div class="setup-step-text">
+          <strong>API a služby → Přihlašovací údaje → Vytvořit → OAuth ID klienta</strong>.
+          <br>Typ aplikace: <strong>Webová aplikace</strong>.
+          <br>Autorizované JS origins: přidej adresu, kde běží appka
+          (nebo <code>http://localhost</code> pro lokální test).
+          <br>Klikni <strong>Vytvořit</strong> – zkopíruj <strong>ID klienta</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div>
+        <div class="setup-step-title"><span class="setup-step-num">5</span> OAuth souhlas (pokud vyzván)</div>
+        <div class="setup-step-text">
+          <strong>API a služby → OAuth souhlas</strong>.
+          Typ: <strong>Externý</strong>, vyplň název apky.
+          Obory: přidej <code>drive.file</code>.
+          Do <strong>testovacích uživatelů</strong> přidej svůj Gmail.
+        </div>
+      </div>
+    </div>
+    <div class="setup-note">
+      💡 <strong>Bezpečnost:</strong> Appka si vyžádá přístup pouze ke svým vlastním souborům
+      (ne k celému Drive). Tvá data nikam neodesíláme – vše běží přímo mezi telefonem a Google.
+    </div>
+  </div>
+
+  <div class="setup-divider"><span>⚜️</span></div>
+
+  <div class="client-id-section">
+    <label class="client-id-label" for="client-id-input">🔑 Vlož Client ID</label>
+    <input
+      type="text"
+      id="client-id-input"
+      placeholder="123456789-abc...apps.googleusercontent.com"
+      autocomplete="off" autocorrect="off" spellcheck="false"
+    />
+    <button class="connect-btn" id="connect-btn">🔗 Připojit Google Drive</button>
+    <button class="skip-btn" id="skip-btn">Přeskočit – ukládat jen lokálně</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════ -->
+<canvas id="stars-canvas"></canvas>
+
+<div id="drive-bar">
+  <div class="drive-dot offline" id="drive-dot"></div>
+  <span id="drive-status-text">Lokální úložiště</span>
+  <button class="drive-action-btn" id="drive-btn">⚙️ Drive</button>
+</div>
+
+<div class="app">
+
+  <div class="header">
+    <div class="header-badge">⚜️ Babylonský trénink ⚜️</div>
+    <h1>Strážce<br>Pokladu</h1>
+    <p>Zachraň alespoň 1 zlatou minci z každých 10.<br>Tak roste tvoje bohatství!</p>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="s-label">Celkem</div>
+      <div class="s-val" id="s-total">0 Kč</div>
+      <div class="s-sub">vše</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Poklad</div>
+      <div class="s-val" id="s-navzdy">0 Kč</div>
+      <div class="s-sub">navždy</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Záznamy</div>
+      <div class="s-val" id="s-count">0</div>
+      <div class="s-sub">transakcí</div>
+    </div>
+  </div>
+
+  <div class="input-section">
+    <div class="input-title">🪙 Kolik mincí jsi získal?</div>
+    <div class="input-row">
+      <div class="input-wrap">
+        <input type="number" id="amount-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/>
+      </div>
+      <button class="add-btn" id="add-btn">Rozdělit ✨</button>
+    </div>
+  </div>
+
+  <div class="golden-rule">
+    ⚖️ Zlaté pravidlo desetiny<br>
+    10% Poklad &nbsp;·&nbsp; 10% Spoření &nbsp;·&nbsp; 80% Tvých
+  </div>
+
+  <div class="jars-title">🏛️ Tři chrámy bohatství</div>
+  <div class="jars-grid">
+
+    <div class="jar-card ted">
+      <div class="jar-svg-wrap">
+        <svg class="jar" viewBox="0 0 60 80">
+          <defs><clipPath id="c-ted"><rect x="7" y="11" width="46" height="58" rx="5"/></clipPath></defs>
+          <rect x="11" y="2" width="38" height="12" rx="5" fill="#5C3D1E"/>
+          <rect x="13" y="4" width="34" height="8" rx="4" fill="#8B5E3C"/>
+          <rect x="7" y="11" width="46" height="58" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,130,60,0.7)" stroke-width="2"/>
+          <rect class="jar-fill-rect" id="fill-ted" x="9" y="67" width="42" height="0" rx="4" fill="rgba(255,130,60,0.72)" clip-path="url(#c-ted)"/>
+          <text x="30" y="52" text-anchor="middle" font-size="18">🍬</text>
+        </svg>
+      </div>
+      <div class="jar-label">TEĎ</div>
+      <div class="jar-sublabel">ÚTRATA</div>
+      <div class="jar-amount" id="val-ted">0 Kč</div>
+      <div class="jar-pct">80 %</div>
+      <div class="jar-desc">Radost<br>&amp; drobnosti</div>
+    </div>
+
+    <div class="jar-card potom">
+      <div class="jar-svg-wrap">
+        <svg class="jar" viewBox="0 0 60 80">
+          <defs><clipPath id="c-potom"><rect x="7" y="11" width="46" height="58" rx="5"/></clipPath></defs>
+          <rect x="11" y="2" width="38" height="12" rx="5" fill="#5C3D1E"/>
+          <rect x="13" y="4" width="34" height="8" rx="4" fill="#8B5E3C"/>
+          <rect x="7" y="11" width="46" height="58" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(80,180,255,0.7)" stroke-width="2"/>
+          <rect class="jar-fill-rect" id="fill-potom" x="9" y="67" width="42" height="0" rx="4" fill="rgba(80,180,255,0.65)" clip-path="url(#c-potom)"/>
+          <text x="30" y="52" text-anchor="middle" font-size="18">🏰</text>
+        </svg>
+      </div>
+      <div class="jar-label">POTOM</div>
+      <div class="jar-sublabel">SPOŘENÍ</div>
+      <div class="jar-amount" id="val-potom">0 Kč</div>
+      <div class="jar-pct">10 %</div>
+      <div class="jar-desc">Velké sny:<br>Lego, kolo…</div>
+    </div>
+
+    <div class="jar-card navzdy">
+      <div class="jar-svg-wrap">
+        <svg class="jar" viewBox="0 0 60 80">
+          <defs><clipPath id="c-navzdy"><rect x="7" y="11" width="46" height="58" rx="5"/></clipPath></defs>
+          <rect x="11" y="2" width="38" height="12" rx="5" fill="#5C3D1E"/>
+          <rect x="13" y="4" width="34" height="8" rx="4" fill="#8B5E3C"/>
+          <rect x="7" y="11" width="46" height="58" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(245,166,35,0.8)" stroke-width="2"/>
+          <rect class="jar-fill-rect" id="fill-navzdy" x="9" y="67" width="42" height="0" rx="4" fill="rgba(245,166,35,0.78)" clip-path="url(#c-navzdy)"/>
+          <text x="30" y="52" text-anchor="middle" font-size="18">🌱</text>
+        </svg>
+      </div>
+      <div class="jar-label">NAVŽDY</div>
+      <div class="jar-sublabel">POKLAD</div>
+      <div class="jar-amount" id="val-navzdy">0 Kč</div>
+      <div class="jar-pct">10 %</div>
+      <div class="jar-desc">Nikdy<br>nevybíráš!</div>
+    </div>
+
+  </div>
+
+  <div class="tree-section">
+    <span class="tree-icon" id="tree-icon">🌱</span>
+    <div class="tree-msg" id="tree-msg">Zasaď své první zlaté semínko 🌱</div>
+  </div>
+
+  <div class="divider"><span>⚜️</span></div>
+
+  <div class="pyramid-section">
+    <div class="pyramid-title">🏛️ Schody k pyramidě</div>
+    <div class="pyramid-sub" id="pyramid-sub">Zlaté semínko: 0 Kč</div>
+    <div class="pyramid-wrap" id="pyramid-wrap"></div>
+    <div class="pyramid-progress" id="pyramid-progress">Začni šetřit a vystoupej na první schodek! 👣</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="history">📜 Kronika</button>
+    <button class="tab-btn" data-tab="tips">💡 Moudrost</button>
+    <button class="tab-btn" data-tab="settings">⚙️ Nastavení</button>
+  </div>
+
+  <div id="panel-history" class="panel">
+    <div id="history-empty" class="history-empty">Zatím žádné záznamy.<br>Přidej své první mince! 🪙</div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+  <div id="panel-tips" class="panel" style="display:none">
+    <div class="tip-item"><div class="tip-icon">⚖️</div><div><div class="tip-title">Pravidlo 1/10</div><div class="tip-text">Z každých 10 korun si vždy schovej jednu. Desátá mince je tvůj strážce!</div></div></div>
+    <div class="tip-item"><div class="tip-icon">🌱</div><div><div class="tip-title">Peníze jsou jako semínka</div><div class="tip-text">Neutracená mince vyroste ve strom, který nese další zlaté plody.</div></div></div>
+    <div class="tip-item"><div class="tip-icon">🛡️</div><div><div class="tip-title">Krotitel Petřebníků</div><div class="tip-text">Rozeznávej, co potřebuješ, a věci, které jen "chceš teď hned".</div></div></div>
+    <div class="tip-item"><div class="tip-icon">📚</div><div><div class="tip-title">Ptej se mistrů</div><div class="tip-text">O penězích mluv jen s těmi, kteří svůj poklad umí pohlídat.</div></div></div>
+    <div class="tip-item"><div class="tip-icon">🏛️</div><div><div class="tip-title">Zlaté semínko</div><div class="tip-text">Z nádoby NAVŽDY se nikdy nevybírá. Tohle je tvůj babylonský poklad!</div></div></div>
+  </div>
+
+  <div id="panel-settings" class="panel" style="display:none">
+    <div class="settings-row">
+      <span class="settings-icon">☁️</span>
+      <span class="settings-label" id="drive-settings-label">Google Drive nepřipojen</span>
+      <button class="settings-btn" id="toggle-drive-btn">Připojit</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-icon">📤</span>
+      <span class="settings-label">Export dat (JSON soubor)</span>
+      <button class="settings-btn" id="export-btn">Exportovat</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-icon">📥</span>
+      <span class="settings-label">Import dat ze souboru</span>
+      <button class="settings-btn" id="import-btn">Importovat</button>
+      <input type="file" id="import-input" accept=".json" style="display:none"/>
+    </div>
+    <div class="settings-row">
+      <span class="settings-icon">🗑️</span>
+      <span class="settings-label">Smazat všechna data</span>
+      <button class="settings-btn danger" id="reset-btn">Resetovat</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── CONFIG ────────────────────────────────────────────────────
+const DRIVE_FILENAME = 'strazce_pokladu_data.json';
+const DRIVE_SCOPE    = 'https://www.googleapis.com/auth/drive.file';
+
+const PYRAMID = [
+  {label:'1 Kč',   target:1,    w:42},
+  {label:'10 Kč',  target:10,   w:52},
+  {label:'50 Kč',  target:50,   w:62},
+  {label:'100 Kč', target:100,  w:72},
+  {label:'200 Kč', target:200,  w:82},
+  {label:'500 Kč', target:500,  w:90},
+  {label:'1000 Kč',target:1000, w:96},
+  {label:'🏆 Zlatý strom!',target:2000,w:100}
+];
+const STEP_COLORS = [
+  ['#FFD700','#A07800'],['#FFB347','#8B6000'],['#FF8C42','#7A3000'],
+  ['#F5A623','#6B3A0E'],['#E8943A','#5C2800'],['#D4822E','#4A1E00'],
+  ['#C07020','#3A1200'],['#A85C10','#2A0A00']
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+let state = {ted:0, potom:0, navzdy:0, history:[]};
+let tokenClient  = null;
+let accessToken  = null;
+let driveFileId  = null;
+let clientId     = null;
+let syncPending  = false;
+let syncTimer    = null;
+let driveEnabled = false;
+
+// ── LOCAL STORAGE ─────────────────────────────────────────────
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem('babylon_v2');
+    if (raw) { const p = JSON.parse(raw); state = p.state || state; driveFileId = p.driveFileId || null; }
+    clientId = localStorage.getItem('babylon_client_id') || null;
+    driveEnabled = !!clientId;
+  } catch(e){}
+}
+function saveLocal() {
+  try { localStorage.setItem('babylon_v2', JSON.stringify({state, driveFileId})); } catch(e){}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+let _toastTimer;
+function toast(msg, dur=2600) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=> el.classList.add('hidden'), dur);
+}
+
+// ── DRIVE STATUS ──────────────────────────────────────────────
+function setDriveStatus(type, text) {
+  const dot  = document.getElementById('drive-dot');
+  const span = document.getElementById('drive-status-text');
+  dot.className = 'drive-dot ' + type;
+  span.textContent = text;
+}
+
+// ── GOOGLE DRIVE API ──────────────────────────────────────────
+function initTokenClient(cid) {
+  if (!window.google?.accounts?.oauth2) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: cid,
+    scope: DRIVE_SCOPE,
+    callback: async (resp) => {
+      if (resp.error) { setDriveStatus('error','Chyba přihlášení'); return; }
+      accessToken = resp.access_token;
+      setDriveStatus('syncing','Připojování…');
+      await loadFromDrive();
+    }
+  });
+}
+
+async function requestToken() {
+  if (!tokenClient) { toast('⚠️ Nastav Client ID v Nastavení'); return; }
+  if (accessToken) { await saveToDrive(); return; }
+  tokenClient.requestAccessToken({prompt:''});
+}
+
+async function driveRequest(method, url, body=null, isJson=true) {
+  const headers = {Authorization: 'Bearer ' + accessToken};
+  if (isJson && body) headers['Content-Type'] = 'application/json';
+  const opts = {method, headers};
+  if (body) opts.body = isJson ? JSON.stringify(body) : body;
+  const r = await fetch(url, opts);
+  if (r.status === 401) { accessToken = null; setDriveStatus('offline','Session vypršela – klikni na Drive'); return null; }
+  if (!r.ok) return null;
+  try { return await r.json(); } catch(e) { return {}; }
+}
+
+async function findFile() {
+  const q = encodeURIComponent(`name='${DRIVE_FILENAME}' and trashed=false`);
+  const r = await driveRequest('GET', `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)`);
+  if (!r || !r.files || !r.files.length) return null;
+  return r.files[0].id;
+}
+
+async function loadFromDrive() {
+  if (!accessToken) return;
+  setDriveStatus('syncing','Načítám z Drive…');
+  try {
+    if (!driveFileId) driveFileId = await findFile();
+    if (!driveFileId) {
+      // First time – save current state
+      setDriveStatus('syncing','Vytvářím soubor…');
+      await saveToDriveNow();
+      return;
+    }
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`, {
+      headers:{Authorization:'Bearer '+accessToken}
+    });
+    if (!r.ok) { setDriveStatus('error','Chyba čtení'); return; }
+    const data = await r.json();
+    if (data && data.state) {
+      state = data.state;
+      saveLocal();
+      render();
+    }
+    setDriveStatus('ok','Synchronizováno ✓');
+    updateSettingsDriveLabel();
+  } catch(e) { setDriveStatus('error','Chyba: ' + e.message); }
+}
+
+async function saveToDriveNow() {
+  if (!accessToken) return;
+  setDriveStatus('syncing','Ukládám…');
+  const payload = JSON.stringify({state, savedAt: new Date().toISOString(), version:2});
+  try {
+    if (!driveFileId) {
+      // Create file
+      const meta = await driveRequest('POST',
+        'https://www.googleapis.com/drive/v3/files?fields=id',
+        {name: DRIVE_FILENAME, mimeType:'application/json'}
+      );
+      if (!meta) { setDriveStatus('error','Nelze vytvořit soubor'); return; }
+      driveFileId = meta.id;
+      saveLocal();
+    }
+    // Update content
+    const r = await fetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,
+      { method:'PATCH', headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'}, body:payload }
+    );
+    if (r.ok) { setDriveStatus('ok','Uloženo do Drive ✓ ' + new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})); }
+    else      { setDriveStatus('error','Chyba uložení'); }
+  } catch(e) { setDriveStatus('error','Offline?'); }
+}
+
+function scheduleSave() {
+  saveLocal();
+  if (!accessToken) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(saveToDriveNow, 1500);
+}
+
+function saveToDrive() {
+  saveLocal();
+  if (accessToken) saveToDriveNow();
+}
+
+// ── JARS ──────────────────────────────────────────────────────
+function updateJarFill(id, val, max) {
+  const el = document.getElementById('fill-' + id);
+  if (!el) return;
+  const mH = 56;
+  const h  = Math.max(2, Math.min(mH, (val / Math.max(max,1)) * mH));
+  el.setAttribute('height', h);
+  el.setAttribute('y', 11 + (mH - h));
+}
+function fmt(v) {
+  if (v==null) return '0 Kč';
+  return (Math.round(v*100)/100).toLocaleString('cs-CZ',{minimumFractionDigits:0,maximumFractionDigits:2})+' Kč';
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render() {
+  const {ted, potom, navzdy, history} = state;
+  document.getElementById('s-total').textContent   = fmt(ted+potom+navzdy);
+  document.getElementById('s-navzdy').textContent  = fmt(navzdy);
+  document.getElementById('s-count').textContent   = history.length;
+  document.getElementById('val-ted').textContent   = fmt(ted);
+  document.getElementById('val-potom').textContent = fmt(potom);
+  document.getElementById('val-navzdy').textContent= fmt(navzdy);
+  updateJarFill('ted',    ted,    Math.max(500,  ted    *1.3));
+  updateJarFill('potom',  potom,  Math.max(200,  potom  *1.3));
+  updateJarFill('navzdy', navzdy, Math.max(500,  navzdy *1.3));
+  // Tree
+  const ti=document.getElementById('tree-icon'),tm=document.getElementById('tree-msg');
+  if(navzdy===0)      {ti.textContent='🌱';tm.textContent='Zasaď své první zlaté semínko 🌱';}
+  else if(navzdy<50)  {ti.textContent='🌿';tm.textContent='Tvůj strom začíná růst! 🌿';}
+  else if(navzdy<200) {ti.textContent='🌳';tm.textContent='Strom sílí, pokračuj! 🌳';}
+  else if(navzdy<500) {ti.textContent='🌳';tm.textContent='Mocný strom! Zlaté plody přicházejí 🍋';}
+  else                {ti.textContent='🌟';tm.textContent='Zlatý strom Babylonu! Jsi opravdový strážce! 🏆';}
+  // Pyramid
+  document.getElementById('pyramid-sub').textContent='Zlaté semínko: '+fmt(navzdy);
+  const wrap=document.getElementById('pyramid-wrap');
+  wrap.innerHTML='';
+  [...PYRAMID].reverse().forEach((lvl,i)=>{
+    const ri=PYRAMID.length-1-i, active=navzdy>=lvl.target;
+    const [c1,c2]=STEP_COLORS[ri];
+    const d=document.createElement('div');
+    d.className='p-step'+(active?' active':'');
+    d.style.width=lvl.w+'%';
+    d.style.background=active?`linear-gradient(90deg,${c2},${c1},${c2})`:'rgba(255,255,255,0.04)';
+    d.textContent=lvl.label; wrap.appendChild(d);
+  });
+  const cl=PYRAMID.filter(l=>navzdy>=l.target).length;
+  const pp=document.getElementById('pyramid-progress');
+  if(cl===0)             pp.textContent='Začni šetřit a vystoupej na první schodek! 👣';
+  else if(cl===PYRAMID.length) pp.textContent='🏆 Dosáhl jsi vrcholu zlaté pyramidy!';
+  else pp.textContent=`Jsi na ${cl}. schodku ze ${PYRAMID.length}. → ${PYRAMID[cl].label}`;
+  // History
+  const hl=document.getElementById('history-list'), he=document.getElementById('history-empty');
+  if(!history.length){he.style.display='block';hl.innerHTML='';}
+  else {
+    he.style.display='none';
+    hl.innerHTML=history.map(h=>`
+      <div class="h-item">
+        <span class="h-coin">🪙</span>
+        <span class="h-amount">${fmt(h.amount)}</span>
+        <span class="h-breakdown">TEĎ ${fmt(h.ted)}<br>POTOM ${fmt(h.potom)} · NAVŽDY ${fmt(h.navzdy)}</span>
+        <span class="h-date">${h.date}</span>
+      </div>`).join('');
+  }
+}
+
+function updateSettingsDriveLabel() {
+  const lbl = document.getElementById('drive-settings-label');
+  const btn = document.getElementById('toggle-drive-btn');
+  if (clientId && accessToken) {
+    lbl.textContent = 'Google Drive připojen ✓';
+    btn.textContent = 'Odpojit';
+  } else if (clientId) {
+    lbl.textContent = 'Client ID uložen – přihlas se';
+    btn.textContent = 'Přihlásit';
+  } else {
+    lbl.textContent = 'Google Drive nepřipojen';
+    btn.textContent = 'Připojit';
+  }
+}
+
+// ── ADD COINS ─────────────────────────────────────────────────
+function addCoins() {
+  const input = document.getElementById('amount-input');
+  const val   = parseFloat(input.value.replace(',','.'));
+  if (!val || val<=0 || isNaN(val)) { toast('⚠️ Zadej platnou částku!'); return; }
+  const nc = Math.round(val*0.10*100)/100;
+  const pc = Math.round(val*0.10*100)/100;
+  const tc = Math.round((val-nc-pc)*100)/100;
+  state.ted    = Math.round((state.ted+tc)*100)/100;
+  state.potom  = Math.round((state.potom+pc)*100)/100;
+  state.navzdy = Math.round((state.navzdy+nc)*100)/100;
+  state.history.unshift({amount:val,ted:tc,potom:pc,navzdy:nc,date:new Date().toLocaleDateString('cs-CZ')});
+  if(state.history.length>50) state.history.pop();
+  scheduleSave();
+  input.value='';
+  // Coin anim
+  const btn=document.getElementById('add-btn');
+  const r=btn.getBoundingClientRect();
+  for(let i=0;i<5;i++){
+    const el=document.createElement('div');
+    el.className='coin-anim'; el.textContent='🪙';
+    el.style.left=(r.left+r.width/2+(Math.random()-.5)*60)+'px';
+    el.style.top=(r.top+window.scrollY-10)+'px';
+    el.style.animationDelay=(i*.08)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1200);
+  }
+  if(state.navzdy>=2000)     toast('🏆 Zlatý strom Babylonu!');
+  else if(state.navzdy>=1000)toast('🌟 1000 Kč v pokladu! Jsi mistr!');
+  else if(state.navzdy>=100) toast('🌱 Zlaté semínko roste!');
+  else                       toast('✅ Přidáno '+fmt(val)+' — rozděleno!');
+  render();
+}
+
+// ── STARS ─────────────────────────────────────────────────────
+function initStars() {
+  const c=document.getElementById('stars-canvas'),ctx=c.getContext('2d');
+  c.width=window.innerWidth; c.height=window.innerHeight*.4;
+  const stars=Array.from({length:40},()=>({
+    x:Math.random()*c.width, y:Math.random()*c.height,
+    r:Math.random()*1.5+.5, a:Math.random(), s:Math.random()*.02+.01
+  }));
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a+=s.s; if(s.a>1||s.a<.2)s.s*=-1;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────
+function exportData() {
+  const blob=new Blob([JSON.stringify({state,savedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='strazce_pokladu_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('📤 Data exportována!');
+}
+function importData(file) {
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try {
+      const d=JSON.parse(e.target.result);
+      if(d.state){state=d.state; saveToDrive(); render(); toast('📥 Data importována!');}
+      else toast('⚠️ Neplatný soubor!');
+    } catch(err){toast('⚠️ Chyba čtení souboru');}
+  };
+  reader.readAsText(file);
+}
+
+// ── SETUP SCREEN ──────────────────────────────────────────────
+function showSetup() { document.getElementById('setup-screen').classList.remove('hidden'); }
+function hideSetup() { document.getElementById('setup-screen').classList.add('hidden'); }
+
+document.getElementById('connect-btn').addEventListener('click', () => {
+  const cid = document.getElementById('client-id-input').value.trim();
+  if (!cid || !cid.includes('googleusercontent.com')) {
+    toast('⚠️ Vlož platné Client ID'); return;
+  }
+  clientId = cid;
+  localStorage.setItem('babylon_client_id', cid);
+  driveEnabled = true;
+  hideSetup();
+  initTokenClient(cid);
+  tokenClient.requestAccessToken({prompt:'consent'});
+  updateSettingsDriveLabel();
+});
+
+document.getElementById('skip-btn').addEventListener('click', () => {
+  hideSetup(); setDriveStatus('offline','Lokální úložiště');
+});
+
+// ── TABS ──────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const t=btn.dataset.tab;
+    document.getElementById('panel-history').style.display=t==='history'?'':'none';
+    document.getElementById('panel-tips').style.display=t==='tips'?'':'none';
+    document.getElementById('panel-settings').style.display=t==='settings'?'':'none';
+    if(t==='settings') updateSettingsDriveLabel();
+  });
+});
+
+// ── SETTINGS ACTIONS ──────────────────────────────────────────
+document.getElementById('toggle-drive-btn').addEventListener('click', () => {
+  if (!clientId) { showSetup(); return; }
+  if (accessToken) { accessToken=null; setDriveStatus('offline','Odhlášen'); updateSettingsDriveLabel(); return; }
+  tokenClient ? tokenClient.requestAccessToken({prompt:''}) : showSetup();
+});
+
+document.getElementById('drive-btn').addEventListener('click', () => {
+  if (!clientId) { showSetup(); return; }
+  if (!accessToken) { tokenClient && tokenClient.requestAccessToken({prompt:''}); return; }
+  saveToDriveNow();
+});
+
+document.getElementById('export-btn').addEventListener('click', exportData);
+document.getElementById('import-btn').addEventListener('click', ()=> document.getElementById('import-input').click());
+document.getElementById('import-input').addEventListener('change', e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
+
+document.getElementById('reset-btn').addEventListener('click', ()=>{
+  if(confirm('Opravdu smazat všechna data?')){
+    state={ted:0,potom:0,navzdy:0,history:[]};
+    saveToDrive(); render(); toast('🔄 Reset hotov!');
+  }
+});
+
+document.getElementById('add-btn').addEventListener('click', addCoins);
+document.getElementById('amount-input').addEventListener('keydown',e=>{ if(e.key==='Enter') addCoins(); });
+
+// ── PWA INSTALL ───────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt=e;
+  toast('📲 Aplikaci lze nainstalovat – tap na ⚙️', 4000);
+});
+window.addEventListener('appinstalled', ()=> toast('🎉 Strážce Pokladu nainstalován!'));
+
+// ── BOOT ──────────────────────────────────────────────────────
+loadLocal();
+initStars();
+render();
+updateSettingsDriveLabel();
+
+// Wait for GIS library to load, then init if we have a client ID
+function tryInitGIS() {
+  if (window.google?.accounts?.oauth2 && clientId) {
+    initTokenClient(clientId);
+    // Auto-sign-in silently
+    tokenClient.requestAccessToken({prompt:''});
+  }
+}
+if (document.readyState==='loading') {
+  window.addEventListener('load', ()=> setTimeout(tryInitGIS, 800));
+} else {
+  setTimeout(tryInitGIS, 800);
+}
+
+// Show setup on first run (no client ID and no data)
+if (!clientId && !state.history.length) {
+  setTimeout(showSetup, 300);
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
