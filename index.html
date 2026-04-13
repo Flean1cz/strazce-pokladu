@@ -36,7 +36,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   transition:opacity .28s ease,transform .28s ease;
   -webkit-overflow-scrolling:touch;
 }
-.screen.hidden{opacity:0;pointer-events:none;transform:translateY(12px);}
+.screen.hidden{display:none;}
 .screen.slide-right{transform:translateX(100%);}
 
 /* ═══ STARS ═══ */
@@ -1564,19 +1564,22 @@ function scheduleSave() {
 }
 function saveToDrive() { saveLocal(); if (accessToken) saveToDriveNow(); }
 /* ═══ SCREEN NAVIGATION ═══ */
-const NAV_SCREENS = ['nadvorí','pokladnice','pribehy','reader','tajemstvi','admin'];
+// setup musí být v seznamu, aby se správně schoval při přechodu na nádvoří
+const NAV_SCREENS = ['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','admin'];
 function showScreen(id, hideNav=false) {
   NAV_SCREENS.forEach(s => {
     const el = document.getElementById('screen-'+s);
     if (!el) return;
     if (s === id) el.classList.remove('hidden');
-    else el.classList.add('hidden');
+    else          el.classList.add('hidden');
   });
   currentScreen = id;
   const nav = document.getElementById('bottom-nav');
   if (nav) {
-    if (hideNav || id==='reader' || id==='admin') nav.classList.add('hidden');
-    else nav.classList.remove('hidden');
+    if (hideNav || id==='reader' || id==='admin' || id==='setup')
+      nav.classList.add('hidden');
+    else
+      nav.classList.remove('hidden');
   }
   // Update nav active state
   document.querySelectorAll('.nav-btn[data-nav]').forEach(btn => {
