@@ -1040,6 +1040,34 @@ svg.jar{width:52px;height:72px;}
     <div class="pyramid-progress-txt" id="pyramid-progress">Začni šetřit! 👣</div>
   </div>
 
+  <div class="divider"><span>🌳</span></div>
+
+  <!-- Chrám růstu (Táta banka) -->
+  <div class="pyramid-section" style="border-color: var(--gold); background: linear-gradient(160deg, rgba(245,166,35,0.1), rgba(42,26,8,0.6));">
+    <div class="pyramid-title-txt" style="color: var(--gold);">🏦 Chrám růstu (Táta banka)</div>
+
+    <div style="position: relative; height: 160px; display: flex; align-items: center; justify-content: center;">
+      <div id="tree-glow" style="position: absolute; width: 120px; height: 120px; background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 70%); border-radius: 50%;"></div>
+      <span id="tata-tree-icon" style="font-size: 80px; z-index: 2; filter: drop-shadow(0 4px 18px rgba(255,215,0,0.5)); animation: treePulse 3s ease-in-out infinite alternate;">🌱</span>
+    </div>
+
+    <div id="tata-tree-msg" style="text-align: center; font-weight: 800; color: var(--gold); margin-bottom: 10px;">Tvé bohatství klíčí...</div>
+
+    <div class="divider"><span>⚜️</span></div>
+
+    <div style="display: flex; justify-content: space-around; text-align: center; padding: 4px 0 8px;">
+      <div>
+        <div class="s-label">Aktuální úrok</div>
+        <div class="s-val" id="current-interest-val" style="color: #81C784;">1 %</div>
+        <div style="font-size: 0.7rem; color: var(--sand); opacity: 0.7;">(čti příběhy pro zvýšení)</div>
+      </div>
+      <div>
+        <div class="s-label">Vklad v bance</div>
+        <div class="s-val" id="bank-navzdy-val">0 Kč</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Tabs: History / Tips / Settings -->
   <div class="tabs">
     <button class="tab-btn active" data-tab="history">📜 Kronika</button>
@@ -1606,6 +1634,40 @@ function setJarFill(id, val, max) {
   el.setAttribute('y', 11+(mH-h));
 }
 
+/* ═══ TÁTA BANKA ═══ */
+function updateTataBanka() {
+  // Úrok: základ 1 % + počet odemčených příběhů (max 8 %)
+  const unlockedCount = state.progression
+    ? (state.progression.unlocked_stories ? state.progression.unlocked_stories.length : 0)
+    : 0;
+  const currentInterest = Math.min(1 + unlockedCount, 8);
+
+  const intEl = document.getElementById('current-interest-val');
+  if (intEl) intEl.textContent = currentInterest + ' %';
+
+  const amountNavzdy = state.balances ? (state.balances.forever_10 || 0) : 0;
+  const bankEl = document.getElementById('bank-navzdy-val');
+  if (bankEl) bankEl.textContent = fmt(amountNavzdy);
+
+  // Vizualizace stromku
+  const iconEl = document.getElementById('tata-tree-icon');
+  const msgEl  = document.getElementById('tata-tree-msg');
+  const glowEl = document.getElementById('tree-glow');
+
+  if (iconEl && msgEl) {
+    let icon, msg, glowSize;
+    if (amountNavzdy <= 0)        { icon='🫘'; msg='Zasaď první zlaté semínko...';       glowSize='60px'; }
+    else if (amountNavzdy < 50)   { icon='🌱'; msg='Tvé bohatství klíčí...';             glowSize='80px'; }
+    else if (amountNavzdy < 200)  { icon='🌿'; msg='Stromek roste! Pokračuj! 🌿';        glowSize='100px'; }
+    else if (amountNavzdy < 1000) { icon='🌳'; msg='Silný strom moudrosti! 🌳';          glowSize='130px'; }
+    else if (amountNavzdy < 5000) { icon='🌲'; msg='Mocný strom plodí zlaté plody! 🍋';  glowSize='160px'; }
+    else                          { icon='🏆'; msg='Legendární strom Babylonu! 🌟';      glowSize='180px'; }
+    iconEl.textContent = icon;
+    msgEl.textContent  = msg;
+    if (glowEl) { glowEl.style.width = glowSize; glowEl.style.height = glowSize; }
+  }
+}
+
 /* ═══ RENDER ALL ═══ */
 function renderAll() {
   renderNadvorí();
@@ -1613,6 +1675,7 @@ function renderAll() {
   renderStories();
   renderSecrets();
   renderAdminPanel();
+  updateTataBanka();
 }
 
 function renderNadvorí() {
