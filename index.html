@@ -2528,9 +2528,79 @@ window.addEventListener('beforeinstallprompt', e=>{
 });
 window.addEventListener('appinstalled', ()=>toast('🎉 Babylonská pokladnice nainstalována!'));
 
-// Service worker
+// ═══ SERVICE WORKER + AUTO-UPDATE ═══
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('[SW] Registered');
+
+      // Kontrola update každých 60s
+      setInterval(() => reg.update().catch(()=>{}), 60000);
+
+      // Detekuj novou verzi
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBanner();
+          }
+        });
+      });
+    }).catch(()=>{});
+
+    // Reload po převzetí kontroly novým SW
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  });
+}
+
+function showUpdateBanner() {
+  if (document.getElementById('update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.style.cssText = `
+    position:fixed;top:0;left:0;right:0;z-index:9999;
+    background:linear-gradient(135deg,#F5A623,#C8860A);
+    color:#3d1a00;padding:12px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+    animation:sw-slide .3s ease-out;
+  `;
+  banner.innerHTML = `
+    <span style="flex:1">✨ Nová verze pokladnice!</span>
+    <button id="sw-update-btn" style="
+      background:#3d1a00;color:#F5A623;border:none;
+      padding:7px 16px;border-radius:8px;font-weight:700;
+      cursor:pointer;font-family:'Cinzel',serif;font-size:11px;
+      letter-spacing:1px;text-transform:uppercase;
+    ">Aktualizovat</button>
+    <button id="sw-close-btn" style="
+      background:transparent;color:#3d1a00;border:1px solid rgba(61,26,0,.3);
+      width:26px;height:26px;border-radius:50%;
+      cursor:pointer;font-size:14px;font-weight:700;padding:0;line-height:1;
+    ">×</button>
+  `;
+  document.body.appendChild(banner);
+
+  document.getElementById('sw-update-btn').onclick = () => {
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (reg?.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+    });
+  };
+  document.getElementById('sw-close-btn').onclick = () => banner.remove();
+
+  if (!document.getElementById('sw-anim-style')) {
+    const s = document.createElement('style');
+    s.id = 'sw-anim-style';
+    s.textContent = '@keyframes sw-slide{from{transform:translateY(-100%)}to{transform:translateY(0)}}';
+    document.head.appendChild(s);
+  }
 }
 
 /* ══════════════════════════════════════════════════════
