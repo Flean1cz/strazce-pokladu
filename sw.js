@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.0.1'; // ← ZMĚŇ TOHLE PŘI KAŽDÉM DEPLOY
+const VERSION = 'v2.1.0'; // ← KROK 1: Moudrost (bodový systém)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 

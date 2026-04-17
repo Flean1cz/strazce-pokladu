@@ -64,6 +64,39 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   font-size:9px;font-family:'Cinzel',serif;padding:3px 9px;cursor:pointer;
 }
 
+/* ═══ KROK 1 – Moudrost (body) ═══ */
+.wisdom-counter{
+  display:flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,rgba(245,166,35,.14),rgba(255,215,0,.08));
+  border:1px solid rgba(255,215,0,.28);
+  border-radius:12px;padding:3px 9px;
+  font-family:'Cinzel',serif;font-weight:600;
+  color:var(--lgold);font-size:12px;
+  box-shadow:0 0 10px rgba(255,215,0,.12) inset;
+  transition:transform .25s ease;
+  cursor:default;user-select:none;
+  flex-shrink:0;
+}
+.wisdom-counter.pulse{
+  transform:scale(1.18);
+  box-shadow:0 0 16px rgba(255,215,0,.55) inset, 0 0 12px rgba(255,215,0,.4);
+}
+.wisdom-ico{font-size:13px;filter:drop-shadow(0 0 4px rgba(255,215,0,.6));}
+.wisdom-val{min-width:18px;text-align:right;letter-spacing:.3px;}
+.wisdom-float{
+  position:fixed;z-index:9999;pointer-events:none;
+  font-family:'Cinzel',serif;font-weight:700;font-size:14px;
+  color:var(--lgold);
+  text-shadow:0 0 8px rgba(255,215,0,.8),0 1px 2px rgba(0,0,0,.6);
+  animation:wisdomFloat 1.4s ease-out forwards;
+  white-space:nowrap;
+}
+@keyframes wisdomFloat{
+  0%  {opacity:0;transform:translate(-50%,0) scale(.7);}
+  20% {opacity:1;transform:translate(-50%,-8px) scale(1.1);}
+  100%{opacity:0;transform:translate(-50%,-48px) scale(1);}
+}
+
 /* ═══ SECTION HEADER ═══ */
 .sec-hdr{
   display:flex;align-items:center;gap:10px;
@@ -871,6 +904,10 @@ svg.jar{width:52px;height:72px;}
 <div id="drive-bar">
   <div class="drive-dot offline" id="drive-dot"></div>
   <span id="drive-status-text">Lokální úložiště</span>
+  <div class="wisdom-counter" id="wisdom-counter" title="Tvá Moudrost – Babylonské body">
+    <span class="wisdom-ico">✨</span>
+    <span class="wisdom-val" id="wisdom-val">0</span>
+  </div>
   <button class="drive-act-btn" id="drive-btn">⚙️ Drive</button>
 </div>
 <div class="admin-float" id="admin-float-btn" title="Rodičovský přístup">🔐</div>
@@ -1483,7 +1520,11 @@ const DEFAULT_STATE = () => ({
   progression: { unlocked_stories: [], unlocked_secrets: [] },
   wishlist: [],
   history: [],
-  last_interest_applied: null
+  last_interest_applied: null,
+  // ═══ KROK 1 – Moudrost (body) ═══
+  wisdom: 0,                  // aktuální počet Moudrosti
+  wisdom_log: [],             // historie: {amount, reason, date} – max 50 záznamů
+  wisdom_daily: {}            // denní limity: {"YYYY-MM-DD": {open:true, tree_strokes:N}}
 });
 
 let state = DEFAULT_STATE();
@@ -1506,6 +1547,10 @@ function loadLocal() {
       if (p.state?.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, p.state.balances);
       if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234'}, p.state.settings);
       if (p.state?.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, p.state.progression);
+      // KROK 1 – Moudrost: zpětná kompatibilita pro stará data
+      if (typeof state.wisdom !== 'number') state.wisdom = 0;
+      if (!Array.isArray(state.wisdom_log)) state.wisdom_log = [];
+      if (!state.wisdom_daily || typeof state.wisdom_daily !== 'object') state.wisdom_daily = {};
       driveFileId = p.driveFileId || null;
     }
     clientId = localStorage.getItem('babylon_client_id') || null;
@@ -1907,6 +1952,8 @@ function doDeposit(val) {
   else if (state.balances.forever_10>=1000) toast('🌟 1000 Kč v pokladu! Jsi mistr!');
   else toast(msgs[0]);
   renderAll();
+  // KROK 1 – Moudrost: +10 za každý vklad
+  if (typeof addWisdom === 'function') addWisdom(10, 'vklad ' + fmt(val));
   // Fáze 6: kontrola milníků + překreslení stromu
   if (typeof checkMilestones === 'function') checkMilestones();
   if (typeof refreshTrees    === 'function') refreshTrees();
@@ -2162,6 +2209,12 @@ function markStoryRead(idx) {
     state.progression.unlocked_secrets.push(idx);
   }
   scheduleSave();
+
+  // KROK 1 – Moudrost: +50 za příběh, +100 za tajemství (jednorázově)
+  if (typeof addWisdom === 'function') {
+    addWisdom(50, 'přečtení příběhu ' + (idx+1));
+    addWisdom(100, 'odemčení tajemství ' + (idx+1));
+  }
 
   // Update button
   const btn = document.getElementById('reader-read-btn');
@@ -2994,6 +3047,133 @@ if (window.matchMedia('(display-mode: standalone)').matches ||
 /* ─────────────────────────────────────────────
    FÁZE 6 HOTOVA ✓
 ───────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 1 – MOUDROST (bodový systém)
+   Reference: Herní design, kap. 4
+═══════════════════════════════════════════════════════ */
+
+/** Vrátí dnešní datum jako "YYYY-MM-DD" (pro denní limity). */
+function _todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+/** Připraví objekt pro dnešní den ve wisdom_daily. */
+function _ensureTodayBucket() {
+  const k = _todayKey();
+  if (!state.wisdom_daily) state.wisdom_daily = {};
+  if (!state.wisdom_daily[k]) state.wisdom_daily[k] = {};
+  // garbage collect: ponech max 7 dní
+  const keys = Object.keys(state.wisdom_daily).sort();
+  if (keys.length > 7) {
+    keys.slice(0, keys.length - 7).forEach(old => delete state.wisdom_daily[old]);
+  }
+  return state.wisdom_daily[k];
+}
+
+/**
+ * Přidá Moudrost a zobrazí float animaci nad počítadlem.
+ * @param {number} amount - kolik bodů přičíst (>0)
+ * @param {string} reason - text pro log (např. "vklad", "pohlazení stromu")
+ */
+function addWisdom(amount, reason) {
+  if (!amount || amount <= 0) return;
+  if (typeof state.wisdom !== 'number') state.wisdom = 0;
+  state.wisdom += amount;
+
+  // Log (max 50 záznamů)
+  if (!Array.isArray(state.wisdom_log)) state.wisdom_log = [];
+  state.wisdom_log.unshift({
+    amount: amount,
+    reason: reason || '',
+    date: new Date().toISOString()
+  });
+  if (state.wisdom_log.length > 50) state.wisdom_log.pop();
+
+  scheduleSave();
+  renderWisdom();
+  showWisdomFloat(amount);
+}
+
+/** Vykreslí aktuální hodnotu Moudrosti do počítadla + puls. */
+function renderWisdom() {
+  const el = document.getElementById('wisdom-val');
+  if (!el) return;
+  el.textContent = String(state.wisdom || 0);
+  const box = document.getElementById('wisdom-counter');
+  if (box) {
+    box.classList.remove('pulse');
+    // reflow pro restart animace
+    void box.offsetWidth;
+    box.classList.add('pulse');
+    setTimeout(() => box.classList.remove('pulse'), 260);
+  }
+}
+
+/** Plovoucí "+X Moudrost" nad počítadlem. */
+function showWisdomFloat(amount) {
+  const counter = document.getElementById('wisdom-counter');
+  if (!counter) return;
+  const rect = counter.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'wisdom-float';
+  el.textContent = '+' + amount + ' ✨';
+  el.style.left = (rect.left + rect.width / 2) + 'px';
+  el.style.top  = (rect.bottom + 2) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+/**
+ * Udělí denní odměnu za otevření aplikace (+5 Moudrosti, 1× denně).
+ * Volá se při bootu, když už má uživatel jméno.
+ */
+function grantDailyOpen() {
+  if (!state.user || !state.user.name) return;
+  const today = _ensureTodayBucket();
+  if (today.open) return; // dnes už odměněno
+  today.open = true;
+  addWisdom(5, 'otevření aplikace');
+}
+
+/**
+ * Pohlazení stromu: +1 Moudrost, max 5× denně.
+ * @returns {boolean} true pokud byl bod udělen, false pokud je limit vyčerpán
+ */
+function grantTreeStroke() {
+  const today = _ensureTodayBucket();
+  const n = today.tree_strokes || 0;
+  if (n >= 5) {
+    toast('🌳 Strom si dnes užil dost pohlazení. Vrať se zítra!');
+    return false;
+  }
+  today.tree_strokes = n + 1;
+  addWisdom(1, 'pohlazení stromu');
+  return true;
+}
+
+// Boot: první vykreslení + denní bonus za otevření (po krátké prodlevě)
+setTimeout(() => {
+  renderWisdom();
+  grantDailyOpen();
+}, 600);
+
+// Pohlazení stromu na Nádvoří
+(function bindTreeStroke(){
+  const yard = document.getElementById('yard-tree-canvas');
+  if (!yard) return;
+  yard.style.cursor = 'pointer';
+  yard.addEventListener('click', () => {
+    grantTreeStroke();
+  });
+})();
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 1
+═══════════════════════════════════════════════════════ */
 </script>
 </body>
 </html>
