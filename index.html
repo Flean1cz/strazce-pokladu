@@ -348,6 +348,113 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   margin-bottom:14px;min-height:14px;
 }
 
+/* ═══ KROK 5 – Interaktivní strom ═══ */
+.tree-wrap{
+  position:relative;
+  text-align:center;
+  padding:8px 0 4px;
+  user-select:none;
+}
+#yard-tree-canvas{
+  cursor:pointer;
+  transition:transform .15s ease;
+}
+#yard-tree-canvas:active{transform:scale(.96);}
+#yard-tree-canvas.tree-breathe{animation:treeBreath 4.5s ease-in-out infinite;}
+@keyframes treeBreath{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.015);}
+}
+#yard-tree-canvas.tree-shake{animation:treeShake .5s ease-in-out;}
+@keyframes treeShake{
+  0%,100%{transform:translateX(0);}
+  15%{transform:translateX(-4px) rotate(-1deg);}
+  35%{transform:translateX(5px) rotate(1deg);}
+  55%{transform:translateX(-3px) rotate(-.5deg);}
+  75%{transform:translateX(2px) rotate(.3deg);}
+}
+#yard-tree-canvas.tree-twist{animation:treeTwist .7s ease-in-out;}
+@keyframes treeTwist{
+  0%,100%{transform:rotate(0);}
+  30%{transform:rotate(-8deg);}
+  70%{transform:rotate(6deg);}
+}
+#yard-tree-canvas.tree-glow{animation:treeGlow 1.2s ease-out;}
+@keyframes treeGlow{
+  0%  {filter:drop-shadow(0 0 0 rgba(255,215,0,0));}
+  30% {filter:drop-shadow(0 0 24px rgba(255,215,0,.85)) drop-shadow(0 0 12px rgba(255,215,0,.9));}
+  100%{filter:drop-shadow(0 0 0 rgba(255,215,0,0));}
+}
+
+.tree-label{
+  font-family:'Cinzel',serif;font-style:italic;
+  font-size:12px;color:var(--lgold);
+  letter-spacing:.4px;margin-top:4px;opacity:.85;
+  min-height:14px;line-height:1.3;
+}
+.tree-label .tree-name-txt{font-weight:700;font-style:normal;}
+.tree-label .tree-season-txt{opacity:.65;margin-left:4px;font-size:11px;}
+
+.tree-season{
+  position:absolute;top:4px;right:calc(50% - 95px);
+  font-size:22px;
+  opacity:.75;
+  animation:seasonFloat 6s ease-in-out infinite;
+  filter:drop-shadow(0 1px 4px rgba(0,0,0,.4));
+  pointer-events:none;
+}
+@keyframes seasonFloat{
+  0%,100%{transform:translateY(0) rotate(-4deg);}
+  50%{transform:translateY(-5px) rotate(4deg);}
+}
+
+/* Reakce: částice stoupající / padající kolem stromu */
+.tree-particle{
+  position:fixed;z-index:50;pointer-events:none;
+  font-size:20px;will-change:transform,opacity;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+}
+.tree-particle.rise{animation:particleRise 1.4s cubic-bezier(.2,.6,.4,1) forwards;}
+@keyframes particleRise{
+  0%  {opacity:0;transform:translate(-50%,0) scale(.5) rotate(0);}
+  15% {opacity:1;transform:translate(-50%,-10px) scale(1) rotate(10deg);}
+  100%{opacity:0;transform:translate(-50%,-70px) scale(.8) rotate(-25deg);}
+}
+.tree-particle.fall{animation:particleFall 1.8s cubic-bezier(.4,.2,.6,.9) forwards;}
+@keyframes particleFall{
+  0%  {opacity:0;transform:translate(-50%,-20px) scale(.5) rotate(0);}
+  15% {opacity:1;transform:translate(-50%,-5px) scale(1) rotate(20deg);}
+  100%{opacity:0;transform:translate(-50%,50px) scale(.8) rotate(180deg);}
+}
+.tree-particle.fly-r{animation:particleFlyRight 1.6s ease-out forwards;}
+@keyframes particleFlyRight{
+  0%  {opacity:0;transform:translate(-50%,-10px);}
+  10% {opacity:1;}
+  100%{opacity:0;transform:translate(60px,-30px) rotate(20deg);}
+}
+.tree-particle.fly-l{animation:particleFlyLeft 1.6s ease-out forwards;}
+@keyframes particleFlyLeft{
+  0%  {opacity:0;transform:translate(-50%,-10px);}
+  10% {opacity:1;}
+  100%{opacity:0;transform:translate(-100px,-30px) rotate(-20deg);}
+}
+
+/* Tree naming modal */
+.tree-name-box{text-align:center;}
+.tree-name-ico{
+  font-size:56px;margin-bottom:8px;
+  animation:treeNameBounce 2.5s ease-in-out infinite;
+}
+@keyframes treeNameBounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-4px);}
+}
+.tree-name-hint{
+  font-family:'Cinzel',serif;font-style:italic;
+  font-size:12px;color:var(--sand);opacity:.75;
+  line-height:1.5;margin:0 4px 14px;
+}
+
 /* ═══ SECTION HEADER ═══ */
 .sec-hdr{
   display:flex;align-items:center;gap:10px;
@@ -1183,8 +1290,10 @@ svg.jar{width:52px;height:72px;}
   </div>
 </div>
 
-<div style="text-align:center;padding:4px 0 6px;">
+<div class="tree-wrap" id="tree-wrap">
+  <div class="tree-season" id="tree-season"></div>
   <canvas id="yard-tree-canvas" width="150" height="150" style="display:block;margin:0 auto;"></canvas>
+  <div class="tree-label" id="tree-label"></div>
 </div>
 
 <div class="pillars">
@@ -1725,6 +1834,20 @@ svg.jar{width:52px;height:72px;}
   </div>
 </div>
 
+<!-- ══════════════ KROK 5 – TREE NAMING MODAL ══════════════ -->
+<div class="modal-overlay hidden" id="modal-tree-name">
+  <div class="modal-box tree-name-box">
+    <div class="tree-name-ico">🌳</div>
+    <div class="modal-title">Jak se jmenuje tvůj strom?</div>
+    <div class="tree-name-hint">Dej mu jméno. Stane se tvým kamarádem na cestě Babylonem.</div>
+    <input type="text" class="modal-inp" id="tree-name-inp" placeholder="Borivoj, Duběnka, Myrta..." maxlength="20" autocorrect="off" spellcheck="false"/>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="tree-name-skip">Možná později</button>
+      <button class="modal-btn confirm" id="tree-name-save">Pojmenovat ✨</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ TOAST ══════════════ -->
 <div id="toast" class="hidden"></div>
 
@@ -1860,6 +1983,11 @@ const DEFAULT_STATE = () => ({
   seals: {
     unlocked: [],             // pole ID získaných pečetí, např. ["first_coin","dream_maker"]
     unlocked_at: {}           // mapa id -> ISO datum získání pro zobrazení v detailu
+  },
+  // ═══ KROK 5 – Interaktivní strom ═══
+  tree: {
+    name: '',                 // jméno stromu (pojmenoval ho uživatel)
+    name_prompt_shown: false  // true = už jsme se na jméno zeptali (u starých dat)
   }
 });
 
@@ -1909,6 +2037,13 @@ function loadLocal() {
       } else {
         if (!Array.isArray(state.seals.unlocked)) state.seals.unlocked = [];
         if (!state.seals.unlocked_at || typeof state.seals.unlocked_at !== 'object') state.seals.unlocked_at = {};
+      }
+      // KROK 5 – Strom: zpětná kompatibilita
+      if (!state.tree || typeof state.tree !== 'object') {
+        state.tree = { name: '', name_prompt_shown: false };
+      } else {
+        if (typeof state.tree.name !== 'string') state.tree.name = '';
+        if (typeof state.tree.name_prompt_shown !== 'boolean') state.tree.name_prompt_shown = false;
       }
       driveFileId = p.driveFileId || null;
     }
@@ -2097,6 +2232,8 @@ function renderAll() {
   updateTataBanka();
   // Krok 4 – pečeti: aktualizace počítadla na pilíři
   if (typeof renderSealsPillar === 'function') renderSealsPillar();
+  // Krok 5 – strom: aktualizace jména a sezóny
+  if (typeof renderTreeLabel === 'function') renderTreeLabel();
 }
 
 function renderNadvorí() {
@@ -4147,6 +4284,182 @@ setTimeout(() => {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 4
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 5 – INTERAKTIVNÍ STROM
+   Reference: Herní design, kap. 9
+═══════════════════════════════════════════════════════ */
+
+/** Vrátí roční období podle aktuálního měsíce. */
+function getSeason() {
+  const m = new Date().getMonth(); // 0..11
+  if (m >= 2 && m <= 4)  return { key:'spring', ico:'🌸', label:'jaro' };
+  if (m >= 5 && m <= 7)  return { key:'summer', ico:'☀️', label:'léto' };
+  if (m >= 8 && m <= 10) return { key:'autumn', ico:'🍂', label:'podzim' };
+  return { key:'winter', ico:'❄️', label:'zima' };
+}
+
+/** Vykreslí popisek stromu (jméno + sezóna). */
+function renderTreeLabel() {
+  const label = document.getElementById('tree-label');
+  const season = document.getElementById('tree-season');
+  if (!label || !season) return;
+
+  const s = getSeason();
+  season.textContent = s.ico;
+  season.setAttribute('title', 'Právě je ' + s.label);
+
+  const tn = (state.tree && state.tree.name) ? state.tree.name.trim() : '';
+  if (tn) {
+    label.innerHTML = '<span class="tree-name-txt">' + _escapeHtml(tn) + '</span>' +
+                     '<span class="tree-season-txt">· ' + s.label + '</span>';
+  } else {
+    label.innerHTML = '<span class="tree-season-txt" style="opacity:.8;">Klepni na strom · ' + s.label + '</span>';
+  }
+}
+
+/** Bezpečný HTML escape pro uživatelské jméno. */
+function _escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/**
+ * Spustí jednu ze sady reakcí stromu při pohlazení.
+ * @param {boolean} rewarded - zda byl udělen bod Moudrosti
+ */
+function playTreeReaction(rewarded) {
+  const canvas = document.getElementById('yard-tree-canvas');
+  const wrap = document.getElementById('tree-wrap');
+  if (!canvas || !wrap) return;
+
+  // Odstranění předchozí animace
+  canvas.classList.remove('tree-shake','tree-twist','tree-glow');
+  void canvas.offsetWidth;
+
+  // Náhodný výběr reakce (8 variant, některé jen pokud byl bod udělen)
+  const reactions = [
+    { anim:'tree-shake',  particle:null,  flight:null    },
+    { anim:'tree-shake',  particle:'🍃',  flight:'fall'  },
+    { anim:'tree-twist',  particle:'🦋',  flight:'fly-r' },
+    { anim:'tree-shake',  particle:'🐦',  flight:'fly-l' },
+    { anim:'tree-glow',   particle:'✨',  flight:'rise'  },
+    { anim:'tree-shake',  particle:'🐿️', flight:'fly-r' },
+    { anim:'tree-twist',  particle:null,  flight:null    },
+    { anim:'tree-glow',   particle:'🌟',  flight:'rise'  }
+  ];
+  // Pokud byl udělen bod, s větší pravděpodobností padající mince
+  if (rewarded && Math.random() < 0.35) {
+    reactions.unshift({ anim:'tree-shake', particle:'🪙', flight:'fall' });
+  }
+
+  const r = reactions[Math.floor(Math.random() * reactions.length)];
+  canvas.classList.add(r.anim);
+  setTimeout(() => canvas.classList.remove(r.anim), 900);
+
+  // Částice
+  if (r.particle && r.flight) {
+    spawnTreeParticle(canvas, r.particle, r.flight);
+  }
+}
+
+/** Vytvoří částici nad stromem s danou animací. */
+function spawnTreeParticle(canvas, emoji, animClass) {
+  const rect = canvas.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'tree-particle ' + animClass;
+  el.textContent = emoji;
+  el.style.left = (rect.left + rect.width / 2) + 'px';
+  el.style.top  = (rect.top + rect.height * 0.35) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+/** Zobrazí modal pro pojmenování stromu (pouze jednou). */
+function showTreeNamingPrompt() {
+  if (!state.user || !state.user.name) return; // onboarding nedokončen
+  if (!state.tree) return;
+  if (state.tree.name) return;                  // už má jméno
+  if (state.tree.name_prompt_shown) return;     // už se nabídlo
+  // Zobraz modal
+  const modal = document.getElementById('modal-tree-name');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    const inp = document.getElementById('tree-name-inp');
+    if (inp) inp.focus();
+  }, 300);
+}
+
+function hideTreeNamingPrompt(markShown) {
+  const modal = document.getElementById('modal-tree-name');
+  if (modal) modal.classList.add('hidden');
+  if (markShown) {
+    state.tree.name_prompt_shown = true;
+    scheduleSave();
+  }
+}
+
+function saveTreeName() {
+  const inp = document.getElementById('tree-name-inp');
+  const name = (inp ? inp.value : '').trim();
+  if (!name) { toast('⚠️ Zadej jméno svému stromu'); return; }
+  if (name.length > 20) { toast('⚠️ Jméno je moc dlouhé (max 20 znaků)'); return; }
+  state.tree.name = name;
+  state.tree.name_prompt_shown = true;
+  scheduleSave();
+  hideTreeNamingPrompt(false);
+  renderTreeLabel();
+  toast('🌳 ' + name + ' ti děkuje za jméno! ✨', 4000);
+}
+
+/** Hook pro pohlazení stromu – přidat animaci. */
+window._onTreeStroked = (function(prev){
+  return function() {
+    if (typeof prev === 'function') prev();        // ponech Krok 4 (pečeť first_stroke)
+    playTreeReaction(true);
+  };
+})(window._onTreeStroked);
+
+/** Nabídka pojmenování se zobrazí ve chvíli 1. pohlazení stromu
+ * (přirozený moment — dítě právě zjistilo, že strom "žije"). */
+window._onTreeStroked = (function(prev){
+  return function() {
+    if (typeof prev === 'function') prev();
+    // Menší zpoždění, aby hráč viděl reakci stromu dřív, než vyskočí modal
+    setTimeout(() => {
+      if (state.tree && !state.tree.name && !state.tree.name_prompt_shown) {
+        showTreeNamingPrompt();
+      }
+    }, 1400);
+  };
+})(window._onTreeStroked);
+
+/** Boot: render label + dech animace. */
+setTimeout(() => {
+  renderTreeLabel();
+  const canvas = document.getElementById('yard-tree-canvas');
+  if (canvas) canvas.classList.add('tree-breathe');
+}, 1600);
+
+/** Pojmenování stromu — event listeners. */
+(function bindTreeNamingEvents(){
+  const saveBtn = document.getElementById('tree-name-save');
+  const skipBtn = document.getElementById('tree-name-skip');
+  const inp     = document.getElementById('tree-name-inp');
+  const modal   = document.getElementById('modal-tree-name');
+  if (saveBtn) saveBtn.addEventListener('click', saveTreeName);
+  if (skipBtn) skipBtn.addEventListener('click', () => hideTreeNamingPrompt(true));
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') saveTreeName(); });
+  if (modal) modal.addEventListener('click', e => {
+    if (e.target === modal) hideTreeNamingPrompt(true);
+  });
+})();
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 5
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
