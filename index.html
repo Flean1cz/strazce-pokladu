@@ -57,7 +57,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 .drive-dot.offline{background:#666;}
 .drive-dot.error{background:var(--red);box-shadow:0 0 6px var(--red);}
 @keyframes pulse{from{opacity:.5}to{opacity:1}}
-#drive-status-text{flex:1;color:var(--sand);opacity:.7;font-size:10px;}
+#drive-status-text{flex:1;color:var(--sand);opacity:.7;font-size:10px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .drive-act-btn{
   background:transparent;border:1px solid rgba(245,166,35,.28);
   border-radius:7px;color:rgba(245,166,35,.7);
@@ -96,6 +96,30 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   20% {opacity:1;transform:translate(-50%,-8px) scale(1.1);}
   100%{opacity:0;transform:translate(-50%,-48px) scale(1);}
 }
+
+/* ═══ KROK 2 – Série (streaks) ═══ */
+.streak-counter{
+  display:flex;align-items:center;gap:4px;
+  background:linear-gradient(135deg,rgba(229,57,53,.14),rgba(255,140,50,.08));
+  border:1px solid rgba(255,140,50,.32);
+  border-radius:12px;padding:3px 8px;
+  font-family:'Cinzel',serif;font-weight:600;
+  color:#FFB37A;font-size:12px;
+  box-shadow:0 0 10px rgba(255,140,50,.1) inset;
+  transition:transform .25s ease;
+  cursor:default;user-select:none;
+  flex-shrink:0;
+}
+.streak-counter.pulse{
+  transform:scale(1.2);
+  box-shadow:0 0 18px rgba(255,140,50,.55) inset,0 0 12px rgba(255,140,50,.4);
+}
+.streak-counter.cold{
+  filter:grayscale(.6);opacity:.6;
+}
+.streak-ico{font-size:13px;filter:drop-shadow(0 0 4px rgba(255,140,50,.5));}
+.streak-val{min-width:14px;text-align:right;letter-spacing:.3px;}
+.streak-shields{font-size:9px;opacity:.85;margin-left:1px;letter-spacing:-1px;}
 
 /* ═══ SECTION HEADER ═══ */
 .sec-hdr{
@@ -908,6 +932,11 @@ svg.jar{width:52px;height:72px;}
     <span class="wisdom-ico">✨</span>
     <span class="wisdom-val" id="wisdom-val">0</span>
   </div>
+  <div class="streak-counter" id="streak-counter" title="Série – dnů v řadě">
+    <span class="streak-ico" id="streak-ico">🔥</span>
+    <span class="streak-val" id="streak-val">0</span>
+    <span class="streak-shields" id="streak-shields"></span>
+  </div>
   <button class="drive-act-btn" id="drive-btn">⚙️ Drive</button>
 </div>
 <div class="admin-float" id="admin-float-btn" title="Rodičovský přístup">🔐</div>
@@ -1524,7 +1553,16 @@ const DEFAULT_STATE = () => ({
   // ═══ KROK 1 – Moudrost (body) ═══
   wisdom: 0,                  // aktuální počet Moudrosti
   wisdom_log: [],             // historie: {amount, reason, date} – max 50 záznamů
-  wisdom_daily: {}            // denní limity: {"YYYY-MM-DD": {open:true, tree_strokes:N}}
+  wisdom_daily: {},           // denní limity: {"YYYY-MM-DD": {open:true, tree_strokes:N}}
+  // ═══ KROK 2 – Série a štíty ═══
+  streak: {
+    current: 0,               // aktuální série v dnech
+    longest: 0,               // osobní rekord
+    last_visit: null,         // "YYYY-MM-DD" posledního otevření
+    shields: 0,               // počet dostupných štítů (max 3)
+    last_shield_date: null,   // "YYYY-MM-DD" posledního pátku, kdy byl udělen štít
+    milestones: []            // již odměněné milníky, např. ["3","7","30"]
+  }
 });
 
 let state = DEFAULT_STATE();
@@ -1551,6 +1589,15 @@ function loadLocal() {
       if (typeof state.wisdom !== 'number') state.wisdom = 0;
       if (!Array.isArray(state.wisdom_log)) state.wisdom_log = [];
       if (!state.wisdom_daily || typeof state.wisdom_daily !== 'object') state.wisdom_daily = {};
+      // KROK 2 – Série: zpětná kompatibilita
+      if (!state.streak || typeof state.streak !== 'object') {
+        state.streak = { current:0, longest:0, last_visit:null, shields:0, last_shield_date:null, milestones:[] };
+      } else {
+        if (typeof state.streak.current !== 'number') state.streak.current = 0;
+        if (typeof state.streak.longest !== 'number') state.streak.longest = 0;
+        if (typeof state.streak.shields !== 'number') state.streak.shields = 0;
+        if (!Array.isArray(state.streak.milestones)) state.streak.milestones = [];
+      }
       driveFileId = p.driveFileId || null;
     }
     clientId = localStorage.getItem('babylon_client_id') || null;
@@ -3173,6 +3220,188 @@ setTimeout(() => {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 1
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 2 – SÉRIE (STREAKS) + ŠTÍTY
+   Reference: Herní design, kap. 7
+═══════════════════════════════════════════════════════ */
+
+/** Rozdíl dvou "YYYY-MM-DD" stringů ve dnech (b - a). */
+function _dayDiff(a, b) {
+  if (!a || !b) return null;
+  const pa = a.split('-').map(Number);
+  const pb = b.split('-').map(Number);
+  const da = new Date(pa[0], pa[1]-1, pa[2]);
+  const db = new Date(pb[0], pb[1]-1, pb[2]);
+  return Math.round((db - da) / 86400000);
+}
+
+/** Je dnes pátek? (JS: 0=Ne, 1=Po, ..., 5=Pá, 6=So) */
+function _isFriday() {
+  return new Date().getDay() === 5;
+}
+
+/** Vykreslí počítadlo série a štítů. */
+function renderStreak() {
+  const valEl = document.getElementById('streak-val');
+  const shEl = document.getElementById('streak-shields');
+  const box = document.getElementById('streak-counter');
+  if (!valEl || !shEl || !box) return;
+  const s = state.streak || {};
+  valEl.textContent = String(s.current || 0);
+  // Štíty jako mini tečky: 🛡️🛡️ (max 3)
+  shEl.textContent = s.shields > 0 ? ' ' + '🛡️'.repeat(Math.min(s.shields, 3)) : '';
+  // "chladná" série = 0 nebo dnes ještě nenavštíveno
+  if ((s.current || 0) === 0) {
+    box.classList.add('cold');
+  } else {
+    box.classList.remove('cold');
+  }
+}
+
+/** Krátký puls počítadla při změně. */
+function pulseStreak() {
+  const box = document.getElementById('streak-counter');
+  if (!box) return;
+  box.classList.remove('pulse');
+  void box.offsetWidth;
+  box.classList.add('pulse');
+  setTimeout(() => box.classList.remove('pulse'), 300);
+}
+
+/**
+ * Udělí páteční štít (1× týdně, max 3 kumulovaně).
+ * Volá se v rámci updateStreak().
+ */
+function grantWeeklyShield() {
+  if (!_isFriday()) return;
+  const today = _todayKey();
+  const s = state.streak;
+  if (s.last_shield_date === today) return; // už dnes udělen
+  if (s.shields >= 3) {
+    s.last_shield_date = today; // zaznamenám, ale nepřidám (strop)
+    return;
+  }
+  s.shields = Math.min(3, (s.shields || 0) + 1);
+  s.last_shield_date = today;
+  toast('🛡️ Dostal jsi štít série! Chrání tě, když zapomeneš.', 3500);
+}
+
+/**
+ * Zpracování milníků (3, 7, 30 dnů).
+ * Vyšší milníky (14, 60, 100, 365) budou v dalších krocích
+ * (spojeno s pečetěmi a customizací stromu).
+ */
+function processStreakMilestones() {
+  const s = state.streak;
+  const current = s.current;
+  const awarded = s.milestones;
+
+  function award(key, action) {
+    if (awarded.indexOf(key) === -1) {
+      awarded.push(key);
+      action();
+    }
+  }
+
+  if (current >= 3)  award('3',  () => {
+    setTimeout(() => toast('🔥 Tři dny v řadě! Rituál začíná.', 3200), 400);
+  });
+  if (current >= 7)  award('7',  () => {
+    addWisdom(50, 'série 7 dní');
+    setTimeout(() => toast('🎉 Sedm dní! Mistr stálosti. Bonus +50 ✨', 4000), 600);
+  });
+  if (current >= 30) award('30', () => {
+    addWisdom(300, 'série 30 dní');
+    setTimeout(() => toast('🏆 Třicet dní! Měsíc pilnosti! Bonus +300 ✨', 5000), 600);
+  });
+}
+
+/**
+ * Aktualizuje sérii podle dnešního otevření aplikace.
+ * Volá se při bootu po načtení state.
+ */
+function updateStreak() {
+  if (!state.user || !state.user.name) return; // onboarding nedokončen
+  if (!state.streak) state.streak = { current:0, longest:0, last_visit:null, shields:0, last_shield_date:null, milestones:[] };
+  const s = state.streak;
+  const today = _todayKey();
+
+  // 0) První návštěva vůbec
+  if (!s.last_visit) {
+    s.current = 1;
+    s.last_visit = today;
+    s.longest = Math.max(s.longest || 0, 1);
+    grantWeeklyShield();
+    processStreakMilestones();
+    scheduleSave();
+    renderStreak();
+    pulseStreak();
+    return;
+  }
+
+  // 1) Stejný den = nic se nemění (counter nesmí v UI vypadat jako 0)
+  const gap = _dayDiff(s.last_visit, today);
+  if (gap === 0) {
+    grantWeeklyShield();
+    scheduleSave();
+    renderStreak();
+    return;
+  }
+
+  // 2) Včera = pokračování
+  if (gap === 1) {
+    s.current += 1;
+    s.last_visit = today;
+    s.longest = Math.max(s.longest || 0, s.current);
+    grantWeeklyShield();
+    processStreakMilestones();
+    scheduleSave();
+    renderStreak();
+    pulseStreak();
+    return;
+  }
+
+  // 3) Více dní přeskočeno → zkusíme štíty
+  const missed = gap - 1;      // chybějící dny mezi last_visit a včerejškem
+  if (missed > 0 && missed <= (s.shields || 0)) {
+    s.shields -= missed;
+    s.current += 1;
+    s.last_visit = today;
+    s.longest = Math.max(s.longest || 0, s.current);
+    grantWeeklyShield();
+    processStreakMilestones();
+    scheduleSave();
+    renderStreak();
+    pulseStreak();
+    toast('🛡️ Štít tě zachránil! Série pokračuje ('+missed+' '+(missed===1?'den':'dny')+' kryty).', 4500);
+    return;
+  }
+
+  // 4) Reset – laskavě, žádný shaming
+  s.current = 1;
+  s.last_visit = today;
+  s.milestones = []; // nové milníky se udělí znovu při dosažení
+  // štíty: necháváme, ať si je hráč ponechá
+  grantWeeklyShield();
+  processStreakMilestones();
+  scheduleSave();
+  renderStreak();
+  pulseStreak();
+  const name = state.user.name || 'poutníku';
+  toast('Vítej zpátky, '+name+'! Tvá cesta pokračuje. Dnes je 1. den nové série.', 5000);
+}
+
+// Boot: vykreslení + update série (mírně po Moudrosti, aby bonusy bodů
+// za milníky nebyly vidět přes denní bonus za otevření)
+setTimeout(() => {
+  renderStreak();
+  updateStreak();
+}, 900);
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 2
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
