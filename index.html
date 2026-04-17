@@ -455,6 +455,141 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   line-height:1.5;margin:0 4px 14px;
 }
 
+/* ═══ KROK 6A – Přizpůsobení Nádvoří ═══ */
+.customize-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  margin:8px auto 0;padding:4px 12px;
+  background:rgba(245,166,35,.08);
+  border:1px solid rgba(245,166,35,.28);
+  border-radius:14px;
+  font-family:'Cinzel',serif;font-size:10px;
+  color:var(--gold);opacity:.75;
+  letter-spacing:.8px;cursor:pointer;
+  transition:opacity .2s ease,background .2s ease;
+}
+.customize-btn:hover{opacity:1;background:rgba(245,166,35,.15);}
+.customize-btn:active{transform:scale(.96);}
+
+/* Theming vrstva – aplikuje se na #screen-nadvorí jako data atributy */
+/* Pozadí: data-bg (night / dawn / day / golden / babylon) */
+#screen-nadvorí[data-bg="night"]{background:linear-gradient(180deg,#050208 0%,#0d0507 25%,#1a0e04 55%,#2d1508 100%);}
+#screen-nadvorí[data-bg="dawn"]{background:linear-gradient(180deg,#1a0a2e 0%,#3b1a3d 25%,#6b2c3a 55%,#a84a2e 100%);}
+#screen-nadvorí[data-bg="day"]{background:linear-gradient(180deg,#1a2a4a 0%,#2a4680 25%,#5a80c0 60%,#8bb0d8 100%);}
+#screen-nadvorí[data-bg="golden"]{background:linear-gradient(180deg,#2a1508 0%,#5a3010 25%,#9a6820 60%,#d8a848 100%);}
+#screen-nadvorí[data-bg="babylon"]{
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,215,0,.18) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(206,147,216,.15) 0%, transparent 40%),
+    linear-gradient(180deg,#1a0a2e 0%,#2e1048 25%,#4a1a5a 55%,#6b2a80 100%);
+}
+
+/* Dlažba: data-floor – jemný prvek pod pilíři */
+#screen-nadvorí::after{
+  content:'';position:fixed;left:0;right:0;bottom:72px;height:14px;
+  pointer-events:none;z-index:1;opacity:.65;
+}
+#screen-nadvorí[data-floor="sand"]::after{
+  background:repeating-linear-gradient(90deg,
+    rgba(245,230,195,.12) 0 8px,
+    rgba(139,94,60,.22) 8px 16px);
+}
+#screen-nadvorí[data-floor="mosaic"]::after{
+  background:repeating-linear-gradient(45deg,
+    rgba(42,155,181,.35) 0 6px,
+    rgba(245,230,195,.2) 6px 12px,
+    rgba(245,166,35,.25) 12px 18px);
+}
+#screen-nadvorí[data-floor="gold"]::after{
+  background:linear-gradient(90deg,
+    rgba(200,134,10,.4) 0%,
+    rgba(255,215,0,.5) 50%,
+    rgba(200,134,10,.4) 100%);
+  box-shadow:0 -1px 8px rgba(255,215,0,.4);
+}
+#screen-nadvorí[data-floor="babylon"]::after{
+  height:18px;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 4px, rgba(0,0,0,.3) 4px 5px),
+    repeating-linear-gradient(90deg,
+      #7a3a10 0 18px,
+      #9a5020 18px 36px);
+  opacity:.55;
+}
+
+/* Barva stromu – aplikuje se jako filter na canvas */
+#yard-tree-canvas[data-tc="green"]{filter:none;}
+#yard-tree-canvas[data-tc="gold"]{filter:hue-rotate(20deg) saturate(1.4) brightness(1.15) drop-shadow(0 0 10px rgba(255,215,0,.4));}
+#yard-tree-canvas[data-tc="purple"]{filter:hue-rotate(230deg) saturate(1.3) brightness(1.05);}
+#yard-tree-canvas[data-tc="ruby"]{filter:hue-rotate(300deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 8px rgba(229,57,53,.35));}
+
+/* Customize modal – pro více obsahu potřebuje větší šířku */
+.customize-box{max-width:360px;width:100%;padding:22px 18px 18px;}
+.customize-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:17px;font-weight:700;color:var(--lgold);
+  letter-spacing:.8px;margin-bottom:14px;text-align:center;
+}
+.customize-tabs{
+  display:flex;gap:4px;background:rgba(0,0,0,.35);
+  border-radius:10px;padding:3px;margin-bottom:14px;
+}
+.cu-tab{
+  flex:1;padding:7px 2px;background:transparent;border:none;
+  border-radius:8px;color:var(--sand);opacity:.65;
+  font-family:'Cinzel',serif;font-size:11px;font-weight:600;
+  cursor:pointer;letter-spacing:.3px;transition:all .2s ease;
+}
+.cu-tab.active{
+  background:linear-gradient(135deg,rgba(245,166,35,.25),rgba(255,215,0,.15));
+  color:var(--lgold);opacity:1;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.customize-options{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:9px;
+  margin-bottom:14px;min-height:180px;
+}
+.cu-opt{
+  position:relative;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(245,166,35,.2);
+  border-radius:11px;padding:10px 8px 8px;
+  text-align:center;cursor:pointer;
+  transition:all .2s ease;
+  overflow:hidden;
+}
+.cu-opt:hover{border-color:rgba(245,166,35,.5);}
+.cu-opt.active{
+  border-color:var(--lgold);
+  box-shadow:0 0 12px rgba(255,215,0,.35) inset,0 0 10px rgba(255,215,0,.25);
+}
+.cu-opt.locked{
+  opacity:.5;cursor:not-allowed;
+  filter:grayscale(.7);
+}
+.cu-opt-preview{
+  width:100%;height:42px;border-radius:7px;
+  margin-bottom:6px;
+  position:relative;overflow:hidden;
+}
+.cu-opt-name{
+  font-family:'Cinzel',serif;font-weight:700;font-size:11px;
+  color:var(--lgold);letter-spacing:.3px;
+  margin-bottom:2px;line-height:1.2;
+}
+.cu-opt.locked .cu-opt-name{color:var(--sand);opacity:.7;}
+.cu-opt-hint{
+  font-size:9px;color:var(--sand);opacity:.6;
+  line-height:1.25;
+}
+.cu-opt-lock{
+  position:absolute;top:4px;right:6px;font-size:12px;opacity:.7;
+}
+.cu-opt-check{
+  position:absolute;top:4px;left:6px;font-size:12px;
+  color:var(--lgold);filter:drop-shadow(0 0 3px rgba(255,215,0,.7));
+}
+.customize-close-btn{width:100%;padding:11px;font-size:13px;}
+
 /* ═══ SECTION HEADER ═══ */
 .sec-hdr{
   display:flex;align-items:center;gap:10px;
@@ -1284,6 +1419,7 @@ svg.jar{width:52px;height:72px;}
   </div>
   <div class="user-greeting" id="user-greeting">Vítej, Strážče!</div>
   <div class="user-motto">„Znalosti tě obohacují – ne hned, ale pro tvou budoucnost."</div>
+  <button class="customize-btn" id="customize-btn" title="Přizpůsobit Nádvoří">✨ Upravit</button>
   <div class="rank-progress" id="rank-progress" title="Pokrok k další hodnosti">
     <div class="rank-progress-bar"><div class="rank-progress-fill" id="rank-progress-fill"></div></div>
     <div class="rank-progress-text" id="rank-progress-text">Poutník → Učedník · 0 / 500 ✨</div>
@@ -1848,6 +1984,25 @@ svg.jar{width:52px;height:72px;}
   </div>
 </div>
 
+<!-- ══════════════ KROK 6A – CUSTOMIZE NÁDVOŘÍ MODAL ══════════════ -->
+<div class="modal-overlay hidden" id="modal-customize">
+  <div class="modal-box customize-box">
+    <div class="customize-title">✨ Přizpůsob své Nádvoří</div>
+
+    <div class="customize-tabs">
+      <button class="cu-tab active" data-cu-tab="background">🌌 Pozadí</button>
+      <button class="cu-tab" data-cu-tab="floor">⬜ Dlažba</button>
+      <button class="cu-tab" data-cu-tab="tree_color">🌳 Strom</button>
+    </div>
+
+    <div class="customize-options" id="customize-options">
+      <!-- generated by JS -->
+    </div>
+
+    <button class="ceremony-accept customize-close-btn" id="cu-close">Hotovo ✨</button>
+  </div>
+</div>
+
 <!-- ══════════════ TOAST ══════════════ -->
 <div id="toast" class="hidden"></div>
 
@@ -1988,6 +2143,12 @@ const DEFAULT_STATE = () => ({
   tree: {
     name: '',                 // jméno stromu (pojmenoval ho uživatel)
     name_prompt_shown: false  // true = už jsme se na jméno zeptali (u starých dat)
+  },
+  // ═══ KROK 6A – Přizpůsobení Nádvoří ═══
+  custom: {
+    background: 'night',      // ID zvoleného pozadí
+    floor: 'sand',            // ID dlažby
+    tree_color: 'green'       // ID barvy stromu
   }
 });
 
@@ -2044,6 +2205,14 @@ function loadLocal() {
       } else {
         if (typeof state.tree.name !== 'string') state.tree.name = '';
         if (typeof state.tree.name_prompt_shown !== 'boolean') state.tree.name_prompt_shown = false;
+      }
+      // KROK 6A – Přizpůsobení: zpětná kompatibilita
+      if (!state.custom || typeof state.custom !== 'object') {
+        state.custom = { background: 'night', floor: 'sand', tree_color: 'green' };
+      } else {
+        if (typeof state.custom.background !== 'string') state.custom.background = 'night';
+        if (typeof state.custom.floor !== 'string')      state.custom.floor = 'sand';
+        if (typeof state.custom.tree_color !== 'string') state.custom.tree_color = 'green';
       }
       driveFileId = p.driveFileId || null;
     }
@@ -2234,6 +2403,8 @@ function renderAll() {
   if (typeof renderSealsPillar === 'function') renderSealsPillar();
   // Krok 5 – strom: aktualizace jména a sezóny
   if (typeof renderTreeLabel === 'function') renderTreeLabel();
+  // Krok 6A – přizpůsobení: reaplikovat po každé změně dat
+  if (typeof applyCustomization === 'function') applyCustomization();
 }
 
 function renderNadvorí() {
@@ -4460,6 +4631,166 @@ setTimeout(() => {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 5
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 6A – PŘIZPŮSOBENÍ NÁDVOŘÍ
+   Reference: Herní design, kap. 10
+═══════════════════════════════════════════════════════ */
+
+/**
+ * Definice variant přizpůsobení.
+ * Každá skupina má: id, name, unlock (popis podmínky), preview (CSS gradient pro náhled).
+ * check(state) vrací true pokud je varianta odemčená.
+ */
+var CUSTOM_OPTIONS = {
+  background: [
+    { id:'night',   name:'Hvězdná noc',     unlock:'Výchozí',                  preview:'linear-gradient(180deg,#050208,#1a0e04,#2d1508)',
+      check: () => true },
+    { id:'dawn',    name:'Babylonský úsvit',unlock:'Učedník',                  preview:'linear-gradient(180deg,#1a0a2e,#6b2c3a,#a84a2e)',
+      check: (s) => (s.rank && s.rank.current >= 1) },
+    { id:'day',     name:'Jasný den',       unlock:'Kupec',                    preview:'linear-gradient(180deg,#1a2a4a,#5a80c0,#8bb0d8)',
+      check: (s) => (s.rank && s.rank.current >= 3) },
+    { id:'golden',  name:'Zlaté pole',      unlock:'Strážce keře',             preview:'linear-gradient(180deg,#2a1508,#9a6820,#d8a848)',
+      check: (s) => (s.rank && s.rank.current >= 5) },
+    { id:'babylon', name:'Babylonská věž',  unlock:'Pán pokladnice',           preview:'radial-gradient(circle at 30% 30%,rgba(255,215,0,.3),transparent 40%),linear-gradient(180deg,#1a0a2e,#4a1a5a,#6b2a80)',
+      check: (s) => (s.rank && s.rank.current >= 7) }
+  ],
+  floor: [
+    { id:'sand',    name:'Písek pouště',    unlock:'Výchozí',                  preview:'repeating-linear-gradient(90deg,rgba(245,230,195,.4) 0 6px,rgba(139,94,60,.5) 6px 12px)',
+      check: () => true },
+    { id:'mosaic',  name:'Mozaika',         unlock:'500 ✨ Moudrosti',         preview:'repeating-linear-gradient(45deg,rgba(42,155,181,.6) 0 5px,rgba(245,230,195,.4) 5px 10px,rgba(245,166,35,.5) 10px 15px)',
+      check: (s) => (s.wisdom || 0) >= 500 },
+    { id:'gold',    name:'Zlatá dlažba',    unlock:'2 500 ✨ Moudrosti',       preview:'linear-gradient(90deg,#c8860a,#ffd700 50%,#c8860a)',
+      check: (s) => (s.wisdom || 0) >= 2500 },
+    { id:'babylon', name:'Babylonská cihla',unlock:'10 000 ✨ Moudrosti',      preview:'repeating-linear-gradient(0deg,transparent 0 4px,rgba(0,0,0,.3) 4px 5px),repeating-linear-gradient(90deg,#7a3a10 0 18px,#9a5020 18px 36px)',
+      check: (s) => (s.wisdom || 0) >= 10000 }
+  ],
+  tree_color: [
+    { id:'green',   name:'Zelený',          unlock:'Výchozí',                  preview:'radial-gradient(circle at 50% 50%,#4caf50 0%,#1b5e20 60%,#0d3d15 100%)',
+      check: () => true },
+    { id:'gold',    name:'Zlatý',           unlock:'Série 14 dní',             preview:'radial-gradient(circle at 50% 50%,#ffd700 0%,#c8860a 60%,#3d2a00 100%)',
+      check: (s) => (s.streak && s.streak.longest >= 14) },
+    { id:'purple',  name:'Fialový',         unlock:'Série 30 dní',             preview:'radial-gradient(circle at 50% 50%,#ce93d8 0%,#7b1fa2 60%,#2a0a42 100%)',
+      check: (s) => (s.streak && s.streak.longest >= 30) },
+    { id:'ruby',    name:'Rubínový',        unlock:'Série 100 dní',            preview:'radial-gradient(circle at 50% 50%,#ef5350 0%,#b71c1c 60%,#3d0000 100%)',
+      check: (s) => (s.streak && s.streak.longest >= 100) }
+  ]
+};
+
+/** Aplikuje aktuální výběr (data atributy na screen-nadvorí a canvasu). */
+function applyCustomization() {
+  if (!state.custom) return;
+  const screen = document.getElementById('screen-nadvorí');
+  if (screen) {
+    screen.setAttribute('data-bg',    state.custom.background || 'night');
+    screen.setAttribute('data-floor', state.custom.floor || 'sand');
+  }
+  const canvas = document.getElementById('yard-tree-canvas');
+  if (canvas) canvas.setAttribute('data-tc', state.custom.tree_color || 'green');
+}
+
+/** Fallback: pokud je zvolená varianta nyní zamčená (např. po resetu), spadne na výchozí. */
+function ensureValidCustomization() {
+  if (!state.custom || !CUSTOM_OPTIONS) return;
+  ['background','floor','tree_color'].forEach(group => {
+    const opts = CUSTOM_OPTIONS[group];
+    const current = state.custom[group];
+    const opt = opts.find(o => o.id === current);
+    if (!opt || !opt.check(state)) {
+      // zvol první vždy-odemčenou
+      const dflt = opts.find(o => o.check({}) || o.id === opts[0].id) || opts[0];
+      state.custom[group] = dflt.id;
+    }
+  });
+}
+
+/** Otevře modal. */
+function openCustomizeModal() {
+  const modal = document.getElementById('modal-customize');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  renderCustomizeOptions('background');
+  // přepni aktivní tab vizuálně na pozadí
+  document.querySelectorAll('.cu-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cuTab === 'background');
+  });
+}
+
+function closeCustomizeModal() {
+  const modal = document.getElementById('modal-customize');
+  if (modal) modal.classList.add('hidden');
+}
+
+/** Vykreslí možnosti pro zvolenou skupinu. */
+function renderCustomizeOptions(group) {
+  const wrap = document.getElementById('customize-options');
+  if (!wrap || !CUSTOM_OPTIONS[group]) return;
+  const opts = CUSTOM_OPTIONS[group];
+  const current = (state.custom && state.custom[group]) || opts[0].id;
+
+  wrap.innerHTML = '';
+  opts.forEach(opt => {
+    const unlocked = opt.check(state);
+    const active = unlocked && (opt.id === current);
+    const card = document.createElement('div');
+    card.className = 'cu-opt' + (unlocked ? '' : ' locked') + (active ? ' active' : '');
+    card.setAttribute('data-id', opt.id);
+
+    const preview = '<div class="cu-opt-preview" style="background:' + opt.preview + ';"></div>';
+    const lock = unlocked ? '' : '<div class="cu-opt-lock">🔒</div>';
+    const check = active ? '<div class="cu-opt-check">✓</div>' : '';
+    const hint = unlocked ? 'Získáno ✓' : opt.unlock;
+
+    card.innerHTML = preview + lock + check +
+      '<div class="cu-opt-name">' + opt.name + '</div>' +
+      '<div class="cu-opt-hint">' + hint + '</div>';
+
+    card.addEventListener('click', () => {
+      if (!unlocked) {
+        toast('🔒 Odemkneš na: ' + opt.unlock, 3000);
+        return;
+      }
+      if (!state.custom) state.custom = {};
+      state.custom[group] = opt.id;
+      scheduleSave();
+      applyCustomization();
+      renderCustomizeOptions(group); // překreslí aktivní stav
+    });
+    wrap.appendChild(card);
+  });
+}
+
+/** Event listeners pro modal. */
+(function bindCustomizeEvents(){
+  const btn = document.getElementById('customize-btn');
+  if (btn) btn.addEventListener('click', openCustomizeModal);
+
+  const closeBtn = document.getElementById('cu-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeCustomizeModal);
+
+  const modal = document.getElementById('modal-customize');
+  if (modal) modal.addEventListener('click', e => {
+    if (e.target === modal) closeCustomizeModal();
+  });
+
+  document.querySelectorAll('.cu-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cu-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderCustomizeOptions(tab.dataset.cuTab);
+    });
+  });
+})();
+
+// Boot: aplikuj uložený styl (s kontrolou platnosti)
+setTimeout(() => {
+  ensureValidCustomization();
+  applyCustomization();
+}, 100);
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 6A
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>

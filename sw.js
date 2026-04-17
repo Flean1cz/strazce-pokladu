@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.5.0'; // ← KROK 5: Interaktivní strom (reakce, jméno, sezóna)
+const VERSION = 'v2.6.0'; // ← KROK 6A: Přizpůsobení Nádvoří (pozadí, dlažba, barva stromu)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 
