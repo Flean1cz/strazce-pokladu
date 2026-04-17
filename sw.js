@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.6.0'; // ← KROK 6A: Přizpůsobení Nádvoří (pozadí, dlažba, barva stromu)
+const VERSION = 'v2.7.1'; // ← KROK 6B úprava: deposit_3 target 1 (místo 3)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 

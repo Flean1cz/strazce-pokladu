@@ -590,6 +590,83 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 }
 .customize-close-btn{width:100%;padding:11px;font-size:13px;}
 
+/* ═══ KROK 6B – Karta Algameše (týdenní výzva) ═══ */
+.algamesh-card{
+  display:flex;gap:12px;align-items:stretch;
+  background:linear-gradient(135deg,rgba(245,230,195,.12),rgba(139,94,60,.22));
+  border:1px solid rgba(245,166,35,.4);
+  border-radius:16px;
+  padding:14px 14px 12px;
+  position:relative;overflow:hidden;
+  box-shadow:0 4px 14px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,215,0,.12);
+  animation:algEntry .6s cubic-bezier(.2,.7,.2,1);
+}
+.algamesh-card.hidden{display:none;}
+.algamesh-card.completed{
+  background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(200,134,10,.15));
+  border-color:rgba(255,215,0,.6);
+  box-shadow:0 4px 18px rgba(255,215,0,.25),inset 0 1px 0 rgba(255,215,0,.25);
+}
+@keyframes algEntry{
+  from{opacity:0;transform:translateY(-12px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.algamesh-avatar{
+  flex-shrink:0;
+  width:52px;height:52px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;line-height:1;
+  background:radial-gradient(circle at 40% 40%,rgba(255,215,0,.25),rgba(139,94,60,.25));
+  border:2px solid rgba(255,215,0,.35);
+  border-radius:50%;
+  animation:algFloat 3.5s ease-in-out infinite;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
+}
+@keyframes algFloat{
+  0%,100%{transform:translateY(0) rotate(-2deg);}
+  50%{transform:translateY(-3px) rotate(2deg);}
+}
+.algamesh-body{flex:1;min-width:0;}
+.algamesh-header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:'Cinzel',serif;letter-spacing:.3px;
+  margin-bottom:4px;
+}
+.algamesh-name{font-size:10px;color:var(--lgold);font-weight:700;text-transform:uppercase;}
+.algamesh-week{font-size:9px;color:var(--sand);opacity:.55;}
+.algamesh-bubble{
+  font-family:'Cinzel',serif;font-style:italic;
+  font-size:12px;color:var(--sand);line-height:1.5;
+  margin-bottom:8px;
+  text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.algamesh-bubble .q{font-style:normal;color:var(--lgold);}
+.algamesh-progress{margin-top:2px;}
+.alg-progress-bar{
+  height:5px;border-radius:3px;
+  background:rgba(0,0,0,.32);
+  overflow:hidden;
+  border:1px solid rgba(245,166,35,.22);
+}
+.alg-progress-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#C8860A,#FFD700);
+  border-radius:3px;transition:width .6s ease;
+  box-shadow:0 0 6px rgba(255,215,0,.5);
+}
+.algamesh-card.completed .alg-progress-fill{
+  background:linear-gradient(90deg,#FFD700,#FFF5C8,#FFD700);
+  width:100% !important;
+}
+.alg-progress-text{
+  font-family:'Cinzel',serif;font-size:10px;
+  color:var(--sand);opacity:.65;
+  text-align:right;margin-top:3px;letter-spacing:.3px;
+}
+.algamesh-card.completed .alg-progress-text{
+  color:var(--lgold);opacity:.95;font-weight:700;
+}
+
 /* ═══ SECTION HEADER ═══ */
 .sec-hdr{
   display:flex;align-items:center;gap:10px;
@@ -1433,6 +1510,24 @@ svg.jar{width:52px;height:72px;}
 </div>
 
 <div class="pillars">
+  <!-- ══════ KROK 6B – KARTA ALGAMEŠE (týdenní výzva) ══════ -->
+  <div class="algamesh-card hidden" id="algamesh-card">
+    <div class="algamesh-avatar" id="alg-avatar">👴</div>
+    <div class="algamesh-body">
+      <div class="algamesh-header">
+        <span class="algamesh-name">Algamesh praví:</span>
+        <span class="algamesh-week" id="alg-week">Týdenní výzva</span>
+      </div>
+      <div class="algamesh-bubble" id="alg-bubble">
+        „Tento týden…"
+      </div>
+      <div class="algamesh-progress" id="alg-progress">
+        <div class="alg-progress-bar"><div class="alg-progress-fill" id="alg-progress-fill"></div></div>
+        <div class="alg-progress-text" id="alg-progress-text">0 / 7</div>
+      </div>
+    </div>
+  </div>
+
   <div class="pillar-card pokladnice" id="nav-pokladnice">
     <div class="pillar-icon">🏺</div>
     <div class="pillar-content">
@@ -2149,6 +2244,16 @@ const DEFAULT_STATE = () => ({
     background: 'night',      // ID zvoleného pozadí
     floor: 'sand',            // ID dlažby
     tree_color: 'green'       // ID barvy stromu
+  },
+  // ═══ KROK 6B – Týdenní výzvy od Algameše ═══
+  challenges: {
+    current_id: null,         // ID aktuální výzvy, např. "stroke_daily"
+    week_key: null,           // "YYYY-Wnn" – týden, ke kterému výzva patří
+    started_at: null,         // ISO datum začátku výzvy (zachytí stav pro delta)
+    snapshot: {},             // stav systému při začátku týdne (pro delta-detekci)
+    completed: false,         // true = splněna
+    rewarded: false,          // true = +75 ✨ uděleno
+    history: []               // pole {id, week_key, completed} – max 20 záznamů
   }
 });
 
@@ -2213,6 +2318,13 @@ function loadLocal() {
         if (typeof state.custom.background !== 'string') state.custom.background = 'night';
         if (typeof state.custom.floor !== 'string')      state.custom.floor = 'sand';
         if (typeof state.custom.tree_color !== 'string') state.custom.tree_color = 'green';
+      }
+      // KROK 6B – Týdenní výzvy: zpětná kompatibilita
+      if (!state.challenges || typeof state.challenges !== 'object') {
+        state.challenges = { current_id:null, week_key:null, started_at:null, snapshot:{}, completed:false, rewarded:false, history:[] };
+      } else {
+        if (!Array.isArray(state.challenges.history)) state.challenges.history = [];
+        if (!state.challenges.snapshot || typeof state.challenges.snapshot !== 'object') state.challenges.snapshot = {};
       }
       driveFileId = p.driveFileId || null;
     }
@@ -2405,6 +2517,8 @@ function renderAll() {
   if (typeof renderTreeLabel === 'function') renderTreeLabel();
   // Krok 6A – přizpůsobení: reaplikovat po každé změně dat
   if (typeof applyCustomization === 'function') applyCustomization();
+  // Krok 6B – týdenní výzva: progress
+  if (typeof _updateChallengeCompletion === 'function') _updateChallengeCompletion();
 }
 
 function renderNadvorí() {
@@ -4791,6 +4905,294 @@ setTimeout(() => {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 6A
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 6B – TÝDENNÍ VÝZVY OD ALGAMEŠE
+   Reference: Herní design, kap. 14 + 11
+═══════════════════════════════════════════════════════ */
+
+/**
+ * Definice 7 týdenních výzev.
+ * Každá má:
+ *  - id (string)
+ *  - text: co Algamesh říká (v uvozovkách)
+ *  - target: cílové číslo pro progress bar
+ *  - snapshot(state): vrací hodnotu pro zachycení stavu při začátku týdne
+ *  - progress(state, snap): vrací aktuální {done, target} podle delty
+ */
+var CHALLENGES = [
+  {
+    id: 'stroke_daily',
+    text: '„Pohlaď strom každý den. Strom miluje pozornost jako ty miluješ pohádky."',
+    target: 7,
+    snapshot: (s) => ({ startDay: _todayKey() }),
+    progress: (s, snap) => {
+      // Spočítáme počet dnů od začátku, kdy měl hráč tree_strokes >= 1
+      const daily = s.wisdom_daily || {};
+      const start = snap && snap.startDay ? snap.startDay : _todayKey();
+      let done = 0;
+      Object.keys(daily).forEach(k => {
+        if (k >= start && (daily[k].tree_strokes || 0) >= 1) done++;
+      });
+      return { done: Math.min(done, 7), target: 7 };
+    }
+  },
+  {
+    id: 'deposit_3',
+    text: '„Tento týden ulož alespoň jednou něco do nádoby NAVŽDY. I malá mince má velkou sílu."',
+    target: 1,
+    snapshot: (s) => ({ depositCount: _countRecentDeposits(s, 0) }),
+    progress: (s, snap) => {
+      const baseline = (snap && typeof snap.depositCount === 'number') ? snap.depositCount : 0;
+      const now = _countRecentDeposits(s, 0);
+      const done = Math.max(0, now - baseline);
+      return { done: Math.min(done, 1), target: 1 };
+    }
+  },
+  {
+    id: 'open_5_days',
+    text: '„Navštiv mě alespoň pět dní tohoto týdne. Rád tě tu vidím."',
+    target: 5,
+    snapshot: (s) => ({ startDay: _todayKey() }),
+    progress: (s, snap) => {
+      const daily = s.wisdom_daily || {};
+      const start = snap && snap.startDay ? snap.startDay : _todayKey();
+      let done = 0;
+      Object.keys(daily).forEach(k => {
+        if (k >= start && daily[k].open) done++;
+      });
+      return { done: Math.min(done, 5), target: 5 };
+    }
+  },
+  {
+    id: 'wisdom_100',
+    text: '„Získej tento týden sto zlatých moudrostí. Poznání roste s každým krokem."',
+    target: 100,
+    snapshot: (s) => ({ wisdomStart: s.wisdom || 0 }),
+    progress: (s, snap) => {
+      const base = (snap && typeof snap.wisdomStart === 'number') ? snap.wisdomStart : 0;
+      const done = Math.max(0, (s.wisdom || 0) - base);
+      return { done: Math.min(done, 100), target: 100 };
+    }
+  },
+  {
+    id: 'new_dream',
+    text: '„Napiš si tento týden nový sen do svého svitku. Kdo sní, ten plánuje."',
+    target: 1,
+    snapshot: (s) => ({ wishCount: (s.wishlist || []).length }),
+    progress: (s, snap) => {
+      const base = (snap && typeof snap.wishCount === 'number') ? snap.wishCount : 0;
+      const now = (s.wishlist || []).length;
+      return { done: Math.min(1, Math.max(0, now - base)), target: 1 };
+    }
+  },
+  {
+    id: 'keep_streak',
+    text: '„Obhaj svou sérii. Nepřeruš plamínek, který tak krásně hoří."',
+    target: 7,
+    snapshot: (s) => ({ streakStart: (s.streak && s.streak.current) || 0 }),
+    progress: (s, snap) => {
+      const base = (snap && typeof snap.streakStart === 'number') ? snap.streakStart : 0;
+      const current = (s.streak && s.streak.current) || 0;
+      // Úspěch = série neklesla a přidala alespoň 7 dní
+      const grew = Math.max(0, current - base);
+      return { done: Math.min(grew, 7), target: 7 };
+    }
+  },
+  {
+    id: 'read_story',
+    text: '„Přečti tento týden jeden příběh. Moudrost Babylonu čeká v písmenech."',
+    target: 1,
+    snapshot: (s) => ({ storyCount: ((s.progression && s.progression.unlocked_stories) || []).length }),
+    progress: (s, snap) => {
+      const base = (snap && typeof snap.storyCount === 'number') ? snap.storyCount : 0;
+      const now = ((s.progression && s.progression.unlocked_stories) || []).length;
+      return { done: Math.min(1, Math.max(0, now - base)), target: 1 };
+    }
+  }
+];
+
+/** Pomocná: počet depositů v historii (poslední N dní, 0 = všechny dosud). */
+function _countRecentDeposits(s, dayLimit) {
+  if (!Array.isArray(s.history)) return 0;
+  let n = 0;
+  for (let i = 0; i < s.history.length; i++) {
+    if (s.history[i].type === 'deposit') n++;
+  }
+  return n;
+}
+
+/**
+ * Vrátí ISO "week key" typu "2026-W16" pro daný datum.
+ * Používáme náš vlastní počátek týdne (neděle–sobota), aby respektoval
+ * design "neděli večer" — nicméně kvůli jednoduchosti použijeme pondělí-neděli
+ * se standardním ISO week.
+ */
+function _getWeekKey(date) {
+  const d = date || new Date();
+  // ISO week: upravíme na čtvrtek aktuálního týdne
+  const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = tmp.getUTCDay() || 7; // Po=1 ... Ne=7
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - day); // přesun na čtvrtek
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+  const weekNum = Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7);
+  return tmp.getUTCFullYear() + '-W' + String(weekNum).padStart(2, '0');
+}
+
+/** Hash string → int, pro stabilní výběr výzvy z week_key + user name. */
+function _hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+/** Vybere výzvu pro daný týden (deterministicky podle týdne + uživatele). */
+function _pickChallengeForWeek(weekKey) {
+  const seed = (state.user && state.user.name ? state.user.name : '') + '|' + weekKey;
+  const hash = _hashString(seed);
+  return CHALLENGES[hash % CHALLENGES.length];
+}
+
+/**
+ * Rotace výzvy: zavolat při bootu a po každém dni.
+ * - Pokud není žádná aktivní → založ novou
+ * - Pokud je aktivní a její týden už neběží → vyhodnoť a otevři novou
+ */
+function rotateWeeklyChallengeIfNeeded() {
+  if (!state.user || !state.user.name) return;
+  if (!state.challenges) return;
+  const nowKey = _getWeekKey();
+  const ch = state.challenges;
+
+  // První spuštění – ještě žádná výzva
+  if (!ch.current_id || !ch.week_key) {
+    _assignNewChallenge(nowKey);
+    return;
+  }
+
+  // Aktuální týden se shoduje → nic neměň, jen vyhodnoť progress
+  if (ch.week_key === nowKey) {
+    _updateChallengeCompletion();
+    return;
+  }
+
+  // Jiný týden → zakonzervuj výsledek a pošli do historie
+  _finalizeCurrentChallenge();
+  _assignNewChallenge(nowKey);
+}
+
+/** Založí novou výzvu pro daný týden. */
+function _assignNewChallenge(weekKey) {
+  const def = _pickChallengeForWeek(weekKey);
+  state.challenges.current_id = def.id;
+  state.challenges.week_key = weekKey;
+  state.challenges.started_at = new Date().toISOString();
+  state.challenges.snapshot = def.snapshot(state) || {};
+  state.challenges.completed = false;
+  state.challenges.rewarded = false;
+  scheduleSave();
+  renderAlgameshCard();
+}
+
+/** Uzavře aktuální výzvu před rotací — přesune do historie. */
+function _finalizeCurrentChallenge() {
+  const ch = state.challenges;
+  if (!ch || !ch.current_id) return;
+  ch.history.unshift({
+    id: ch.current_id,
+    week_key: ch.week_key,
+    completed: !!ch.completed
+  });
+  if (ch.history.length > 20) ch.history.pop();
+}
+
+/**
+ * Aktualizuje progress aktuální výzvy. Pokud je splněna poprvé,
+ * udělí +75 ✨ a ukaže toast.
+ */
+function _updateChallengeCompletion() {
+  const ch = state.challenges;
+  if (!ch || !ch.current_id) return;
+  const def = _getChallengeDef(ch.current_id);
+  if (!def) return;
+
+  const prog = def.progress(state, ch.snapshot || {});
+  const justCompleted = !ch.completed && prog.done >= prog.target;
+
+  if (justCompleted) {
+    ch.completed = true;
+    if (!ch.rewarded) {
+      ch.rewarded = true;
+      addWisdom(75, 'týdenní výzva: ' + def.id);
+      setTimeout(() => {
+        toast('🎖️ Týdenní výzva splněna! Algamesh je hrdý. +75 ✨', 5000);
+        if (typeof spawnConfetti === 'function') {
+          spawnConfetti(window.innerWidth / 2, window.innerHeight * 0.35,
+            ['👴','⭐','✨','🌟','📜']);
+        }
+      }, 400);
+    }
+    scheduleSave();
+  }
+  renderAlgameshCard(prog);
+}
+
+function _getChallengeDef(id) {
+  return CHALLENGES.find(c => c.id === id) || null;
+}
+
+/** Vykreslí kartu Algameše podle aktuálního stavu. */
+function renderAlgameshCard(prog) {
+  if (!CHALLENGES) return; // boot order safety
+  const card = document.getElementById('algamesh-card');
+  if (!card) return;
+  const ch = state.challenges;
+  if (!ch || !ch.current_id || !state.user || !state.user.name) {
+    card.classList.add('hidden');
+    return;
+  }
+  const def = _getChallengeDef(ch.current_id);
+  if (!def) { card.classList.add('hidden'); return; }
+
+  card.classList.remove('hidden');
+  card.classList.toggle('completed', !!ch.completed);
+
+  const bubble = document.getElementById('alg-bubble');
+  if (bubble) bubble.innerHTML = ch.completed
+    ? '<span class="q">Výzva splněna! Jsi hrdina svého týdne. ✦</span>'
+    : def.text;
+
+  const weekEl = document.getElementById('alg-week');
+  if (weekEl) weekEl.textContent = ch.completed ? '✓ Splněno' : 'Týdenní výzva';
+
+  // Progress
+  const p = prog || def.progress(state, ch.snapshot || {});
+  const pct = Math.max(0, Math.min(100, (p.done / p.target) * 100));
+  const fill = document.getElementById('alg-progress-fill');
+  const ptxt = document.getElementById('alg-progress-text');
+  if (fill) fill.style.width = pct.toFixed(1) + '%';
+  if (ptxt) ptxt.textContent = p.done + ' / ' + p.target;
+}
+
+/** Hook: při každé změně Moudrosti → zkontrolovat progress výzvy. */
+window._onWisdomChanged = (function(prev){
+  return function() {
+    if (typeof prev === 'function') prev();
+    if (typeof _updateChallengeCompletion === 'function') _updateChallengeCompletion();
+  };
+})(window._onWisdomChanged);
+
+// Boot: rotace + render
+setTimeout(() => {
+  rotateWeeklyChallengeIfNeeded();
+}, 1800);
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 6B
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
