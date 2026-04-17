@@ -3897,8 +3897,13 @@ window._onWisdomChanged = function() {
  * Definice 10 pečetí Kategorie A.
  * - check(s): funkce vrací true, pokud stav splňuje podmínku (deklarativní)
  * - event: true = odemyká se pouze událostí (volá se unlockSeal(id))
+ *
+ * POZN: Použito 'var' místo 'const' záměrně kvůli hoisting.
+ * Boot kód (renderAll → renderSealsPillar) může být volán
+ * dřív, než se tato deklarace vykoná lineárně. Var zajistí,
+ * že identifikátor existuje (jako undefined) od začátku scope.
  */
-const SEALS = [
+var SEALS = [
   { id:'name_in_clay',     name:'Jméno v hlíně',   ico:'📜',
     hint:'Dokonči úvodní nastavení',
     body:'Napsal jsi své jméno do hliněné tabulky. Babylon tě nyní zná.',
@@ -3952,6 +3957,7 @@ const SEALS = [
 
 /** Vrátí pečeť podle ID. */
 function getSeal(id) {
+  if (!SEALS) return null;
   return SEALS.find(s => s.id === id) || null;
 }
 
@@ -4007,6 +4013,7 @@ function unlockSeal(id) {
  */
 function checkAllSeals() {
   if (!state.user || !state.user.name) return;
+  if (!SEALS) return; // boot order safety
   for (let i = 0; i < SEALS.length; i++) {
     const seal = SEALS[i];
     if (seal.event) continue;               // eventové pečeti se kontrolují jinde
@@ -4021,6 +4028,7 @@ function checkAllSeals() {
 function renderSealsPillar() {
   const el = document.getElementById('pillar-seals');
   if (!el) return;
+  if (!SEALS) return; // boot order safety: renderAll může běžet dřív než SEALS deklarace
   const count = (state.seals && state.seals.unlocked) ? state.seals.unlocked.length : 0;
   el.textContent = 'Získáno: ' + count + ' / ' + SEALS.length;
 }
@@ -4038,6 +4046,7 @@ function _formatSealDate(iso) {
 function renderSealsScreen(animateNew) {
   const grid = document.getElementById('seals-grid');
   if (!grid) return;
+  if (!SEALS) return; // boot order safety
   const unlocked = (state.seals && state.seals.unlocked) || [];
   const unlockedAt = (state.seals && state.seals.unlocked_at) || {};
 
