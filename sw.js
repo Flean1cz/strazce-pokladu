@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.3.0'; // ← KROK 3: Hodnosti + ceremonie povýšení
+const VERSION = 'v2.4.0'; // ← KROK 4: Pečeti (Kategorie A, 10 kusů)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 
