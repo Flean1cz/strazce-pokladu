@@ -247,6 +247,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 }
 .ceremony-accept:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.55),inset 0 2px 8px rgba(255,245,200,.6);}
 .ceremony-accept:active{transform:translateY(0);}
+.ceremony-skip-hint{
+  font-size:10px;color:rgba(245,230,195,.35);
+  font-family:'Cinzel',serif;letter-spacing:.5px;
+  margin-top:12px;text-align:center;
+}
 
 /* ═══ KROK 4 – Pečeti (Síň pečetí) ═══ */
 .pillar-card.seals-pillar{
@@ -2163,6 +2168,7 @@ svg.jar{width:52px;height:72px;}
       <div class="ceremony-quote" id="cer-quote">Od tohoto dne jsi Učedník. Babylon tě zná.</div>
     </div>
     <button class="ceremony-accept" id="cer-accept">✦ Přijímám titul ✦</button>
+    <div class="ceremony-skip-hint">nebo klepni kdekoli mimo rám</div>
   </div>
 </div>
 
@@ -3037,6 +3043,8 @@ function addWish() {
   toast(`🏰 Sen přidán: ${name}`);
   // Krok 4 – pečeti: dream_maker, planner
   if (typeof checkAllSeals === 'function') checkAllSeals();
+  // Krok 6B – výzva new_dream: delta wishlistu (addWish nevolá addWisdom, takže hook nejde přes řetěz)
+  if (typeof _updateChallengeCompletion === 'function') _updateChallengeCompletion();
 }
 
 /* ════════════════════════════════════════════
@@ -3229,8 +3237,20 @@ function finishSetupWithName() {
   document.getElementById('bottom-nav').classList.remove('hidden');
   renderAll();
   toast(`🏺 Vítej, ${name}! Babylonská pokladnice je otevřena! ✨`, 3500);
-  // Krok 4 – pečeti: kontrola po dokončení setupu
-  if (typeof checkAllSeals === 'function') setTimeout(checkAllSeals, 800);
+
+  // Krok 1–7: spustit všechny boot hooky, které čekaly na user.name.
+  // Při fresh onboardingu boot sekvence proběhla před zadáním jména,
+  // takže byly přeskočeny (protože state.user.name byl prázdný).
+  // Teď je jméno známé, můžeme je doběhnout.
+  setTimeout(() => {
+    if (typeof grantDailyOpen === 'function') grantDailyOpen();               // Krok 1: +5 ✨ za otevření
+    if (typeof updateStreak === 'function') updateStreak();                   // Krok 2: start série (1 den)
+    if (typeof checkRankPromotion === 'function') checkRankPromotion();       // Krok 3: hodnosti
+    if (typeof checkAllSeals === 'function') checkAllSeals();                 // Krok 4: pečeti
+    if (typeof rotateWeeklyChallengeIfNeeded === 'function')
+      rotateWeeklyChallengeIfNeeded();                                        // Krok 6B: výzva
+    if (typeof checkAllArtifacts === 'function') checkAllArtifacts();         // Krok 7: artefakty
+  }, 300);
 }
 
 /* ═══ BOOT ═══ */
@@ -3963,7 +3983,13 @@ document.querySelectorAll('.pillar-card, .story-card, .secret-card').forEach(el 
 document.querySelectorAll('input[type="number"], input[type="text"], input[type="password"]')
   .forEach(inp => {
     inp.addEventListener('focus', () => {
-      setTimeout(() => inp.scrollIntoView({ behavior:'smooth', block:'center' }), 320);
+      setTimeout(() => {
+        try {
+          if (typeof inp.scrollIntoView === 'function') {
+            inp.scrollIntoView({ behavior:'smooth', block:'center' });
+          }
+        } catch(e) { /* nečiníme problém z focusu */ }
+      }, 320);
     });
   });
 
@@ -4442,10 +4468,16 @@ window._onWisdomChanged = function() {
   checkRankPromotion();
 };
 
-// Event listener pro tlačítko "Přijímám titul"
+// Event listener pro tlačítko "Přijímám titul" + klik mimo box = zavřít
 (function bindCeremonyAccept(){
   const btn = document.getElementById('cer-accept');
   if (btn) btn.addEventListener('click', confirmCeremony);
+  // Záchranná brzda: klik na overlay (mimo box) = přijmout titul
+  // Řeší případ, kdy je overlay viditelný ale box nebo tlačítko neni dosažitelné
+  const overlay = document.getElementById('modal-ceremony');
+  if (overlay) overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) confirmCeremony();
+  });
 })();
 
 /* ═══════════════════════════════════════════════════════
@@ -5259,6 +5291,9 @@ function _finalizeCurrentChallenge() {
 function _updateChallengeCompletion() {
   const ch = state.challenges;
   if (!ch || !ch.current_id) return;
+  // Safety: CHALLENGES je var deklarován dále v kódu a na velmi ranném bootu
+  // (např. při re-loadu s existujícími daty) může být undefined.
+  if (typeof CHALLENGES === 'undefined' || !CHALLENGES) return;
   const def = _getChallengeDef(ch.current_id);
   if (!def) return;
 
@@ -5284,6 +5319,7 @@ function _updateChallengeCompletion() {
 }
 
 function _getChallengeDef(id) {
+  if (typeof CHALLENGES === 'undefined' || !CHALLENGES) return null;
   return CHALLENGES.find(c => c.id === id) || null;
 }
 
@@ -5576,18 +5612,27 @@ function _checkGroupBonus(group) {
 }
 
 /** Projde všechny artefakty a odemkne ty, jejichž check vrací true. */
+/** Příznak: zabrání rekurzivnímu volání z addWisdom → _onWisdomChanged. */
+var _checkingArtifacts = false;
+
 function checkAllArtifacts() {
+  if (_checkingArtifacts) return; // zabrání rekurzi: _grantArtifact→addWisdom→hook→zpátky sem
   if (!state.user || !state.user.name) return;
   if (!COLLECTIONS) return;
-  for (let g = 0; g < COLLECTIONS.length; g++) {
-    const group = COLLECTIONS[g];
-    for (let i = 0; i < group.items.length; i++) {
-      const it = group.items[i];
-      if (_isArtifactUnlocked(it.id)) continue;
-      try {
-        if (it.check(state)) _grantArtifact(it, group);
-      } catch(e) { console.error('artifact check error', it.id, e); }
+  _checkingArtifacts = true;
+  try {
+    for (let g = 0; g < COLLECTIONS.length; g++) {
+      const group = COLLECTIONS[g];
+      for (let i = 0; i < group.items.length; i++) {
+        const it = group.items[i];
+        if (_isArtifactUnlocked(it.id)) continue;
+        try {
+          if (it.check(state)) _grantArtifact(it, group);
+        } catch(e) { console.error('artifact check error', it.id, e); }
+      }
     }
+  } finally {
+    _checkingArtifacts = false;
   }
 }
 
