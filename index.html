@@ -268,9 +268,30 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   color:var(--lgold);font-weight:600;opacity:.9;
 }
 .seals-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:12px;padding:12px 14px 30px;
+  padding:12px 14px 30px;
 }
+.seals-grid-inner{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:12px;margin-bottom:18px;
+}
+.seals-group-header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:0 4px 8px;margin:6px 0 10px;
+  border-bottom:1px solid rgba(245,166,35,.22);
+}
+.seals-group-header.complete{
+  border-bottom-color:rgba(255,229,92,.6);
+}
+.seals-group-title{
+  font-family:'Cinzel',serif;font-weight:700;font-size:13px;
+  color:var(--lgold);letter-spacing:.4px;
+}
+.seals-group-header.complete .seals-group-title{color:#FFE55C;}
+.seals-group-count{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--sand);opacity:.65;letter-spacing:.3px;
+}
+.seals-group-header.complete .seals-group-count{color:#FFE55C;opacity:.9;}
 .seal-card{
   position:relative;
   background:linear-gradient(135deg,rgba(245,166,35,.08),rgba(0,0,0,.3));
@@ -2369,7 +2390,8 @@ const DEFAULT_STATE = () => ({
   // ═══ KROK 5 – Interaktivní strom ═══
   tree: {
     name: '',                 // jméno stromu (pojmenoval ho uživatel)
-    name_prompt_shown: false  // true = už jsme se na jméno zeptali (u starých dat)
+    name_prompt_shown: false, // true = už jsme se na jméno zeptali (u starých dat)
+    total_strokes: 0          // kumulativní počet pohlazení (Krok 8: pro pečeť tree_whisperer)
   },
   // ═══ KROK 6A – Přizpůsobení Nádvoří ═══
   custom: {
@@ -2444,10 +2466,23 @@ function loadLocal() {
       }
       // KROK 5 – Strom: zpětná kompatibilita
       if (!state.tree || typeof state.tree !== 'object') {
-        state.tree = { name: '', name_prompt_shown: false };
+        state.tree = { name: '', name_prompt_shown: false, total_strokes: 0 };
       } else {
         if (typeof state.tree.name !== 'string') state.tree.name = '';
         if (typeof state.tree.name_prompt_shown !== 'boolean') state.tree.name_prompt_shown = false;
+        // KROK 8: total_strokes counter. Pro existující uživatele z verze před
+        // Krokem 8 pole neexistovalo — doplníme proxy z wisdom_log.
+        // Pozor: po Object.assign má state.tree.total_strokes = 0 (z DEFAULT_STATE),
+        // takže musíme kontrolovat originální data p.state.tree, ne merged state.
+        const origHadCounter = p.state && p.state.tree && typeof p.state.tree.total_strokes === 'number';
+        if (!origHadCounter) {
+          let proxy = 0;
+          if (Array.isArray(state.wisdom_log)) {
+            state.wisdom_log.forEach(l => { if (l.reason === 'pohlazení stromu') proxy++; });
+          }
+          // Proxy je odhad — reálné číslo může být vyšší kvůli log limitu 50 záznamů.
+          state.tree.total_strokes = proxy;
+        }
       }
       // KROK 6A – Přizpůsobení: zpětná kompatibilita
       if (!state.custom || typeof state.custom !== 'object') {
@@ -4112,6 +4147,10 @@ function grantTreeStroke() {
     return false;
   }
   today.tree_strokes = n + 1;
+  // KROK 8: kumulativní counter pro pečeť tree_whisperer (50 pohlazení celkem)
+  if (!state.tree) state.tree = { name:'', name_prompt_shown:false, total_strokes:0 };
+  if (typeof state.tree.total_strokes !== 'number') state.tree.total_strokes = 0;
+  state.tree.total_strokes += 1;
   addWisdom(1, 'pohlazení stromu');
   // Hook pro další moduly (Krok 4 – pečeť first_stroke)
   if (typeof window._onTreeStroked === 'function') window._onTreeStroked();
@@ -4548,8 +4587,125 @@ var SEALS = [
   { id:'first_interest',   name:'První úrok',      ico:'💰',
     hint:'Získej první úrok ze Stromu peněz',
     body:'Tvoje peníze začaly pracovat. Získal jsi první úrok – peníze rodí peníze.',
-    check:(s) => !!s.last_interest_applied }
+    check:(s) => !!s.last_interest_applied },
+
+  // ═════════════════════════════════════════════════════════════
+  // KATEGORIE B — STÁLOST (10 pečetí, Krok 8)
+  // Dlouhodobé chování, nenaučí se za jeden den.
+  // ═════════════════════════════════════════════════════════════
+
+  { id:'week_babylon',     name:'Týden ve znamení Babylonu', ico:'🗓️', category:'B',
+    hint:'Udrž 7denní sérii',
+    body:'Sedm dní v řadě jsi navštívil své Nádvoří. Rituál se stal tvou součástí.',
+    check:(s) => (s.streak && s.streak.current >= 7) || (s.streak && s.streak.longest >= 7) },
+
+  { id:'moon_diligence',   name:'Měsíc pilnosti', ico:'🌙', category:'B',
+    hint:'Udrž 30denní sérii',
+    body:'Třicet dní pilnosti. Velké věci začínají takovými malými krůčky.',
+    check:(s) => (s.streak && s.streak.current >= 30) || (s.streak && s.streak.longest >= 30) },
+
+  { id:'century_tree',     name:'Stoletý strom', ico:'🌳', category:'B',
+    hint:'Udrž 100denní sérii',
+    body:'Sto dní v řadě. Tvůj strom zapustil hluboké kořeny. Jsi jeho pán.',
+    check:(s) => (s.streak && s.streak.current >= 100) || (s.streak && s.streak.longest >= 100) },
+
+  { id:'faithful_gardener',name:'Věrný sadař', ico:'🌾', category:'B',
+    hint:'Vklad každý týden po 4 týdny v řadě',
+    body:'Čtyři týdny po sobě jsi do pokladnice přidal. Tvá pilnost nezná výjimky.',
+    check:(s) => _hasDepositInLastNWeeks(s, 4) },
+
+  { id:'mountain_patience',name:'Trpělivost hor', ico:'⛰️', category:'B',
+    hint:'90 dní bez výběru z nádoby NAVŽDY',
+    body:'Tři měsíce nikdy nic nevzal z nádoby NAVŽDY. Trpělivost hor je tvá ctnost.',
+    check:(s) => _hasMountainPatience(s, 90) },
+
+  { id:'tree_whisperer',   name:'Šeptající stromu', ico:'🍃', category:'B',
+    hint:'Pohlaď strom celkem 50×',
+    body:'Padesát pohlazení. Strom zná tvůj hlas lépe než kdokoli jiný.',
+    check:(s) => _totalTreeStrokes(s) >= 50 },
+
+  { id:'coin_stream',      name:'Pramen mincí', ico:'💧', category:'B',
+    hint:'Přidej do pokladnice 20×',
+    body:'Dvacet vkladů. Z pramene se stal pravidelný tok zlata.',
+    check:(s) => _countDeposits(s) >= 20 },
+
+  { id:'seasoned_reader',  name:'Ostřílený čtenář', ico:'📚', category:'B',
+    hint:'Přečti 3 příběhy',
+    body:'Tři celé příběhy. Algamešova moudrost v tobě roste.',
+    check:(s) => _storyCount(s) >= 3 },
+
+  { id:'wisdom_500',       name:'Učedníkova moudrost', ico:'✨', category:'B',
+    hint:'Získej 500 Moudrosti',
+    body:'Pět set zrnek moudrosti. Hodnost Učedníka svítí nad tvým jménem.',
+    check:(s) => (s.wisdom || 0) >= 500 },
+
+  { id:'wisdom_2500',      name:'Měšťanova moudrost', ico:'🌟', category:'B',
+    hint:'Získej 2 500 Moudrosti',
+    body:'Dva a půl tisíce. Tvoje cesta se stává legendou mezi babyloňany.',
+    check:(s) => (s.wisdom || 0) >= 2500 }
 ];
+
+/** Počet unikátních kalendářních týdnů s vkladem v posledních N týdnech. */
+function _hasDepositInLastNWeeks(s, n) {
+  if (!Array.isArray(s.history) || s.history.length === 0) return false;
+  const nowKey = _getWeekKey(new Date());
+  const keysFound = new Set();
+  // Spočítáme unikátní week_key pro deposity v historii
+  s.history.forEach(h => {
+    if (h.type !== 'deposit') return;
+    const iso = h.iso || h.timestamp;
+    let dateObj;
+    if (iso) {
+      dateObj = new Date(iso);
+    } else if (h.date) {
+      // history používá "14.4.2026" — parsujeme
+      const m = String(h.date).match(/(\d+)\.(\d+)\.(\d+)/);
+      if (m) dateObj = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+    }
+    if (dateObj && !isNaN(dateObj.getTime())) {
+      keysFound.add(_getWeekKey(dateObj));
+    }
+  });
+  // Potřebujeme aby mezi nalezenými klíči bylo posledních N týdnů
+  // Spočítáme klíče pro posledních N týdnů včetně aktuálního
+  for (let i = 0; i < n; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i * 7);
+    if (!keysFound.has(_getWeekKey(d))) return false;
+  }
+  return true;
+}
+
+/** Kontrola zda uživatel nevybíral z NAVŽDY po dobu N dní od prvního vkladu. */
+function _hasMountainPatience(s, days) {
+  if (!Array.isArray(s.history) || s.history.length === 0) return false;
+  // Najdeme první event (nejstarší) — historie je v opačném pořadí (nejnovější první)
+  let firstEvent = null;
+  for (let i = s.history.length - 1; i >= 0; i--) {
+    const h = s.history[i];
+    if (h.type === 'deposit' || h.type === 'withdraw' || h.type === 'interest') {
+      firstEvent = h;
+      break;
+    }
+  }
+  if (!firstEvent) return false;
+  // Parsování data
+  let firstDate = null;
+  const iso = firstEvent.iso || firstEvent.timestamp;
+  if (iso) firstDate = new Date(iso);
+  else if (firstEvent.date) {
+    const m = String(firstEvent.date).match(/(\d+)\.(\d+)\.(\d+)/);
+    if (m) firstDate = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+  }
+  if (!firstDate || isNaN(firstDate.getTime())) return false;
+  // Musí uplynout aspoň N dní od prvního vkladu
+  const now = new Date();
+  const diffDays = Math.floor((now - firstDate) / (1000 * 60 * 60 * 24));
+  if (diffDays < days) return false;
+  // A nesmí být žádný výběr z NAVŽDY (history.navzdy < 0)
+  const hasWithdraw = s.history.some(h => (h.navzdy || 0) < 0);
+  return !hasWithdraw;
+}
 
 /** Vrátí pečeť podle ID. */
 function getSeal(id) {
@@ -4638,7 +4794,7 @@ function _formatSealDate(iso) {
   } catch(e) { return ''; }
 }
 
-/** Vykreslí mřížku pečetí v Síni. */
+/** Vykreslí mřížku pečetí v Síni — rozdělené podle kategorií. */
 function renderSealsScreen(animateNew) {
   const grid = document.getElementById('seals-grid');
   if (!grid) return;
@@ -4650,30 +4806,56 @@ function renderSealsScreen(animateNew) {
   const prev = grid._prevUnlocked || [];
   const prevSet = new Set(prev);
 
+  // Rozdělení do kategorií. Pečeti bez 'category' = A (zpětná kompatibilita).
+  const groups = [
+    { id:'A', name:'Kategorie A — První kroky',
+      hint:'Drobné úspěchy ze začátku tvé cesty.' },
+    { id:'B', name:'Kategorie B — Stálost',
+      hint:'Dlouhodobé chování. Nenaučí se za den.' }
+  ];
+
   grid.innerHTML = '';
-  SEALS.forEach(seal => {
-    const isUn = unlocked.indexOf(seal.id) > -1;
-    const justGot = animateNew && isUn && !prevSet.has(seal.id);
-    const card = document.createElement('div');
-    card.className = 'seal-card ' + (isUn ? 'unlocked' : 'locked') + (justGot ? ' just-got' : '');
-    card.setAttribute('data-seal', seal.id);
+  groups.forEach(group => {
+    const sealsInGroup = SEALS.filter(s => (s.category || 'A') === group.id);
+    if (sealsInGroup.length === 0) return;
+    const gotInGroup = sealsInGroup.filter(s => unlocked.indexOf(s.id) > -1).length;
+    const groupComplete = gotInGroup === sealsInGroup.length;
 
-    const lockHtml = isUn ? '' : '<div class="seal-lock-overlay">🔒</div>';
-    const dateHtml = isUn ? '<div class="seal-date">' + _formatSealDate(unlockedAt[seal.id]) + '</div>' : '';
-    const descHtml = isUn
-      ? '<div class="seal-hint" style="opacity:.75;">Získáno ✓</div>'
-      : '<div class="seal-hint">' + seal.hint + '</div>';
+    const header = document.createElement('div');
+    header.className = 'seals-group-header' + (groupComplete ? ' complete' : '');
+    header.innerHTML =
+      '<div class="seals-group-title">' + group.name + '</div>' +
+      '<div class="seals-group-count">' + gotInGroup + ' / ' + sealsInGroup.length + '</div>';
+    grid.appendChild(header);
 
-    card.innerHTML =
-      lockHtml +
-      '<div class="seal-ico">' + seal.ico + '</div>' +
-      '<div class="seal-name">' + seal.name + '</div>' +
-      descHtml +
-      dateHtml;
+    const gridInner = document.createElement('div');
+    gridInner.className = 'seals-grid-inner';
+    sealsInGroup.forEach(seal => {
+      const isUn = unlocked.indexOf(seal.id) > -1;
+      const justGot = animateNew && isUn && !prevSet.has(seal.id);
+      const card = document.createElement('div');
+      card.className = 'seal-card ' + (isUn ? 'unlocked' : 'locked') + (justGot ? ' just-got' : '');
+      card.setAttribute('data-seal', seal.id);
 
-    card.addEventListener('click', () => openSealDetail(seal.id));
-    grid.appendChild(card);
+      const lockHtml = isUn ? '' : '<div class="seal-lock-overlay">🔒</div>';
+      const dateHtml = isUn ? '<div class="seal-date">' + _formatSealDate(unlockedAt[seal.id]) + '</div>' : '';
+      const descHtml = isUn
+        ? '<div class="seal-hint" style="opacity:.75;">Získáno ✓</div>'
+        : '<div class="seal-hint">' + seal.hint + '</div>';
+
+      card.innerHTML =
+        lockHtml +
+        '<div class="seal-ico">' + seal.ico + '</div>' +
+        '<div class="seal-name">' + seal.name + '</div>' +
+        descHtml +
+        dateHtml;
+
+      card.addEventListener('click', () => openSealDetail(seal.id));
+      gridInner.appendChild(card);
+    });
+    grid.appendChild(gridInner);
   });
+
   grid._prevUnlocked = unlocked.slice();
 
   // Progress text
@@ -5510,14 +5692,16 @@ function _countDeposits(s) {
   return n;
 }
 function _totalTreeStrokes(s) {
-  if (!s.wisdom_daily) return 0;
-  let n = 0;
-  Object.keys(s.wisdom_daily).forEach(k => { n += (s.wisdom_daily[k].tree_strokes || 0); });
-  // wisdom_daily se maže po 7 dnech, takže jako proxy použijeme i wisdom_log
-  if (Array.isArray(s.wisdom_log)) {
-    s.wisdom_log.forEach(l => { if (l.reason === 'pohlazení stromu') n++; });
+  // KROK 8: autoritativní zdroj je state.tree.total_strokes (nesubjektuje
+  // limitu wisdom_logu na 50 záznamů). Fallback na wisdom_log pro stará data.
+  if (s.tree && typeof s.tree.total_strokes === 'number' && s.tree.total_strokes > 0) {
+    return s.tree.total_strokes;
   }
-  // Vrátíme větší z obou (log je autoritativní, daily jen backup)
+  // Fallback: zkusíme nasčítat z wisdom_log (omezeno na 50) a wisdom_daily
+  let n = 0;
+  if (s.wisdom_daily) {
+    Object.keys(s.wisdom_daily).forEach(k => { n += (s.wisdom_daily[k].tree_strokes || 0); });
+  }
   let logCount = 0;
   if (Array.isArray(s.wisdom_log)) {
     s.wisdom_log.forEach(l => { if (l.reason === 'pohlazení stromu') logCount++; });
