@@ -1608,6 +1608,14 @@ svg.jar{width:52px;height:72px;}
   color:var(--sand);opacity:.5;text-align:center;
   min-height:16px;
 }
+.report-unsub-btn{
+  display:block;width:100%;margin-top:8px;
+  background:transparent;border:none;
+  font-family:'Cinzel',serif;font-size:10px;
+  color:var(--sand);opacity:.35;cursor:pointer;
+  text-decoration:underline;padding:4px 0;
+}
+.report-unsub-btn:hover{opacity:.6;}
 
 /* Připomínka (banner na Nádvoří) */
 .report-reminder{
@@ -2478,6 +2486,7 @@ svg.jar{width:52px;height:72px;}
         <button class="admin-btn report-btn-mail dep" id="report-mail-btn">✉️ Otevřít v e-mailu</button>
       </div>
       <div class="report-last-sent" id="report-last-sent"></div>
+      <button class="report-unsub-btn" id="report-unsub-btn">Odhlásit z automatického zasílání</button>
     </div>
 
     <!-- Logout -->
@@ -2944,6 +2953,10 @@ function loadLocal() {
 }
 function saveLocal() {
   try { localStorage.setItem('babylon_v3', JSON.stringify({state, driveFileId})); } catch(e) {}
+  // KROK 13 – push report dat na backend (jen pokud je e-mail nastaven)
+  if (typeof _pushReportToBackend === 'function') {
+    _pushReportToBackend();
+  }
 }
 
 /* ═══ TOAST ═══ */
@@ -7007,8 +7020,18 @@ setTimeout(() => { if (typeof updateArkadHint === 'function') updateArkadHint();
 /* ═══════════════════════════════════════════════════════
    KROK 13 – TÝDENNÍ E-MAIL REPORT
    Reference: Herní design, kap. 16.4
-   Mechanika: mailto: link (bez backendu) + clipboard copy
+   Mechanika: mailto: link + clipboard + automatický backend push
 ═══════════════════════════════════════════════════════ */
+
+/**
+ * URL backendu — nastavte po deployi.
+ * Cloudflare Workers: https://babylon-report.YOUR_NAME.workers.dev
+ * Railway/Render:     https://babylon-report-xxxx.railway.app
+ * Lokální dev:        http://localhost:3000
+ *
+ * Pokud je null, automatický push je vypnutý (funguje jen mailto/clipboard).
+ */
+var BACKEND_URL = null; // ← DOPLŇTE po deployi backendu
 
 /**
  * Sestaví text týdenního reportu podle aktuálního stavu.
@@ -7218,6 +7241,60 @@ function checkReportReminder() {
   banner.classList.remove('hidden');
 }
 
+/** ── BACKEND PUSH ─────────────────────────────────────────
+ * Posílá aktuální report na backend při každém saveLocal.
+ * Throttlováno — max 1× za 5 minut, aby se nezahlcoval server.
+ */
+var _lastPushTime = 0;
+function _pushReportToBackend() {
+  if (!BACKEND_URL) return;                               // backend není nastaven
+  if (!state.report || !state.report.parent_email) return; // e-mail není nastaven
+  if (!state.user || !state.user.name) return;             // onboarding nedokončen
+
+  const now = Date.now();
+  if (now - _lastPushTime < 5 * 60 * 1000) return;        // throttle 5 min
+  _lastPushTime = now;
+
+  const report_text = (typeof generateWeeklyReport === 'function')
+    ? generateWeeklyReport() : '';
+  if (!report_text) return;
+
+  fetch(BACKEND_URL + '/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email:       state.report.parent_email,
+      child_name:  state.user.name,
+      report_text,
+      app_version: '2.12.0'
+    })
+  }).catch(() => {
+    // Tiché selhání — backend může být dočasně nedostupný
+  });
+}
+
+/** Odhlásí e-mail z automatického odesílání. */
+function unsubscribeFromBackend() {
+  if (!BACKEND_URL) return;
+  const email = state.report && state.report.parent_email;
+  if (!email) return;
+
+  fetch(BACKEND_URL + '/unsubscribe', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  }).then(() => {
+    state.report.parent_email = '';
+    scheduleSave();
+    const inp = document.getElementById('report-email-inp');
+    if (inp) inp.value = '';
+    renderReportPreview();
+    toast('✓ Odhlášeno z automatického zasílání.', 3500);
+  }).catch(() => {
+    toast('⚠️ Odhlášení se nezdařilo — zkontrolujte připojení.', 4000);
+  });
+}
+
 /** Event listenery pro Krok 13. */
 (function bindReportEvents(){
   // E-mail input → save do state
@@ -7230,8 +7307,11 @@ function checkReportReminder() {
     });
   }
 
-  // Kopírovat tlačítko
-  const copyBtn = document.getElementById('report-copy-btn');
+  // Odhlásit z backendu
+  const unsubBtn = document.getElementById('report-unsub-btn');
+  if (unsubBtn) unsubBtn.addEventListener('click', () => {
+    if (confirm('Odhlásit z automatického zasílání?')) unsubscribeFromBackend();
+  });
   if (copyBtn) copyBtn.addEventListener('click', copyReportToClipboard);
 
   // Otevřít v e-mailu

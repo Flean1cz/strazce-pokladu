@@ -1,0 +1,19 @@
+name = "babylon-report"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Cron: každou neděli 18:05 SEČ (UTC+2 = 16:05 UTC v létě)
+# Zimní čas (UTC+1): změňte na "5 17 * * 0"
+[triggers]
+crons = ["5 16 * * 0"]
+
+# ── D1 databáze
+[[d1_databases]]
+binding = "DB"
+database_name = "babylon-pokladnice"
+database_id = "DOPLNTE_PO_VYTVORENI"   # viz README – wrangler d1 create babylon-pokladnice
+
+# ── Tajné proměnné (nastavit přes: wrangler secret put RESEND_API_KEY)
+# RESEND_API_KEY  – API klíč z resend.com
+# FROM_EMAIL      – odesílací adresa (musí být ověřená v Resend)

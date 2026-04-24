@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.12.0'; // ← KROK 13: Týdenní e-mail report (mailto + clipboard)
+const VERSION = 'v2.13.0'; // ← KROK 13+: backend push — automatický týdenní e-mail
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 
