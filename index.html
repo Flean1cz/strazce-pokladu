@@ -1572,6 +1572,70 @@ svg.jar{width:52px;height:72px;}
   border-radius:10px;color:rgba(245,166,35,.38);
   font-size:12px;padding:9px 20px;cursor:pointer;
 }
+
+/* ═══ KROK 13 – Týdenní report ═══ */
+.report-desc{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--sand);opacity:.7;line-height:1.55;margin-bottom:12px;
+}
+.report-label{
+  display:block;font-family:'Cinzel',serif;font-size:10px;
+  color:var(--sand);opacity:.65;letter-spacing:.5px;
+  text-transform:uppercase;margin-bottom:5px;
+}
+.report-email-inp{width:100%;box-sizing:border-box;margin-bottom:12px;}
+.report-preview{
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(245,166,35,.18);
+  border-radius:10px;padding:12px 14px;
+  font-family:'Cinzel',serif;font-size:12px;
+  color:var(--sand);line-height:1.7;
+  white-space:pre-wrap;word-break:break-word;
+  min-height:80px;margin-bottom:12px;
+}
+.report-btn-row{display:flex;gap:8px;margin-bottom:8px;}
+.report-btn-copy,.report-btn-mail{flex:1;font-size:12px;}
+.report-btn-copy{
+  background:rgba(245,166,35,.12);
+  border:1px solid rgba(245,166,35,.3);
+  border-radius:10px;padding:10px 6px;
+  font-family:'Cinzel',serif;color:var(--lgold);
+  cursor:pointer;
+}
+.report-btn-copy:active{opacity:.7;}
+.report-last-sent{
+  font-family:'Cinzel',serif;font-size:10px;
+  color:var(--sand);opacity:.5;text-align:center;
+  min-height:16px;
+}
+
+/* Připomínka (banner na Nádvoří) */
+.report-reminder{
+  display:flex;align-items:center;gap:8px;
+  margin:6px 14px 2px;
+  background:rgba(42,130,181,.14);
+  border:1px solid rgba(100,180,220,.3);
+  border-radius:10px;padding:8px 10px;
+}
+.report-reminder.hidden{display:none;}
+.report-reminder-ico{font-size:16px;flex-shrink:0;}
+.report-reminder-txt{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--sand);flex:1;line-height:1.4;
+}
+.report-reminder-btn{
+  background:rgba(100,180,220,.25);
+  border:1px solid rgba(100,180,220,.4);
+  border-radius:8px;
+  font-family:'Cinzel',serif;font-size:10px;
+  color:#aaddff;padding:4px 10px;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;
+}
+.report-reminder-close{
+  background:transparent;border:none;
+  color:var(--sand);opacity:.4;font-size:14px;
+  cursor:pointer;padding:0 2px;flex-shrink:0;
+}
 .interest-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .interest-label{font-size:12px;color:var(--sand);opacity:.72;flex:1;line-height:1.4;}
 .pin-change-wrap{display:none;}
@@ -1883,6 +1947,14 @@ svg.jar{width:52px;height:72px;}
     <div class="arkad-figure-name">Arkád</div>
   </div>
   <div class="arkad-speech-hint" id="arkad-speech-hint">„…"</div>
+</div>
+
+<!-- ══ KROK 13 – Report připomínka (neděle večer) ══ -->
+<div class="report-reminder hidden" id="report-reminder">
+  <span class="report-reminder-ico">📧</span>
+  <span class="report-reminder-txt">Neděle — čas na týdenní report pro rodiče.</span>
+  <button class="report-reminder-btn" id="report-reminder-btn">Otevřít</button>
+  <button class="report-reminder-close" id="report-reminder-close">✕</button>
 </div>
 
 <div class="pillars">
@@ -2387,6 +2459,27 @@ svg.jar{width:52px;height:72px;}
       </div>
     </div>
 
+    <!-- ══ KROK 13 – TÝDENNÍ E-MAIL REPORT ══ -->
+    <div class="admin-card" id="admin-report-card">
+      <div class="admin-card-title">📧 Týdenní report pro rodiče</div>
+      <div class="report-desc">
+        Shrnutí týdne — zkopírujte text nebo otevřete přímo v e-mailovém klientovi.
+      </div>
+      <div class="report-email-row">
+        <label class="report-label" for="report-email-inp">E-mail rodiče (volitelný)</label>
+        <input type="email" id="report-email-inp" class="admin-inp report-email-inp"
+          placeholder="rodic@example.com" inputmode="email" autocomplete="email"/>
+      </div>
+      <div class="report-preview" id="report-preview">
+        <!-- generuje JS -->
+      </div>
+      <div class="report-btn-row">
+        <button class="admin-btn report-btn-copy" id="report-copy-btn">📋 Kopírovat</button>
+        <button class="admin-btn report-btn-mail dep" id="report-mail-btn">✉️ Otevřít v e-mailu</button>
+      </div>
+      <div class="report-last-sent" id="report-last-sent"></div>
+    </div>
+
     <!-- Logout -->
     <button class="admin-logout" id="admin-logout-btn">Odhlásit se z administrace</button>
   </div>
@@ -2740,6 +2833,11 @@ const DEFAULT_STATE = () => ({
     unlocked: [],             // pole ID získaných artefaktů
     unlocked_at: {},          // mapa id -> ISO datum získání
     group_rewards: []         // ID skupin, za které už byla udělena odměna kompletní sbírky
+  },
+  // ═══ KROK 13 – Týdenní e-mail report ═══
+  report: {
+    parent_email: '',         // e-mail rodiče (volitelný)
+    last_sent: null           // ISO datum posledního odeslání/generování
   }
 });
 
@@ -2832,6 +2930,12 @@ function loadLocal() {
         if (!Array.isArray(state.collections.unlocked)) state.collections.unlocked = [];
         if (!state.collections.unlocked_at || typeof state.collections.unlocked_at !== 'object') state.collections.unlocked_at = {};
         if (!Array.isArray(state.collections.group_rewards)) state.collections.group_rewards = [];
+      }
+      // KROK 13 – Report: zpětná kompatibilita
+      if (!state.report || typeof state.report !== 'object') {
+        state.report = { parent_email: '', last_sent: null };
+      } else {
+        if (typeof state.report.parent_email !== 'string') state.report.parent_email = '';
       }
       driveFileId = p.driveFileId || null;
     }
@@ -6710,9 +6814,9 @@ var ARKAD_DIALOGUES = {
 
   // --- Moudrá slova / náhodné ---
   wisdom: [
-    '„Existuje babylonský zákon, který nikdo nenapsal: kdo spoří, neklesá."',
-    '„Viděl jsem v životě mnoho bohatých lidí. Věříš, že všichni začali s mnoho? Nikoliv."',
-    '„Přání je oprávka. Plán je cesta. Wishlist je tvůj plán."',
+    '„Existuje babylonský zákon, který nikdo nenapsal: kdo spoří, stane se bohatým."',
+    '„Viděl jsem v životě mnoho bohatých lidí. Myslíš, že všichni začali s miliony? Nikoliv."',
+    '„Přání je tvůj opěrný bod. Plán je cesta k přání. Wishlist je tvůj plán."',
     '„Kolik stojí mír, {name}? Přesně tolik, kolik máš v nádobě NAVŽDY."',
     '„Ztratil jsem mnoho věcí za svůj život. Nůž, plášť, jednou i oslíka. Nikdy jsem neztratil návyk spořit."',
     '„Úrok je tichý přítel. Pracuje, zatímco ty spíš."',
@@ -6898,6 +7002,284 @@ setTimeout(() => { if (typeof updateArkadHint === 'function') updateArkadHint();
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 12
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 13 – TÝDENNÍ E-MAIL REPORT
+   Reference: Herní design, kap. 16.4
+   Mechanika: mailto: link (bez backendu) + clipboard copy
+═══════════════════════════════════════════════════════ */
+
+/**
+ * Sestaví text týdenního reportu podle aktuálního stavu.
+ * Vzor z kap. 16.4 designu.
+ */
+function generateWeeklyReport() {
+  const name = (state.user && state.user.name) || 'vaše dítě';
+  const w = (typeof _collectWeekStats === 'function') ? _collectWeekStats()
+    : { days_active:0, strokes:0, deposits:0, deposits_total_kc:0, new_seals:0, new_stories:0 };
+  const life = (typeof _collectLifeStats === 'function') ? _collectLifeStats()
+    : { streak_longest:0, total_deposits:0, stories_got:0 };
+
+  const rank = (typeof RANKS !== 'undefined' && RANKS && state.rank)
+    ? RANKS[state.rank.current] : null;
+  const rankName = rank ? rank.name : '—';
+  const wisdom = state.wisdom || 0;
+  const streak = (state.streak && state.streak.current) || 0;
+  const shields = (state.streak && state.streak.shields) || 0;
+  const navzdy = state.balances ? state.balances.forever_10 : 0;
+  const sny = state.balances ? state.balances.dreams_10 : 0;
+  const ted = state.balances ? state.balances.living_80 : 0;
+
+  // Celkový součet v pokladnici
+  const total = Math.round((navzdy + sny + ted) * 100) / 100;
+
+  // Nové pečeti tento týden — jejich jména
+  const newSealNames = [];
+  if (state.seals && state.seals.unlocked_at) {
+    const weekStart = (typeof _weekStartKey === 'function') ? _weekStartKey() : '';
+    if (typeof SEALS !== 'undefined' && SEALS) {
+      SEALS.forEach(s => {
+        const got = state.seals.unlocked_at[s.id];
+        if (got && got.slice(0,10) >= weekStart) newSealNames.push(s.name);
+      });
+    }
+  }
+
+  // Název aktuální výzvy
+  let challengeText = '';
+  if (state.challenges && state.challenges.current_id) {
+    const def = (typeof _getChallengeDef === 'function')
+      ? _getChallengeDef(state.challenges.current_id) : null;
+    if (def) {
+      const done = state.challenges.completed ? 'Splněna ✓' : 'Probíhá';
+      challengeText = `Výzva: ${def.text.replace(/„|"/g,'').replace(/"/g,'').trim()} (${done})`;
+    }
+  }
+
+  // Tip pro rozhovor (z Kroku 9)
+  const tip = (typeof _generateTip === 'function') ? _generateTip() : '';
+
+  // --- Sestavení textu ---
+  const lines = [];
+  lines.push(`Týdenní report z Babylonské pokladnice`);
+  lines.push(`─────────────────────────────────────`);
+  lines.push('');
+
+  // Intro věta v duchu designdoc
+  const introVisits = w.days_active > 0
+    ? `Tento týden ${name} navštívil${name.endsWith('a') ? 'a' : ''} pokladnici ${w.days_active}×`
+    : `Tento týden ${name} aplikaci neotevřel${name.endsWith('a') ? 'a' : ''}`;
+
+  const introStroke = w.strokes > 0
+    ? `, pohladil${name.endsWith('a') ? 'a' : ''} strom ${w.strokes}×`
+    : '';
+
+  const introStory = w.new_stories > 0
+    ? ` a přečetl${name.endsWith('a') ? 'a' : ''} ${w.new_stories} příběh`
+    : '';
+
+  lines.push(introVisits + introStroke + introStory + '.');
+
+  if (newSealNames.length > 0) {
+    lines.push(`Získal${name.endsWith('a') ? 'a' : ''} pečeť ${newSealNames.join(', ')}.`);
+  }
+
+  if (w.deposits > 0) {
+    lines.push(`Do pokladnice přidal${name.endsWith('a') ? 'a' : ''} celkem ${fmt(w.deposits_total_kc)} (${w.deposits}× vklad).`);
+  }
+
+  lines.push('');
+  lines.push(`Celkový stav:`);
+  lines.push(`  Moudrost: ${wisdom} ✨ · Hodnost: ${rankName}`);
+  lines.push(`  Série: ${streak} dní${shields > 0 ? ' (štíty: ' + shields + ')' : ''}`);
+  lines.push(`  V pokladnici celkem: ${fmt(total)}`);
+  lines.push(`    TEĎ: ${fmt(ted)} · POTOM: ${fmt(sny)} · NAVŽDY: ${fmt(navzdy)}`);
+
+  if (challengeText) {
+    lines.push('');
+    lines.push(challengeText);
+  }
+
+  if (tip) {
+    lines.push('');
+    lines.push(`💡 Tip pro rozhovor:`);
+    lines.push(tip);
+  }
+
+  lines.push('');
+  lines.push(`─────────────────────────────────────`);
+  lines.push(`Odesláno z Babylonské pokladnice · ${new Date().toLocaleDateString('cs-CZ')}`);
+
+  return lines.join('\n');
+}
+
+/** Vykreslí náhled reportu v admin kartě. */
+function renderReportPreview() {
+  const el = document.getElementById('report-preview');
+  if (!el || !state.user || !state.user.name) return;
+  el.textContent = generateWeeklyReport();
+}
+
+/** Otevře mailto: link s předvyplněným reportem. */
+function sendReportByEmail() {
+  const report = generateWeeklyReport();
+  const name   = (state.user && state.user.name) || 'vaše dítě';
+  const email  = (state.report && state.report.parent_email) || '';
+
+  const subject = encodeURIComponent(
+    `Týdenní report Babylonské pokladnice – ${name} – ${new Date().toLocaleDateString('cs-CZ')}`
+  );
+  const body = encodeURIComponent(report);
+  const mailto = `mailto:${email}?subject=${subject}&body=${body}`;
+
+  // Otevřeme mailto — prohlížeč/OS otevře e-mailový klient
+  const a = document.createElement('a');
+  a.href = mailto;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Uložíme datum posledního odeslání
+  if (!state.report) state.report = { parent_email: '', last_sent: null };
+  state.report.last_sent = new Date().toISOString();
+  scheduleSave();
+  _updateReportLastSent();
+}
+
+/** Zkopíruje text reportu do schránky. */
+function copyReportToClipboard() {
+  const report = generateWeeklyReport();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(report).then(() => {
+      toast('📋 Report zkopírován do schránky!', 3000);
+      if (!state.report) state.report = { parent_email: '', last_sent: null };
+      state.report.last_sent = new Date().toISOString();
+      scheduleSave();
+      _updateReportLastSent();
+    }).catch(() => _copyFallback(report));
+  } else {
+    _copyFallback(report);
+  }
+}
+
+function _copyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    toast('📋 Report zkopírován!', 3000);
+    if (!state.report) state.report = { parent_email: '', last_sent: null };
+    state.report.last_sent = new Date().toISOString();
+    scheduleSave();
+    _updateReportLastSent();
+  } catch(e) {
+    toast('⚠️ Kopírování se nezdařilo — zkuste vybrat text ručně.', 4000);
+  }
+  document.body.removeChild(ta);
+}
+
+/** Zobrazí datum posledního odeslání. */
+function _updateReportLastSent() {
+  const el = document.getElementById('report-last-sent');
+  if (!el) return;
+  const iso = state.report && state.report.last_sent;
+  if (iso) {
+    const d = new Date(iso);
+    el.textContent = 'Naposledy: ' + d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', {hour:'2-digit',minute:'2-digit'});
+  } else {
+    el.textContent = 'Zatím nebyl odeslán.';
+  }
+}
+
+/**
+ * Zobrazí/skryje připomínku na Nádvoří.
+ * Podmínka: neděle večer (po 18:00) + tento týden nebyl odeslán report.
+ */
+function checkReportReminder() {
+  const banner = document.getElementById('report-reminder');
+  if (!banner || !state.user || !state.user.name) return;
+
+  const now = new Date();
+  const isSundayEvening = now.getDay() === 0 && now.getHours() >= 18;
+  if (!isSundayEvening) { banner.classList.add('hidden'); return; }
+
+  // Byl report odeslán tento týden?
+  const weekStart = (typeof _weekStartKey === 'function') ? _weekStartKey() : '';
+  const lastSent = state.report && state.report.last_sent;
+  const sentThisWeek = lastSent && lastSent.slice(0,10) >= weekStart;
+
+  if (sentThisWeek) { banner.classList.add('hidden'); return; }
+
+  banner.classList.remove('hidden');
+}
+
+/** Event listenery pro Krok 13. */
+(function bindReportEvents(){
+  // E-mail input → save do state
+  const emailInp = document.getElementById('report-email-inp');
+  if (emailInp) {
+    emailInp.addEventListener('input', () => {
+      if (!state.report) state.report = { parent_email: '', last_sent: null };
+      state.report.parent_email = emailInp.value.trim();
+      scheduleSave();
+    });
+  }
+
+  // Kopírovat tlačítko
+  const copyBtn = document.getElementById('report-copy-btn');
+  if (copyBtn) copyBtn.addEventListener('click', copyReportToClipboard);
+
+  // Otevřít v e-mailu
+  const mailBtn = document.getElementById('report-mail-btn');
+  if (mailBtn) mailBtn.addEventListener('click', sendReportByEmail);
+
+  // Banner — tlačítko Otevřít → přejde do adminu
+  const reminderBtn = document.getElementById('report-reminder-btn');
+  if (reminderBtn) reminderBtn.addEventListener('click', () => {
+    document.getElementById('report-reminder').classList.add('hidden');
+    document.getElementById('admin-float-btn').click();
+  });
+
+  // Banner — zavřít
+  const reminderClose = document.getElementById('report-reminder-close');
+  if (reminderClose) reminderClose.addEventListener('click', () => {
+    document.getElementById('report-reminder').classList.add('hidden');
+  });
+})();
+
+/**
+ * Hook: při otevření admin panelu (settings tab) vykreslíme náhled
+ * a naplníme e-mail input z uloženého stavu.
+ */
+(function patchSwitchAdminTab(){
+  const orig = window.switchAdminTab;
+  window.switchAdminTab = function(tabId) {
+    orig(tabId);
+    if (tabId === 'settings') {
+      // Naplnit e-mail
+      const inp = document.getElementById('report-email-inp');
+      if (inp && state.report) inp.value = state.report.parent_email || '';
+      // Vykreslit náhled
+      renderReportPreview();
+      _updateReportLastSent();
+    }
+  };
+})();
+
+// Boot: zkontroluj připomínku + předvyplň e-mail při prvním zobrazení
+setTimeout(() => {
+  checkReportReminder();
+  const inp = document.getElementById('report-email-inp');
+  if (inp && state.report) inp.value = state.report.parent_email || '';
+}, 2400);
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 13
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
