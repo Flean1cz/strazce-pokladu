@@ -1276,6 +1276,159 @@ svg.jar{width:52px;height:72px;}
   font-size:12px;padding:9px 20px;cursor:pointer;
 }
 .admin-panel-wrap{max-width:480px;margin:0 auto;padding:0 14px;}
+
+/* ═══ KROK 9 – Admin tabs + Dashboard ═══ */
+.admin-tabs{
+  display:flex;gap:4px;padding:4px;margin:0 14px 14px;max-width:480px;
+  margin-left:auto;margin-right:auto;
+  background:rgba(0,0,0,.4);border-radius:12px;
+  border:1px solid rgba(245,166,35,.2);
+}
+.admin-tab{
+  flex:1;padding:8px 4px;background:transparent;border:none;
+  border-radius:9px;color:var(--sand);opacity:.65;
+  font-family:'Cinzel',serif;font-size:11px;font-weight:600;
+  cursor:pointer;letter-spacing:.5px;transition:all .2s ease;
+}
+.admin-tab.active{
+  background:linear-gradient(135deg,rgba(245,166,35,.28),rgba(255,215,0,.14));
+  color:var(--lgold);opacity:1;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.dash-card{}
+.dash-name{
+  font-family:'Cinzel Decorative',serif;
+  font-size:18px;color:var(--lgold);
+  text-align:center;margin:-4px 0 8px;letter-spacing:.5px;
+}
+.dash-rank-row{
+  display:flex;justify-content:center;align-items:center;gap:10px;
+  margin-bottom:12px;flex-wrap:wrap;
+}
+.dash-rank-badge{
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;
+  color:var(--lgold);padding:3px 10px;
+  background:rgba(245,166,35,.15);
+  border:1px solid rgba(245,166,35,.35);
+  border-radius:10px;letter-spacing:.5px;
+}
+.dash-rank-prog{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--sand);opacity:.75;
+}
+.dash-three-jars{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  margin-bottom:12px;
+}
+.dash-jar{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(245,166,35,.2);
+  border-radius:10px;padding:8px 6px;text-align:center;
+}
+.dash-jar-l{
+  font-family:'Cinzel',serif;font-size:9px;
+  color:var(--sand);opacity:.65;letter-spacing:1px;
+  margin-bottom:3px;
+}
+.dash-jar-v{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  color:var(--lgold);
+}
+.dash-stats-row{
+  display:flex;justify-content:space-around;gap:6px;
+  padding:8px 0;margin-bottom:4px;
+  border-top:1px solid rgba(245,166,35,.12);
+  border-bottom:1px solid rgba(245,166,35,.12);
+}
+.dash-stat{
+  display:flex;align-items:center;gap:5px;
+  font-family:'Cinzel',serif;font-size:12px;font-weight:700;
+  color:var(--lgold);
+}
+.dash-stat-ico{font-size:14px;}
+.dash-wishes{
+  margin-top:10px;display:flex;flex-direction:column;gap:6px;
+}
+.dash-wish{
+  background:rgba(245,166,35,.06);
+  border:1px solid rgba(245,166,35,.18);
+  border-radius:8px;padding:6px 10px;
+  display:flex;justify-content:space-between;align-items:center;
+  gap:8px;
+}
+.dash-wish-name{
+  font-family:'Cinzel',serif;font-size:12px;color:var(--sand);
+  flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.dash-wish-prog{
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--lgold);
+}
+
+.dash-week-grid,.dash-life-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:6px 10px;
+}
+.dash-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:5px 0;
+  border-bottom:1px dashed rgba(245,166,35,.1);
+  font-family:'Cinzel',serif;font-size:12px;
+}
+.dash-row:last-child{border-bottom:none;}
+.dash-row-l{color:var(--sand);opacity:.8;}
+.dash-row-v{color:var(--lgold);font-weight:700;}
+
+.dash-challenge{
+  margin-top:10px;padding:10px;
+  background:rgba(245,230,195,.06);
+  border:1px solid rgba(245,166,35,.22);
+  border-radius:10px;
+}
+.dash-challenge-t{
+  font-family:'Cinzel',serif;font-size:10px;color:var(--gold);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;
+}
+.dash-challenge-b{
+  font-family:'Cinzel',serif;font-style:italic;font-size:12px;
+  color:var(--sand);line-height:1.4;margin-bottom:6px;
+}
+.dash-challenge-p{
+  height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden;
+}
+.dash-challenge-p-fill{
+  height:100%;background:linear-gradient(90deg,#C8860A,#FFD700);
+  border-radius:3px;transition:width .4s ease;
+}
+.dash-challenge.done .dash-challenge-p-fill{
+  background:linear-gradient(90deg,#FFD700,#FFF5C8,#FFD700);width:100% !important;
+}
+
+.dash-progress{
+  margin-top:10px;display:flex;flex-direction:column;gap:6px;
+}
+.dash-progress-row{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Cinzel',serif;font-size:11px;
+}
+.dash-progress-label{width:80px;color:var(--sand);opacity:.8;flex-shrink:0;}
+.dash-progress-bar{
+  flex:1;height:6px;background:rgba(0,0,0,.35);
+  border-radius:3px;overflow:hidden;
+}
+.dash-progress-fill{
+  height:100%;background:linear-gradient(90deg,#C8860A,#FFD700);
+  border-radius:3px;
+}
+.dash-progress-val{width:52px;text-align:right;color:var(--lgold);font-weight:700;}
+
+.dash-tip-card{
+  background:linear-gradient(135deg,rgba(42,155,181,.1),rgba(0,0,0,.3));
+  border-color:rgba(100,180,200,.3);
+}
+.dash-tip-text{
+  font-family:'Cinzel',serif;font-style:italic;font-size:13px;
+  color:var(--sand);line-height:1.55;
+  padding:4px 0;
+}
 .admin-card{
   background:rgba(0,0,0,.22);border:1px solid rgba(245,166,35,.22);
   border-radius:16px;padding:15px 14px;margin-bottom:11px;
@@ -2033,7 +2186,11 @@ svg.jar{width:52px;height:72px;}
 </div>
 
 <div id="admin-panel-view" style="display:none">
-  <div class="admin-panel-wrap">
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-admin-tab="settings">⚙️ Nastavení</button>
+    <button class="admin-tab" data-admin-tab="dashboard">📊 Přehled</button>
+  </div>
+  <div class="admin-panel-wrap" id="admin-tab-settings">
     <!-- Balances overview -->
     <div class="admin-card">
       <div class="admin-card-title">💰 Aktuální zůstatky</div>
@@ -2124,7 +2281,48 @@ svg.jar{width:52px;height:72px;}
     <!-- Logout -->
     <button class="admin-logout" id="admin-logout-btn">Odhlásit se z administrace</button>
   </div>
-</div>
+
+  <!-- ══════════════ KROK 9 – DASHBOARD (druhý tab) ══════════════ -->
+  <div class="admin-panel-wrap" id="admin-tab-dashboard" style="display:none">
+    <div class="admin-card dash-card">
+      <div class="admin-card-title">👤 Aktuální stav</div>
+      <div class="dash-name" id="dash-name">—</div>
+      <div class="dash-rank-row">
+        <span class="dash-rank-badge" id="dash-rank-badge">Poutník</span>
+        <span class="dash-rank-prog" id="dash-rank-prog">0 / 500 ✨</span>
+      </div>
+      <div class="dash-three-jars">
+        <div class="dash-jar"><div class="dash-jar-l">TEĎ</div><div class="dash-jar-v" id="dash-ted">0 Kč</div></div>
+        <div class="dash-jar"><div class="dash-jar-l">POTOM</div><div class="dash-jar-v" id="dash-potom">0 Kč</div></div>
+        <div class="dash-jar"><div class="dash-jar-l">NAVŽDY</div><div class="dash-jar-v" id="dash-navzdy">0 Kč</div></div>
+      </div>
+      <div class="dash-stats-row">
+        <div class="dash-stat"><span class="dash-stat-ico">✨</span><span id="dash-wisdom">0</span></div>
+        <div class="dash-stat"><span class="dash-stat-ico">🔥</span><span id="dash-streak">0 dní</span></div>
+        <div class="dash-stat"><span class="dash-stat-ico">🛡️</span><span id="dash-shields">0</span></div>
+      </div>
+      <div class="dash-wishes" id="dash-wishes"></div>
+    </div>
+
+    <div class="admin-card dash-card">
+      <div class="admin-card-title">📅 Tento týden</div>
+      <div class="dash-week-grid" id="dash-week-grid"></div>
+      <div class="dash-challenge" id="dash-challenge"></div>
+    </div>
+
+    <div class="admin-card dash-card">
+      <div class="admin-card-title">📈 Celoživotní přehled</div>
+      <div class="dash-life-grid" id="dash-life-grid"></div>
+      <div class="dash-progress" id="dash-progress"></div>
+    </div>
+
+    <div class="admin-card dash-card dash-tip-card">
+      <div class="admin-card-title">💡 Tip pro rozhovor</div>
+      <div class="dash-tip-text" id="dash-tip">—</div>
+    </div>
+
+    <button class="admin-logout" id="admin-logout-btn-2">Odhlásit se z administrace</button>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -2990,6 +3188,10 @@ function resetAdminView() {
   pinBuffer=''; updatePinDots();
   const err = document.getElementById('pin-error');
   if (err) err.textContent = '';
+  // Krok 9: reset tabů zpět na Nastavení
+  if (typeof switchAdminTab === 'function') {
+    try { switchAdminTab('settings'); } catch(e) {}
+  }
 }
 
 /* ═══ COIN ANIMATION ═══ */
@@ -5935,6 +6137,351 @@ setTimeout(() => {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 7
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 9 – RODIČOVSKÝ DASHBOARD
+   Reference: Herní design, kap. 16.3
+═══════════════════════════════════════════════════════ */
+
+/** Přepne mezi Nastavení a Dashboard taby. */
+function switchAdminTab(tabId) {
+  document.querySelectorAll('.admin-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-admin-tab') === tabId);
+  });
+  const settings = document.getElementById('admin-tab-settings');
+  const dashboard = document.getElementById('admin-tab-dashboard');
+  if (settings) settings.style.display = (tabId === 'settings') ? '' : 'none';
+  if (dashboard) dashboard.style.display = (tabId === 'dashboard') ? '' : 'none';
+  if (tabId === 'dashboard') renderDashboard();
+}
+
+/** Pomocné: první den aktuálního týdne jako YYYY-MM-DD. */
+function _weekStartKey(date) {
+  const d = date ? new Date(date) : new Date();
+  const day = d.getDay() || 7; // Po=1..Ne=7
+  d.setDate(d.getDate() - (day - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/** Počet dnů od daného datumu. */
+function _daysSince(iso) {
+  if (!iso) return 0;
+  try {
+    const d = new Date(iso);
+    const diff = Date.now() - d.getTime();
+    return Math.max(0, Math.floor(diff / 86400000));
+  } catch(e) { return 0; }
+}
+
+/** Agregace týdenních statistik. */
+function _collectWeekStats() {
+  const stats = {
+    days_active: 0,
+    strokes: 0,
+    deposits: 0,
+    deposits_total_kc: 0,
+    wisdom_gained: 0,
+    new_seals: 0,
+    new_artifacts: 0,
+    new_stories: 0
+  };
+  const weekStart = _weekStartKey();
+
+  // Denní aktivita + pohlazení – z wisdom_daily
+  if (state.wisdom_daily) {
+    Object.keys(state.wisdom_daily).forEach(k => {
+      if (k >= weekStart) {
+        if (state.wisdom_daily[k].open) stats.days_active++;
+        stats.strokes += state.wisdom_daily[k].tree_strokes || 0;
+      }
+    });
+  }
+
+  // Vklady – z history
+  if (Array.isArray(state.history)) {
+    state.history.forEach(h => {
+      if (h.type !== 'deposit') return;
+      let dateObj = null;
+      if (h.iso) dateObj = new Date(h.iso);
+      else if (h.date) {
+        const m = String(h.date).match(/(\d+)\.(\d+)\.(\d+)/);
+        if (m) dateObj = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+      }
+      if (dateObj) {
+        const dkey = dateObj.toISOString().slice(0, 10);
+        if (dkey >= weekStart) {
+          stats.deposits++;
+          stats.deposits_total_kc += Math.abs(h.amount || 0);
+        }
+      }
+    });
+  }
+
+  // Moudrost – z wisdom_log
+  if (Array.isArray(state.wisdom_log)) {
+    state.wisdom_log.forEach(l => {
+      if (!l.date) return;
+      const d = new Date(l.date);
+      if (d.toISOString().slice(0, 10) >= weekStart) {
+        stats.wisdom_gained += l.amount || 0;
+      }
+    });
+  }
+
+  // Nové pečeti — unlocked_at
+  if (state.seals && state.seals.unlocked_at) {
+    Object.keys(state.seals.unlocked_at).forEach(id => {
+      const iso = state.seals.unlocked_at[id];
+      if (iso && iso.slice(0, 10) >= weekStart) stats.new_seals++;
+    });
+  }
+
+  // Nové artefakty
+  if (state.collections && state.collections.unlocked_at) {
+    Object.keys(state.collections.unlocked_at).forEach(id => {
+      const iso = state.collections.unlocked_at[id];
+      if (iso && iso.slice(0, 10) >= weekStart) stats.new_artifacts++;
+    });
+  }
+
+  return stats;
+}
+
+/** Agregace celoživotních statistik. */
+function _collectLifeStats() {
+  const deposits = Array.isArray(state.history)
+    ? state.history.filter(h => h.type === 'deposit') : [];
+  const depositTotal = deposits.reduce((n, h) => n + Math.abs(h.amount || 0), 0);
+  const avgDeposit = deposits.length > 0 ? Math.round(depositTotal / deposits.length) : 0;
+
+  const firstEvent = (Array.isArray(state.history) && state.history.length > 0)
+    ? state.history[state.history.length - 1] : null;
+  let daysSinceStart = 0;
+  if (firstEvent) {
+    const iso = firstEvent.iso || firstEvent.timestamp;
+    if (iso) daysSinceStart = _daysSince(iso);
+    else if (firstEvent.date) {
+      const m = String(firstEvent.date).match(/(\d+)\.(\d+)\.(\d+)/);
+      if (m) {
+        const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+        daysSinceStart = _daysSince(d.toISOString());
+      }
+    }
+  }
+  // Fallback: z user.created_at
+  if (daysSinceStart === 0 && state.user && state.user.created_at) {
+    daysSinceStart = _daysSince(state.user.created_at);
+  }
+
+  return {
+    streak_longest: (state.streak && state.streak.longest) || 0,
+    total_strokes: (state.tree && state.tree.total_strokes) || 0,
+    total_deposits: deposits.length,
+    avg_deposit: avgDeposit,
+    total_deposited: depositTotal,
+    days_since_start: daysSinceStart,
+    seals_got: (state.seals && state.seals.unlocked) ? state.seals.unlocked.length : 0,
+    seals_total: (typeof SEALS !== 'undefined' && SEALS) ? SEALS.length : 20,
+    artifacts_got: (state.collections && state.collections.unlocked) ? state.collections.unlocked.length : 0,
+    artifacts_total: (typeof COLLECTIONS !== 'undefined' && COLLECTIONS)
+      ? COLLECTIONS.reduce((n, g) => n + g.items.length, 0) : 20,
+    stories_got: (state.progression && state.progression.unlocked_stories)
+      ? state.progression.unlocked_stories.length : 0,
+    stories_total: 7
+  };
+}
+
+/** Deterministický tip pro rozhovor — podle aktuálního stavu. */
+function _generateTip() {
+  const w = _collectWeekStats();
+  const life = _collectLifeStats();
+  const name = (state.user && state.user.name) ? state.user.name : 'vaše dítě';
+  const tips = [];
+
+  // Tipy podle týdenních akcí
+  if (w.deposits_total_kc > 0) {
+    tips.push(`${name} tento týden uložil ${fmt(w.deposits_total_kc)} do pokladnice. Zeptejte se, na co si aktuálně spoří.`);
+  }
+  if (w.new_seals > 0) {
+    tips.push(`${name} tento týden získal ${w.new_seals}× novou pečeť! Nechte si je ukázat v Síni pečetí.`);
+  }
+  if (w.new_stories > 0 || w.new_artifacts >= 2) {
+    tips.push(`${name} tento týden objevil nový příběh nebo artefakt. Zeptejte se, co nového se dozvěděl o Babylonu.`);
+  }
+  if (state.streak && state.streak.current >= 7) {
+    tips.push(`${name} má ${state.streak.current}denní sérii — navštěvuje aplikaci každý den. Pochvalte jeho pilnost.`);
+  }
+  if (state.wishlist && state.wishlist.length > 0) {
+    const active = state.wishlist[0];
+    tips.push(`Na seznamu snů má: „${active.item}" za ${fmt(active.target_price)}. Promluvte si o tom, jak si na to šetří.`);
+  }
+  if (w.days_active >= 5) {
+    tips.push(`${name} byl tento týden v aplikaci ${w.days_active} dní. Rituál se usadil — to je skvělé.`);
+  }
+  if (life.total_strokes >= 50) {
+    tips.push(`${name} celkově pohladil strom ${life.total_strokes}×. Má ho rád.`);
+  }
+  // Fallback
+  if (tips.length === 0) {
+    tips.push(`${name} právě objevuje svět Babylonské pokladnice. Prvních pár týdnů je o zvykání — buďte trpěliví.`);
+  }
+
+  // Deterministický výběr: hash podle týdne
+  const weekKey = _getWeekKey();
+  let hash = 0;
+  const seed = (state.user?.name || '') + weekKey;
+  for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+  return tips[Math.abs(hash) % tips.length];
+}
+
+/** Hlavní render funkce dashboardu. */
+function renderDashboard() {
+  if (!state.user || !state.user.name) return;
+
+  // Karta 1 — Aktuální stav
+  const name = state.user.name;
+  const nameEl = document.getElementById('dash-name');
+  if (nameEl) nameEl.textContent = name;
+
+  const rank = (typeof RANKS !== 'undefined' && RANKS) ? RANKS[state.rank.current] : null;
+  if (rank) {
+    const rbEl = document.getElementById('dash-rank-badge');
+    if (rbEl) rbEl.textContent = rank.name;
+    const rpEl = document.getElementById('dash-rank-prog');
+    if (rpEl) {
+      const next = RANKS[state.rank.current + 1];
+      if (next) rpEl.textContent = state.wisdom + ' / ' + next.threshold + ' ✨';
+      else rpEl.textContent = 'Nejvyšší hodnost ✨';
+    }
+  }
+
+  const d = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  d('dash-ted', fmt(state.balances.living_80));
+  d('dash-potom', fmt(state.balances.dreams_10));
+  d('dash-navzdy', fmt(state.balances.forever_10));
+  d('dash-wisdom', state.wisdom + ' ✨');
+  d('dash-streak', (state.streak.current || 0) + ' dní');
+  d('dash-shields', (state.streak.shields || 0));
+
+  // Aktivní sny
+  const wishEl = document.getElementById('dash-wishes');
+  if (wishEl) {
+    wishEl.innerHTML = '';
+    const wishes = (state.wishlist || []).slice(0, 2);
+    wishes.forEach(w => {
+      const saved = w.saved || 0;
+      const prog = w.target_price > 0 ? Math.round(saved / w.target_price * 100) : 0;
+      const row = document.createElement('div');
+      row.className = 'dash-wish';
+      row.innerHTML =
+        '<span class="dash-wish-name">🏰 ' + (w.item || '—') + '</span>' +
+        '<span class="dash-wish-prog">' + prog + '%</span>';
+      wishEl.appendChild(row);
+    });
+  }
+
+  // Karta 2 — Tento týden
+  const w = _collectWeekStats();
+  const wg = document.getElementById('dash-week-grid');
+  if (wg) {
+    wg.innerHTML = '';
+    const rows = [
+      ['Návštěv', w.days_active + ' / 7 dní'],
+      ['Pohlazení stromu', w.strokes],
+      ['Vkladů', w.deposits + (w.deposits > 0 ? ' (' + fmt(w.deposits_total_kc) + ')' : '')],
+      ['Nových pečetí', w.new_seals],
+      ['Nových artefaktů', w.new_artifacts],
+      ['Moudrost získaná', '+' + w.wisdom_gained + ' ✨']
+    ];
+    rows.forEach(([l, v]) => {
+      const r = document.createElement('div');
+      r.className = 'dash-row';
+      r.innerHTML = '<span class="dash-row-l">' + l + '</span><span class="dash-row-v">' + v + '</span>';
+      wg.appendChild(r);
+    });
+  }
+
+  // Týdenní výzva
+  const chEl = document.getElementById('dash-challenge');
+  if (chEl && state.challenges && state.challenges.current_id) {
+    const def = (typeof _getChallengeDef === 'function') ? _getChallengeDef(state.challenges.current_id) : null;
+    if (def) {
+      const prog = def.progress(state, state.challenges.snapshot || {});
+      const pct = Math.min(100, (prog.done / prog.target) * 100);
+      const isDone = !!state.challenges.completed;
+      chEl.className = 'dash-challenge' + (isDone ? ' done' : '');
+      chEl.innerHTML =
+        '<div class="dash-challenge-t">👴 Týdenní výzva Algameše' + (isDone ? ' · ✓ splněno' : '') + '</div>' +
+        '<div class="dash-challenge-b">' + def.text + '</div>' +
+        '<div class="dash-challenge-p"><div class="dash-challenge-p-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+        '<div style="text-align:right;font-size:10px;color:var(--sand);opacity:.6;margin-top:3px;font-family:\'Cinzel\',serif;">' + prog.done + ' / ' + prog.target + '</div>';
+    } else {
+      chEl.innerHTML = '';
+    }
+  }
+
+  // Karta 3 — Celoživotní přehled
+  const life = _collectLifeStats();
+  const lg = document.getElementById('dash-life-grid');
+  if (lg) {
+    lg.innerHTML = '';
+    const rows = [
+      ['Nejdelší série', life.streak_longest + ' dní'],
+      ['Pohlazení celkem', life.total_strokes],
+      ['Vkladů celkem', life.total_deposits],
+      ['Průměr / vklad', fmt(life.avg_deposit)],
+      ['Celkem vloženo', fmt(life.total_deposited)],
+      ['V aplikaci od', life.days_since_start + ' dní']
+    ];
+    rows.forEach(([l, v]) => {
+      const r = document.createElement('div');
+      r.className = 'dash-row';
+      r.innerHTML = '<span class="dash-row-l">' + l + '</span><span class="dash-row-v">' + v + '</span>';
+      lg.appendChild(r);
+    });
+  }
+
+  // Progress bary (sbírání)
+  const pg = document.getElementById('dash-progress');
+  if (pg) {
+    pg.innerHTML = '';
+    const items = [
+      ['Pečeti', life.seals_got, life.seals_total],
+      ['Artefakty', life.artifacts_got, life.artifacts_total],
+      ['Příběhy', life.stories_got, life.stories_total]
+    ];
+    items.forEach(([l, got, total]) => {
+      const pct = total > 0 ? (got / total * 100) : 0;
+      const row = document.createElement('div');
+      row.className = 'dash-progress-row';
+      row.innerHTML =
+        '<span class="dash-progress-label">' + l + '</span>' +
+        '<span class="dash-progress-bar"><span class="dash-progress-fill" style="width:' + pct + '%"></span></span>' +
+        '<span class="dash-progress-val">' + got + ' / ' + total + '</span>';
+      pg.appendChild(row);
+    });
+  }
+
+  // Karta 4 — Tip pro rozhovor
+  d('dash-tip', _generateTip());
+}
+
+/** Event listeners pro admin taby. */
+(function bindAdminTabs(){
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchAdminTab(tab.getAttribute('data-admin-tab')));
+  });
+  // Druhé tlačítko logout (v dashboard tabu) sdílí funkci
+  const logout2 = document.getElementById('admin-logout-btn-2');
+  if (logout2) logout2.addEventListener('click', () => {
+    const btn1 = document.getElementById('admin-logout-btn');
+    if (btn1) btn1.click();
+  });
+})();
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 9
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>

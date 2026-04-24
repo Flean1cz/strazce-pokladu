@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.9.2'; // ← KROK 8 patch: proxy fix — kontrola původních dat, ne merged state
+const VERSION = 'v2.10.0'; // ← KROK 9: Rodičovský dashboard (týdenní + celoživotní statistiky + tip)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 
