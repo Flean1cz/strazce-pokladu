@@ -616,8 +616,108 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 }
 .customize-close-btn{width:100%;padding:11px;font-size:13px;}
 
-/* ═══ KROK 6B – Karta Algameše (týdenní výzva) ═══ */
-.algamesh-card{
+/* ═══ KROK 12 – Arkád na Nádvoří + dialogový modal ═══ */
+
+/* Postava Arkáda pod stromem */
+.arkad-nadvori{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 16px 0;
+  cursor:pointer;
+  width:fit-content;margin:0 auto;
+  transition:transform .2s ease;
+}
+.arkad-nadvori:hover{transform:scale(1.04);}
+.arkad-nadvori:active{transform:scale(.97);}
+.arkad-figure{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  flex-shrink:0;
+}
+.arkad-figure-ico{
+  font-size:34px;line-height:1;
+  animation:arkadFloat 4s ease-in-out infinite;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.45));
+}
+@keyframes arkadFloat{
+  0%,100%{transform:translateY(0) rotate(-1deg);}
+  50%{transform:translateY(-4px) rotate(1deg);}
+}
+.arkad-figure-name{
+  font-family:'Cinzel',serif;font-size:9px;
+  color:var(--gold);opacity:.7;letter-spacing:1px;
+}
+.arkad-speech-hint{
+  font-family:'Cinzel',serif;font-style:italic;font-size:11px;
+  color:var(--sand);opacity:.75;line-height:1.4;
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(245,166,35,.2);
+  border-radius:10px;border-bottom-left-radius:2px;
+  padding:6px 10px;max-width:180px;
+  position:relative;
+}
+.arkad-speech-hint::before{
+  content:'';position:absolute;
+  left:-7px;bottom:8px;
+  border:4px solid transparent;
+  border-right-color:rgba(245,166,35,.2);
+}
+
+/* Dialogový modal */
+.arkad-dialog-box{
+  max-width:340px;width:100%;
+  padding:0;overflow:hidden;
+  background:linear-gradient(180deg,#1a0e04,#0d0700);
+  border:1px solid rgba(255,215,0,.4);
+}
+.arkad-dialog-portrait{
+  background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(139,94,60,.2));
+  border-bottom:1px solid rgba(255,215,0,.2);
+  padding:18px 16px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.arkad-dialog-ico{
+  font-size:52px;line-height:1;
+  animation:arkadFloat 4s ease-in-out infinite;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));
+}
+.arkad-dialog-pname{
+  font-family:'Cinzel Decorative',serif;
+  font-size:13px;color:var(--lgold);
+  letter-spacing:1.5px;
+}
+.arkad-dialog-bubble{
+  padding:18px 20px 12px;
+  font-family:'Cinzel',serif;font-style:italic;
+  font-size:14px;color:var(--sand);line-height:1.65;
+  text-align:center;letter-spacing:.2px;
+  min-height:80px;
+}
+.arkad-dialog-choices{
+  padding:0 16px 8px;
+  display:flex;flex-direction:column;gap:7px;
+}
+.arkad-choice-btn{
+  width:100%;padding:9px 12px;
+  background:rgba(245,166,35,.1);
+  border:1px solid rgba(245,166,35,.3);
+  border-radius:10px;
+  font-family:'Cinzel',serif;font-size:12px;
+  color:var(--sand);letter-spacing:.3px;
+  cursor:pointer;text-align:left;line-height:1.4;
+  transition:all .2s ease;
+}
+.arkad-choice-btn:hover{
+  background:rgba(245,166,35,.2);
+  border-color:rgba(245,166,35,.55);
+  color:var(--lgold);
+}
+.arkad-dialog-close{
+  display:block;width:calc(100% - 32px);
+  margin:4px 16px 16px;
+  padding:11px;font-size:12px;
+}
+
+/* ═══ KROK 6B – Karta Arkáde (týdenní výzva) ═══ */
+.arkad-card{
   display:flex;gap:12px;align-items:stretch;
   background:linear-gradient(135deg,rgba(245,230,195,.12),rgba(139,94,60,.22));
   border:1px solid rgba(245,166,35,.4);
@@ -627,8 +727,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   box-shadow:0 4px 14px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,215,0,.12);
   animation:algEntry .6s cubic-bezier(.2,.7,.2,1);
 }
-.algamesh-card.hidden{display:none;}
-.algamesh-card.completed{
+.arkad-card.hidden{display:none;}
+.arkad-card.completed{
   background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(200,134,10,.15));
   border-color:rgba(255,215,0,.6);
   box-shadow:0 4px 18px rgba(255,215,0,.25),inset 0 1px 0 rgba(255,215,0,.25);
@@ -637,7 +737,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   from{opacity:0;transform:translateY(-12px);}
   to{opacity:1;transform:translateY(0);}
 }
-.algamesh-avatar{
+.arkad-avatar{
   flex-shrink:0;
   width:52px;height:52px;
   display:flex;align-items:center;justify-content:center;
@@ -652,22 +752,22 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   0%,100%{transform:translateY(0) rotate(-2deg);}
   50%{transform:translateY(-3px) rotate(2deg);}
 }
-.algamesh-body{flex:1;min-width:0;}
-.algamesh-header{
+.arkad-body{flex:1;min-width:0;}
+.arkad-header{
   display:flex;justify-content:space-between;align-items:baseline;
   font-family:'Cinzel',serif;letter-spacing:.3px;
   margin-bottom:4px;
 }
-.algamesh-name{font-size:10px;color:var(--lgold);font-weight:700;text-transform:uppercase;}
-.algamesh-week{font-size:9px;color:var(--sand);opacity:.55;}
-.algamesh-bubble{
+.arkad-name{font-size:10px;color:var(--lgold);font-weight:700;text-transform:uppercase;}
+.arkad-week{font-size:9px;color:var(--sand);opacity:.55;}
+.arkad-bubble{
   font-family:'Cinzel',serif;font-style:italic;
   font-size:12px;color:var(--sand);line-height:1.5;
   margin-bottom:8px;
   text-shadow:0 1px 2px rgba(0,0,0,.35);
 }
-.algamesh-bubble .q{font-style:normal;color:var(--lgold);}
-.algamesh-progress{margin-top:2px;}
+.arkad-bubble .q{font-style:normal;color:var(--lgold);}
+.arkad-progress{margin-top:2px;}
 .alg-progress-bar{
   height:5px;border-radius:3px;
   background:rgba(0,0,0,.32);
@@ -680,7 +780,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   border-radius:3px;transition:width .6s ease;
   box-shadow:0 0 6px rgba(255,215,0,.5);
 }
-.algamesh-card.completed .alg-progress-fill{
+.arkad-card.completed .alg-progress-fill{
   background:linear-gradient(90deg,#FFD700,#FFF5C8,#FFD700);
   width:100% !important;
 }
@@ -689,7 +789,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
   color:var(--sand);opacity:.65;
   text-align:right;margin-top:3px;letter-spacing:.3px;
 }
-.algamesh-card.completed .alg-progress-text{
+.arkad-card.completed .alg-progress-text{
   color:var(--lgold);opacity:.95;font-weight:700;
 }
 
@@ -1776,19 +1876,28 @@ svg.jar{width:52px;height:72px;}
   <div class="tree-label" id="tree-label"></div>
 </div>
 
+<!-- ══════ KROK 12 – ARKÁD NA NÁDVOŘÍ ══════ -->
+<div class="arkad-nadvori" id="arkad-nadvori" title="Promluvit s Arkádem">
+  <div class="arkad-figure">
+    <div class="arkad-figure-ico">👴</div>
+    <div class="arkad-figure-name">Arkád</div>
+  </div>
+  <div class="arkad-speech-hint" id="arkad-speech-hint">„…"</div>
+</div>
+
 <div class="pillars">
-  <!-- ══════ KROK 6B – KARTA ALGAMEŠE (týdenní výzva) ══════ -->
-  <div class="algamesh-card hidden" id="algamesh-card">
-    <div class="algamesh-avatar" id="alg-avatar">👴</div>
-    <div class="algamesh-body">
-      <div class="algamesh-header">
-        <span class="algamesh-name">Algamesh praví:</span>
-        <span class="algamesh-week" id="alg-week">Týdenní výzva</span>
+  <!-- ══════ KROK 6B – KARTA ARKÁDE (týdenní výzva) ══════ -->
+  <div class="arkad-card hidden" id="arkad-card">
+    <div class="arkad-avatar" id="alg-avatar">👴</div>
+    <div class="arkad-body">
+      <div class="arkad-header">
+        <span class="arkad-name">Arkád praví:</span>
+        <span class="arkad-week" id="alg-week">Týdenní výzva</span>
       </div>
-      <div class="algamesh-bubble" id="alg-bubble">
+      <div class="arkad-bubble" id="alg-bubble">
         „Tento týden…"
       </div>
-      <div class="algamesh-progress" id="alg-progress">
+      <div class="arkad-progress" id="alg-progress">
         <div class="alg-progress-bar"><div class="alg-progress-fill" id="alg-progress-fill"></div></div>
         <div class="alg-progress-text" id="alg-progress-text">0 / 7</div>
       </div>
@@ -2449,6 +2558,25 @@ svg.jar{width:52px;height:72px;}
   </div>
 </div>
 
+<!-- ══════════════ KROK 12 – ARKÁD DIALOGOVÝ MODAL ══════════════ -->
+<div class="modal-overlay hidden" id="modal-arkad">
+  <div class="modal-box arkad-dialog-box">
+    <div class="arkad-dialog-portrait">
+      <div class="arkad-dialog-ico">👴</div>
+      <div class="arkad-dialog-pname">Arkád</div>
+    </div>
+    <div class="arkad-dialog-bubble" id="arkad-dialog-bubble">
+      „…"
+    </div>
+    <div class="arkad-dialog-choices" id="arkad-dialog-choices">
+      <!-- generated by JS, optional -->
+    </div>
+    <button class="ceremony-accept arkad-dialog-close" id="arkad-dialog-close">
+      Díky, Arkáde ✦
+    </button>
+  </div>
+</div>
+
 <!-- ══════════════ TOAST ══════════════ -->
 <div id="toast" class="hidden"></div>
 
@@ -2597,7 +2725,7 @@ const DEFAULT_STATE = () => ({
     floor: 'sand',            // ID dlažby
     tree_color: 'green'       // ID barvy stromu
   },
-  // ═══ KROK 6B – Týdenní výzvy od Algameše ═══
+  // ═══ KROK 6B – Týdenní výzvy od Arkáde ═══
   challenges: {
     current_id: null,         // ID aktuální výzvy, např. "stroke_daily"
     week_key: null,           // "YYYY-Wnn" – týden, ke kterému výzva patří
@@ -2900,6 +3028,8 @@ function renderAll() {
   if (typeof _updateChallengeCompletion === 'function') _updateChallengeCompletion();
   // Krok 7 – vitrína: počítadlo pilíře
   if (typeof renderVitrinePillar === 'function') renderVitrinePillar();
+  // Krok 12 – Arkád: aktualizace náhledové bubliny
+  if (typeof updateArkadHint === 'function') updateArkadHint();
 }
 
 function renderNadvorí() {
@@ -3428,6 +3558,11 @@ function markStoryRead(idx) {
 
   // Auto-open modal after short delay
   setTimeout(() => openSecretModal(idx), 900);
+
+  // KROK 12 — Arkád okomentuje přečtení příběhu (po modalu tajemství)
+  setTimeout(() => {
+    if (typeof triggerArkadEvent === 'function') triggerArkadEvent('story_finish');
+  }, 3500);
 }
 
 /* ════════════════════════════════════════════
@@ -4650,7 +4785,6 @@ function showCeremony(newRankIdx) {
 function confirmCeremony() {
   const r = state.rank;
   if (!r || r.pending_ceremony === null || r.pending_ceremony === undefined) {
-    // safety: jen zavři
     document.getElementById('modal-ceremony').classList.add('hidden');
     document.body.style.overflow = '';
     return;
@@ -4666,7 +4800,11 @@ function confirmCeremony() {
   renderRank();
   toast('🎖️ Přijal jsi titul ' + RANKS[newIdx].name + '!', 4000);
 
-  // Po krátké pauze zkontroluj, zda se nepovýšilo rovnou o víc úrovní
+  // KROK 12 — Arkád pogratuluje k povýšení
+  if (typeof triggerArkadEvent === 'function') {
+    triggerArkadEvent('rank_up', { rank: RANKS[newIdx].name });
+  }
+
   setTimeout(checkRankPromotion, 500);
 }
 
@@ -4763,7 +4901,7 @@ var SEALS = [
 
   { id:'scribe_apprentice',name:'Písařův učeň',    ico:'📘',
     hint:'Dokonči první příběh',
-    body:'Dočetl jsi první příběh až do konce. Algamesh je hrdý.',
+    body:'Dočetl jsi první příběh až do konce. Arkád je hrdý.',
     check:(s) => s.progression && Array.isArray(s.progression.unlocked_stories) && s.progression.unlocked_stories.length >= 1 },
 
   { id:'first_seal',       name:'První tajemství', ico:'🌟',
@@ -4833,7 +4971,7 @@ var SEALS = [
 
   { id:'seasoned_reader',  name:'Ostřílený čtenář', ico:'📚', category:'B',
     hint:'Přečti 3 příběhy',
-    body:'Tři celé příběhy. Algamešova moudrost v tobě roste.',
+    body:'Tři celé příběhy. Arkádova moudrost v tobě roste.',
     check:(s) => _storyCount(s) >= 3 },
 
   { id:'wisdom_500',       name:'Učedníkova moudrost', ico:'✨', category:'B',
@@ -5466,7 +5604,7 @@ setTimeout(() => {
 ═══════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════
-   KROK 6B – TÝDENNÍ VÝZVY OD ALGAMEŠE
+   KROK 6B – TÝDENNÍ VÝZVY OD ARKÁDE
    Reference: Herní design, kap. 14 + 11
 ═══════════════════════════════════════════════════════ */
 
@@ -5474,7 +5612,7 @@ setTimeout(() => {
  * Definice 7 týdenních výzev.
  * Každá má:
  *  - id (string)
- *  - text: co Algamesh říká (v uvozovkách)
+ *  - text: co Arkád říká (v uvozovkách)
  *  - target: cílové číslo pro progress bar
  *  - snapshot(state): vrací hodnotu pro zachycení stavu při začátku týdne
  *  - progress(state, snap): vrací aktuální {done, target} podle delty
@@ -5653,7 +5791,7 @@ function _assignNewChallenge(weekKey) {
   state.challenges.completed = false;
   state.challenges.rewarded = false;
   scheduleSave();
-  renderAlgameshCard();
+  renderArkádCard();
 }
 
 /** Uzavře aktuální výzvu před rotací — přesune do historie. */
@@ -5690,16 +5828,18 @@ function _updateChallengeCompletion() {
       ch.rewarded = true;
       addWisdom(75, 'týdenní výzva: ' + def.id);
       setTimeout(() => {
-        toast('🎖️ Týdenní výzva splněna! Algamesh je hrdý. +75 ✨', 5000);
+        toast('🎖️ Týdenní výzva splněna! Arkád je hrdý. +75 ✨', 5000);
         if (typeof spawnConfetti === 'function') {
           spawnConfetti(window.innerWidth / 2, window.innerHeight * 0.35,
             ['👴','⭐','✨','🌟','📜']);
         }
+        // KROK 12 — Arkád pogratuluje ke splnění výzvy
+        if (typeof triggerArkadEvent === 'function') triggerArkadEvent('challenge_done');
       }, 400);
     }
     scheduleSave();
   }
-  renderAlgameshCard(prog);
+  renderArkádCard(prog);
 }
 
 function _getChallengeDef(id) {
@@ -5707,10 +5847,10 @@ function _getChallengeDef(id) {
   return CHALLENGES.find(c => c.id === id) || null;
 }
 
-/** Vykreslí kartu Algameše podle aktuálního stavu. */
-function renderAlgameshCard(prog) {
+/** Vykreslí kartu Arkáde podle aktuálního stavu. */
+function renderArkádCard(prog) {
   if (!CHALLENGES) return; // boot order safety
-  const card = document.getElementById('algamesh-card');
+  const card = document.getElementById('arkad-card');
   if (!card) return;
   const ch = state.challenges;
   if (!ch || !ch.current_id || !state.user || !state.user.name) {
@@ -5807,7 +5947,7 @@ var COLLECTIONS = [
     bonusReward: 50,
     items: [
       { id:'herb_mint', name:'Máta', ico:'🌿',
-        origin:'Zahrada u Algamešova stolu',
+        origin:'Zahrada u Arkádova stolu',
         body:'První bylinka, kterou jsi dal stromu. Osvěžuje i moudrého.',
         check:(s) => _totalTreeStrokes(s) >= 1 },
       { id:'herb_saffron', name:'Šafrán', ico:'🌼',
@@ -5863,7 +6003,7 @@ var COLLECTIONS = [
     bonusReward: 100,
     items: [
       { id:'book_desetina', name:'O desetině', ico:'📖',
-        origin:'Svitky Algamešovy',
+        origin:'Svitky Arkádovy',
         body:'První zákon. Desetina patří tobě, navždy.',
         check:(s) => _storyCount(s) >= 1 },
       { id:'book_prani', name:'O ovládání přání', ico:'📜',
@@ -5879,7 +6019,7 @@ var COLLECTIONS = [
         body:'Kompletní moudrost. Přečetl jsi všechny příběhy.',
         check:(s) => _storyCount(s) >= 7 },
       { id:'book_master', name:'Mistrovský rukopis', ico:'📘',
-        origin:'Algamešův vlastní spis',
+        origin:'Arkádův vlastní spis',
         body:'Všech 10 prvních pečetí v hrsti. Jsi mistr První kroky.',
         check:(s) => _allKategorieASeals(s) }
     ]
@@ -6412,7 +6552,7 @@ function renderDashboard() {
       const isDone = !!state.challenges.completed;
       chEl.className = 'dash-challenge' + (isDone ? ' done' : '');
       chEl.innerHTML =
-        '<div class="dash-challenge-t">👴 Týdenní výzva Algameše' + (isDone ? ' · ✓ splněno' : '') + '</div>' +
+        '<div class="dash-challenge-t">👴 Týdenní výzva Arkáde' + (isDone ? ' · ✓ splněno' : '') + '</div>' +
         '<div class="dash-challenge-b">' + def.text + '</div>' +
         '<div class="dash-challenge-p"><div class="dash-challenge-p-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
         '<div style="text-align:right;font-size:10px;color:var(--sand);opacity:.6;margin-top:3px;font-family:\'Cinzel\',serif;">' + prog.done + ' / ' + prog.target + '</div>';
@@ -6482,6 +6622,282 @@ function renderDashboard() {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 9
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 12 – POSTAVA ARKÁDA + DIALOGOVÝ SYSTÉM
+   Reference: Herní design, kap. 11 + 12
+   Postava: Arkád — starý babylonský písař, moudrý průvodce.
+   Pravidla hlasu:
+     - Nikdy nerozkazuje. Pokládá otázky.
+     - Přirovnání z přírody a ze starého Babylonu.
+     - Oceňuje malé úspěchy.
+     - Má smysl pro humor, ne sarkasmus.
+     - Mluví dospěle, uctivě, srozumitelně.
+═══════════════════════════════════════════════════════ */
+
+/**
+ * 8 kontextů × 6–7 frází = 50 frází celkem.
+ * Každý kontext: pole stringů. Výběr je (polo)deterministický.
+ */
+var ARKAD_DIALOGUES = {
+
+  // --- Pozdrav (denní otevření) ---
+  greeting: [
+    '„Vítej zpátky, {name}. Tvůj strom na tebe čekal."',
+    '„Dobrý den, {name}. Každý den, kdy přijdeš, je výhrou."',
+    '„Ah, {name}! Věděl jsem, že přijdeš. Usedni, povídej."',
+    '„Tvá přítomnost je jako déšť na zaschlou zemi. Vítej, {name}."',
+    '„Babylon vzkvétá, protože se vracíš každý den, {name}."',
+    '„Přišel jsi právě včas. Strom začínal být neklidný."'
+  ],
+
+  // --- Pochvala série ---
+  streak: [
+    '„{streak} dní v řadě. To není náhoda — to je charakter."',
+    '„Víš, proč jsou řeky mocnější než déšť? Protože tečou každý den. Ty také, {name}."',
+    '„Tvá série {streak} dnů mi připomíná mladého kupce, který nevynechal ani jeden trh."',
+    '„Každý den navíc je cihla, ze které buduješ svůj Babylon."',
+    '„Série {streak} dnů. Ani největší hory nevyrostly za jednu noc."',
+    '„Tvůj plamínek hoří. Opatruj ho — a jednou bude ohněm."'
+  ],
+
+  // --- Pochvala vkladu ---
+  deposit: [
+    '„Vložil jsi a nechal peníze pracovat. Tohle je první zákon Babylonu."',
+    '„Každá mince, která jde do NAVŽDY, seje semínko. Jednou bude strom."',
+    '„Moudrý člověk neposuzuje vklad podle výše — ale podle záměru za ním."',
+    '„Říkám ti, {name}: kdo si zvykne odkládat deset, nikdy nebude mít málo."',
+    '„Tvoje pokladnice roste. Tiše, nenápadně — ale roste."',
+    '„Slyšel jsem, jak mince zazvoní. Dobrý zvuk. Velmi dobrý zvuk."'
+  ],
+
+  // --- Uvedení příběhu ---
+  story_intro: [
+    '„Poslechu, {name}. Připravil jsem pro tebe příběh, který nese velkou moudrost."',
+    '„Hliněné destičky čekají. Jsou staré tisíce let — ale jejich slova jsou čerstvá jako ráno."',
+    '„Každý příběh je dveře. Chceš je otevřít? Dobře. Pojď dál."',
+    '„Mám pro tebe příběh ze starého Babylonu. Někteří ho čtou, jiní mu rozumějí. Ty — ty mu rozumíš."',
+    '„Tuhle moudrost nezískal Samuel snadno. A ty ji nezískaš čtením — ale přemýšlením."'
+  ],
+
+  // --- Po přečtení příběhu ---
+  story_finish: [
+    '„Přečetl jsi, co jiní přeskočili. Teď v tobě semeno klíčí. Nech ho."',
+    '„Hmm. Co si z toho odneseš, {name}? Neptám se pro sebe — ptám se proto, abys to řekl nahlas."',
+    '„Tohle tajemství nyní patří tobě. Nosí ho jenom ti, kdo si dali čas číst."',
+    '„Dobrý čtenář otočí stránku. Moudrý čtenář se zastaví a přemýšlí. Tys zastavil."',
+    '„Babylon byl postaven na takových příbězích. A teď ho stavíš ty."'
+  ],
+
+  // --- Splnění výzvy ---
+  challenge_done: [
+    '„Splnil jsi výzvu. Víš, co to znamená? Že jsi člověk svého slova."',
+    '„Tuto výzvu jsi dotáhl do konce. Malá věc? Ne. Malé věci jsou z čeho jsou velké."',
+    '„Řekl jsem ti: zkus to. A ty jsi to zkusil. A zvládl. A to je vše."',
+    '„Tahle výzva nebyla pro všechny. Ty jsi ji dokončil. To říká hodně."',
+    '„Výzva splněna, {name}. Babylonský trh patří těm, kdo dostojí svým závazkům."'
+  ],
+
+  // --- Milník Moudrosti / povýšení ---
+  rank_up: [
+    '„Nová hodnost. Gratuluju — i když vím, že to slovo je málo. Zasloužil sis ji."',
+    '„{name}. Pamatuješ, kde jsi začínal? A podívej se teď. Přesně tak se staví Babylon."',
+    '„Říká se: hodnost nezíská ten, kdo se snaží o hodnost. Ale ten, kdo se snaží o moudrost. Ty jsi důkazem."',
+    '„Nová tabulka, nové jméno, nová odpovědnost. Babylon má nového {rank}."',
+    '„Přijímám tě na tento stupeň. A vím, že na příštím stupeň tě přijme ten, kdo přijde po mně."'
+  ],
+
+  // --- Moudrá slova / náhodné ---
+  wisdom: [
+    '„Existuje babylonský zákon, který nikdo nenapsal: kdo spoří, neklesá."',
+    '„Viděl jsem v životě mnoho bohatých lidí. Věříš, že všichni začali s mnoho? Nikoliv."',
+    '„Přání je oprávka. Plán je cesta. Wishlist je tvůj plán."',
+    '„Kolik stojí mír, {name}? Přesně tolik, kolik máš v nádobě NAVŽDY."',
+    '„Ztratil jsem mnoho věcí za svůj život. Nůž, plášť, jednou i oslíka. Nikdy jsem neztratil návyk spořit."',
+    '„Úrok je tichý přítel. Pracuje, zatímco ty spíš."',
+    '„Neptej se: »Proč šetřit?« Ptej se: »Na co šetřit?« Odpověď tě pohne dál."',
+    '„Strom neví, jak velký jednou bude. Ale roste stejně. I ty."'
+  ],
+
+  // --- Rozloučení ---
+  farewell: [
+    '„Buď zdráv, {name}. Zítra bude nový den — a strom bude čekat."',
+    '„Jdi. Žij. A pamatuj: Babylon jsi ty."',
+    '„Moje pergameny počkají. Ty — ty máš ještě co dělat venku."',
+    '„Příjemný den, {name}. A dej mi vědět, až budeš zpátky."',
+    '„Dobrá. Na dnešek stačí. Zítra se vrátíme."',
+    '„Odcházíš bohatší, než jsi přišel. I kdyby jen o jedno semínko moudrosti."'
+  ]
+};
+
+/**
+ * Vybere kontextově vhodný dialog + substituuje proměnné.
+ * @param {string} context - klíč v ARKAD_DIALOGUES
+ * @param {Object} overrides - { name, streak, rank, ... } pro substituci
+ * @returns {string}
+ */
+function getArkadDialogue(context, overrides) {
+  if (typeof ARKAD_DIALOGUES === 'undefined' || !ARKAD_DIALOGUES[context]) return '';
+  const pool = ARKAD_DIALOGUES[context];
+  // Polo-deterministický: hash(context + day + user) pro konzistenci v průběhu dne
+  const dayStr = new Date().toISOString().slice(0, 10);
+  const seed = (state.user?.name || '') + context + dayStr;
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = ((h << 5) - h) + seed.charCodeAt(i);
+  const idx = Math.abs(h) % pool.length;
+  let text = pool[idx];
+
+  // Substituce
+  const vars = Object.assign({
+    name: (state.user?.name) || 'příteli',
+    streak: (state.streak?.current) || 0,
+    rank: (typeof RANKS !== 'undefined' && RANKS && state.rank)
+      ? RANKS[state.rank.current]?.name || '' : ''
+  }, overrides || {});
+  text = text.replace(/\{(\w+)\}/g, (m, k) => vars[k] !== undefined ? vars[k] : m);
+  return text;
+}
+
+/**
+ * Otevře dialogový modal Arkáda s daným textem a volitelnými volbami.
+ * @param {string} text - připravený text (výsledek getArkadDialogue)
+ * @param {Array}  choices - [{ label, response }] — po kliknutí ukáže odpověď
+ */
+function openArkadModal(text, choices) {
+  const modal = document.getElementById('modal-arkad');
+  if (!modal) return;
+
+  const bubble = document.getElementById('arkad-dialog-bubble');
+  if (bubble) bubble.innerHTML = text;
+
+  const choicesEl = document.getElementById('arkad-dialog-choices');
+  if (choicesEl) {
+    choicesEl.innerHTML = '';
+    if (Array.isArray(choices) && choices.length > 0) {
+      choices.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'arkad-choice-btn';
+        btn.textContent = ch.label;
+        btn.addEventListener('click', () => {
+          if (bubble) bubble.innerHTML = ch.response;
+          choicesEl.innerHTML = '';
+        });
+        choicesEl.appendChild(btn);
+      });
+    }
+  }
+  modal.classList.remove('hidden');
+}
+
+function closeArkadModal() {
+  const modal = document.getElementById('modal-arkad');
+  if (modal) modal.classList.add('hidden');
+}
+
+/**
+ * Aktualizuje náhledovou bublinu vedle Arkáda na Nádvoří.
+ * Volá se při renderNadvorí a při bootu.
+ */
+function updateArkadHint() {
+  const hint = document.getElementById('arkad-speech-hint');
+  if (!hint || !state.user || !state.user.name) return;
+
+  // Kontextuální výběr — přirozený dle situace
+  let context = 'wisdom';
+  if (state.streak && state.streak.current >= 3) context = 'streak';
+  if (state.challenges && state.challenges.completed) context = 'challenge_done';
+
+  // Zkrátíme na 1. větu pro náhled
+  const full = getArkadDialogue(context);
+  const short = full.split('.')[0] + (full.includes('.') ? '…' : '');
+  hint.textContent = short.length > 2 ? short : full;
+}
+
+/**
+ * Otevře dialog Arkáda kontextově — klik na postavu na Nádvoří.
+ */
+function openArkadFromNadvori() {
+  if (!state.user || !state.user.name) return;
+
+  // Vybereme kontext dle stavu
+  let context = 'wisdom';
+  const hour = new Date().getHours();
+
+  if (!state.user.created_at || _daysSince(state.user.created_at) < 2) {
+    context = 'greeting';
+  } else if (hour < 10) {
+    context = 'greeting';
+  } else if (hour >= 20) {
+    context = 'farewell';
+  } else if (state.challenges && state.challenges.completed && !state.challenges._arkad_praised) {
+    context = 'challenge_done';
+  } else if (state.streak && state.streak.current >= 7) {
+    context = 'streak';
+  } else {
+    context = 'wisdom';
+  }
+
+  const text = getArkadDialogue(context);
+
+  // Volby pro vybrané kontexty
+  let choices = [];
+  if (context === 'wisdom') {
+    choices = [
+      { label: '„Jak to mám použít?"',
+        response: getArkadDialogue('deposit') },
+      { label: '„Díky, Arkáde."',
+        response: '„Nic víc nepotřebuješ. Nos to v sobě."' }
+    ];
+  } else if (context === 'greeting') {
+    choices = [
+      { label: '„Dnes jsem pohladil strom."',
+        response: getArkadDialogue('deposit').replace('Vložil jsi', 'Pohladil jsi strom') },
+      { label: '„Jen se dívám."',
+        response: '„I pohled je někdy dost. Zůstaň, jak dlouho chceš."' }
+    ];
+  }
+
+  openArkadModal(text, choices);
+}
+
+/** Automatický dialog — Arkád se ozve sám při klíčové události. */
+function triggerArkadEvent(context, overrides) {
+  if (!state.user || !state.user.name) return;
+  if (typeof ARKAD_DIALOGUES === 'undefined') return;
+  const text = getArkadDialogue(context, overrides);
+  if (!text) return;
+  // Zobrazíme modal s malým zpožděním (po animaci/ceremonii)
+  setTimeout(() => openArkadModal(text, []), 800);
+}
+
+/** Napojení hooku na povýšení hodnosti. */
+window._onWisdomChanged = (function(prev){
+  return function() {
+    if (typeof prev === 'function') prev();
+    // Po ceremonii hodnosti — triggeruje se z confirmCeremony
+  };
+})(window._onWisdomChanged);
+
+/** Event listenery — tlačítko + modal. */
+(function bindArkadEvents(){
+  const figure = document.getElementById('arkad-nadvori');
+  if (figure) figure.addEventListener('click', openArkadFromNadvori);
+
+  const closeBtn = document.getElementById('arkad-dialog-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeArkadModal);
+
+  const modal = document.getElementById('modal-arkad');
+  if (modal) modal.addEventListener('click', e => {
+    if (e.target === modal) closeArkadModal();
+  });
+})();
+
+// Boot: aktualizace náhledové bubliny
+setTimeout(() => { if (typeof updateArkadHint === 'function') updateArkadHint(); }, 2200);
+
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 12
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>

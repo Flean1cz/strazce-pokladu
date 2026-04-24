@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.10.0'; // ← KROK 9: Rodičovský dashboard (týdenní + celoživotní statistiky + tip)
+const VERSION = 'v2.11.0'; // ← Arkád rename (Algameš→Arkád) + Krok 12: dialogový systém 50 frází
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json'];
 
