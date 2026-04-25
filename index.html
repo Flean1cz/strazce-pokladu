@@ -7312,6 +7312,9 @@ function unsubscribeFromBackend() {
   if (unsubBtn) unsubBtn.addEventListener('click', () => {
     if (confirm('Odhlásit z automatického zasílání?')) unsubscribeFromBackend();
   });
+
+  // Kopírovat tlačítko
+  const copyBtn = document.getElementById('report-copy-btn');
   if (copyBtn) copyBtn.addEventListener('click', copyReportToClipboard);
 
   // Otevřít v e-mailu
