@@ -23,6 +23,122 @@
   --parchment:#F4E4C1;--ink:#3d2a14;
   --purple:#9C27B0;--lpurple:#CE93D8;
 }
+
+/* ═══════════════════════════════════════════════════════
+   SPLASH + INTRO VIDEO (vždy při spuštění aplikace)
+═══════════════════════════════════════════════════════ */
+.splash-overlay,
+.video-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.splash-overlay {
+  background-image: url('splash-bg.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #1a0e04; /* fallback dokud se nenačte obrázek */
+}
+.splash-overlay::before {
+  content:'';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.15) 30%,
+    rgba(0,0,0,0.15) 60%,
+    rgba(0,0,0,0.65) 100%
+  );
+  pointer-events: none;
+}
+.splash-content {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
+  padding: 2rem;
+  display: flex; flex-direction: column; justify-content: space-between;
+  text-align: center;
+  animation: splashFadeIn 1.1s ease-out;
+}
+.splash-title-wrap { margin-top: 8vh; }
+.splash-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.2rem, 9vw, 4.2rem);
+  font-weight: 600;
+  color: var(--lgold);
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  margin: 0;
+  text-shadow:
+    0 2px 12px rgba(0,0,0,0.85),
+    0 4px 28px rgba(245,166,35,0.35);
+}
+.splash-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.85rem, 2.8vw, 1.1rem);
+  color: var(--gold);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  margin-top: 1rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+}
+.splash-button-wrap { margin-bottom: 12vh; }
+.splash-ornament {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; margin-bottom: 1.5rem; opacity: 0.75;
+}
+.splash-ornament-line {
+  width: 60px; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+}
+.splash-ornament-dot {
+  width: 6px; height: 6px;
+  background: var(--lgold); border-radius: 50%;
+  box-shadow: 0 0 8px var(--gold);
+}
+.splash-button {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 0.95rem 3rem;
+  background: rgba(20,14,8,0.55);
+  color: var(--lgold);
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: all 0.35s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(245,166,35,0.15);
+}
+.splash-button:hover,
+.splash-button:active {
+  background: linear-gradient(135deg, var(--gold), var(--dgold));
+  color: var(--dbrown);
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 28px rgba(245,166,35,0.55),
+    0 4px 20px rgba(0,0,0,0.5);
+}
+.video-overlay { background: #000; }
+#intro-video {
+  width: 100%; height: 100%;
+  object-fit: contain;
+}
+.splash-fade-out {
+  animation: splashFadeOut 0.5s ease-in forwards;
+}
+@keyframes splashFadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes splashFadeOut {
+  to { opacity: 0; pointer-events: none; }
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overscroll-behavior:none;}
 body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;color:#fff;overflow:hidden;}
@@ -1870,6 +1986,29 @@ svg.jar{width:52px;height:72px;}
 </style>
 </head>
 <body>
+
+<!-- ══════════════ SPLASH SCREEN (vždy při spuštění) ══════════════ -->
+<div id="splash-screen" class="splash-overlay">
+  <div class="splash-content">
+    <div class="splash-title-wrap">
+      <h1 class="splash-title">Babylonská<br>pokladnice</h1>
+      <div class="splash-subtitle">Tajemství zlata</div>
+    </div>
+    <div class="splash-button-wrap">
+      <div class="splash-ornament">
+        <span class="splash-ornament-line"></span>
+        <span class="splash-ornament-dot"></span>
+        <span class="splash-ornament-line"></span>
+      </div>
+      <button id="splash-enter" class="splash-button" type="button">Vstoupit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ INTRO VIDEO OVERLAY ══════════════ -->
+<div id="intro-video-overlay" class="video-overlay" hidden>
+  <video id="intro-video" playsinline preload="auto" src="intro.mp4"></video>
+</div>
 
 <canvas id="stars-canvas"></canvas>
 
@@ -7363,6 +7502,57 @@ setTimeout(() => {
 
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 13
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 — Splash screen + intro video
+   Spouští se při každém otevření aplikace.
+   Boot sekvence běží paralelně na pozadí, aby app byla
+   připravena do okamžiku, kdy uživatel doklikne přes splash
+   a video doběhne.
+═══════════════════════════════════════════════════════ */
+(function setupIntroFlow(){
+  var splash = document.getElementById('splash-screen');
+  var videoOverlay = document.getElementById('intro-video-overlay');
+  var video = document.getElementById('intro-video');
+  var enterBtn = document.getElementById('splash-enter');
+
+  if (!splash || !videoOverlay || !video || !enterBtn) {
+    console.warn('[Intro] Některé prvky chybí, přeskakuji intro flow.');
+    return;
+  }
+
+  function hideOverlay(el){
+    el.classList.add('splash-fade-out');
+    setTimeout(function(){
+      el.hidden = true;
+      el.style.display = 'none';
+    }, 500);
+  }
+
+  enterBtn.addEventListener('click', function(){
+    // 1) Schovej splash
+    hideOverlay(splash);
+
+    // 2) Zobraz video overlay a přehraj
+    videoOverlay.hidden = false;
+    var p = video.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch(function(err){
+        console.warn('[Intro] Video se nepodařilo přehrát:', err);
+        hideOverlay(videoOverlay);
+      });
+    }
+  }, { once: true });
+
+  video.addEventListener('ended', function(){ hideOverlay(videoOverlay); });
+  video.addEventListener('error', function(){
+    console.warn('[Intro] Chyba při načítání videa, skrývám overlay.');
+    hideOverlay(videoOverlay);
+  });
+})();
+/* ═══════════════════════════════════════════════════════
+   KONEC KROKU 14
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>

@@ -3,9 +3,9 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.13.0'; // ← KROK 13+: backend push — automatický týdenní e-mail
+const VERSION = 'v2.14.0'; // ← KROK 14: splash screen + intro video
 const CACHE = `strazce-${VERSION}`;
-const ASSETS = ['./', './index.html', './manifest.json'];
+const ASSETS = ['./', './index.html', './manifest.json', './splash-bg.jpg', './intro.mp4'];
 
 // ═══ INSTALL ═══
 self.addEventListener('install', e => {
