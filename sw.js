@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.14.0'; // ← KROK 14: splash screen + intro video
+const VERSION = 'v2.14.1'; // ← KROK 14.1: fix splash overlay [hidden]
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = ['./', './index.html', './manifest.json', './splash-bg.jpg', './intro.mp4'];
 
