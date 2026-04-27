@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.14.2'; // ← KROK 14.2: PWA ikony + favicon
+const VERSION = 'v2.15.0'; // ← KROK 14: Mistrovské hry – infrastruktura
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
@@ -60,6 +60,9 @@ self.addEventListener('fetch', e => {
 
   // Jen GET požadavky
   if (e.request.method !== 'GET') return;
+
+  // Přeskočit non-http(s) schémata (chrome-extension://, data:, blob: atd.)
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
 
   const isHTML = e.request.mode === 'navigate' ||
                  url.endsWith('.html') ||

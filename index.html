@@ -1931,6 +1931,102 @@ svg.jar{width:52px;height:72px;}
 .secret-card.unlocked{cursor:pointer;}
 .secret-card.unlocked:active{transform:scale(.97);}
 
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – Mistrovské hry (sekce v kartě tajemství)
+═══════════════════════════════════════════════════════ */
+.minigame-section{
+  margin-top:10px;
+  padding-top:10px;
+  text-align:center;
+}
+.minigame-divider{
+  height:1px;
+  background:linear-gradient(to right, transparent, rgba(245,166,35,.4), transparent);
+  margin-bottom:8px;
+}
+.minigame-label{
+  font-family:'Cinzel',serif;
+  font-size:8.5px;
+  letter-spacing:.15em;
+  color:rgba(245,166,35,.65);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.minigame-name{
+  font-family:'Cinzel',serif;
+  font-weight:600;
+  font-size:11px;
+  color:var(--lgold);
+  margin-bottom:2px;
+}
+.minigame-short{
+  font-size:9px;
+  color:var(--sand);
+  opacity:.7;
+  font-style:italic;
+  margin-bottom:6px;
+  line-height:1.3;
+}
+.minigame-coming{
+  font-size:9px;
+  color:rgba(255,255,255,.4);
+  font-style:italic;
+  font-family:'Cinzel',serif;
+  letter-spacing:.05em;
+}
+.minigame-cta{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:4px;
+  flex-wrap:wrap;
+}
+.minigame-play-btn{
+  font-family:'Cinzel',serif;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.08em;
+  padding:4px 12px;
+  background:linear-gradient(135deg, var(--gold), var(--dgold));
+  color:var(--dbrown);
+  border:none;
+  border-radius:3px;
+  cursor:pointer;
+  transition:transform .15s, box-shadow .15s;
+  box-shadow:0 2px 8px rgba(245,166,35,.3);
+  /* zabránit propagaci kliku na kartu (která otevírá modal tajemství) */
+}
+.minigame-play-btn:active{
+  transform:scale(.95);
+}
+.minigame-score{
+  font-size:9.5px;
+  color:var(--lgold);
+  font-family:'Cinzel',serif;
+  font-weight:600;
+}
+.minigame-daily-note{
+  font-size:8.5px;
+  color:rgba(255,255,255,.45);
+  font-style:italic;
+  margin-top:5px;
+  letter-spacing:.02em;
+}
+
+/* Obrazovka mini-hry — kontejner */
+#screen-minigame{
+  padding-bottom:60px;
+}
+#minigame-canvas-wrap{
+  width:100%;
+  min-height:60vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+}
+
 /* confetti burst particles */
 @keyframes confettiFall{
   0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}
@@ -2453,6 +2549,17 @@ svg.jar{width:52px;height:72px;}
 </div>
 </div>
 
+<!-- ══════════════ KROK 14 – OBRAZOVKA MISTROVSKÉ HRY ══════════════ -->
+<div id="screen-minigame" class="screen hidden">
+<div class="sec-hdr">
+  <button class="back-btn" data-back="tajemstvi">‹</button>
+  <div class="sec-title" id="minigame-title">🎮 Mistrovská hra</div>
+</div>
+<div id="minigame-canvas-wrap">
+  <!-- konkrétní hra se vykreslí sem přes window.renderMinigame_N(idx) -->
+</div>
+</div>
+
 <!-- ══════════════ KROK 4 – SÍŇ PEČETÍ ══════════════ -->
 <div id="screen-seals" class="screen hidden">
 <div class="sec-hdr">
@@ -2907,6 +3014,23 @@ const STORIES = [
   }
 ];
 
+// ═══════════════════════════════════════════════════════
+// KROK 14 – Mistrovské hry (Mini-hry)
+// Každá hra je vázaná na jeden příběh (idx 0–6).
+// Hra se odemyká současně s tajemstvím (po dokončení příběhu).
+// implemented: false → karta zobrazí "Brzy přijde mistrovská hra"
+// max_wisdom: maximální Moudrost dosažitelná za perfektní výkon
+// ═══════════════════════════════════════════════════════
+var MINIGAMES = [
+  { id: 0, title: "Desátek",            icon: "🪙", short: "Chytni jednu z deseti",     max_wisdom: 30, implemented: false },
+  { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty",             max_wisdom: 30, implemented: false },
+  { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "Sleduj kouzlo úročení",     max_wisdom: 25, implemented: false },
+  { id: 3, title: "Matějova nabídka",   icon: "🎭", short: "Pravda nebo podvod?",        max_wisdom: 30, implemented: false },
+  { id: 4, title: "Stavitel",           icon: "🏗️", short: "Zařiď pokoj v rozpočtu",    max_wisdom: 30, implemented: false },
+  { id: 5, title: "Zadní vrátka",       icon: "🛡️", short: "Použij rezervu moudře",     max_wisdom: 30, implemented: false },
+  { id: 6, title: "Bazar",              icon: "🛒", short: "Hospodař s Moudrostí",       max_wisdom: 30, implemented: false }
+];
+
 const PYRAMID = [
   {label:'100 Kč',  target:100,   w:18},
   {label:'200 Kč',  target:200,   w:27},
@@ -2993,6 +3117,15 @@ const DEFAULT_STATE = () => ({
   report: {
     parent_email: '',         // e-mail rodiče (volitelný)
     last_sent: null           // ISO datum posledního odeslání/generování
+  },
+  // ═══ KROK 14 – Mistrovské hry (mini-hry) ═══
+  minigames: {
+    scores: {},               // { "0": 28, "1": 15, ... } – best score per game (0–6)
+    plays: {},                // { "0": 3, ... } – total play count per game
+    perfect: {},              // { "0": true } – ever achieved max_wisdom? (pro pečeti C)
+    last_played: {},          // { "0": "2026-04-27" } – ISO datum posledního pokusu
+    wisdom_dates: {},         // { "0": "2026-04-27" } – ISO datum posledního udělení Moudrosti (anti-grind: 1× denně)
+    total_wisdom: 0           // celková Moudrost získaná z her (statistika)
   }
 });
 
@@ -3091,6 +3224,20 @@ function loadLocal() {
         state.report = { parent_email: '', last_sent: null };
       } else {
         if (typeof state.report.parent_email !== 'string') state.report.parent_email = '';
+      }
+      // KROK 14 – Minigames: zpětná kompatibilita
+      if (!state.minigames || typeof state.minigames !== 'object') {
+        state.minigames = {
+          scores: {}, plays: {}, perfect: {},
+          last_played: {}, wisdom_dates: {}, total_wisdom: 0
+        };
+      } else {
+        if (!state.minigames.scores || typeof state.minigames.scores !== 'object') state.minigames.scores = {};
+        if (!state.minigames.plays || typeof state.minigames.plays !== 'object') state.minigames.plays = {};
+        if (!state.minigames.perfect || typeof state.minigames.perfect !== 'object') state.minigames.perfect = {};
+        if (!state.minigames.last_played || typeof state.minigames.last_played !== 'object') state.minigames.last_played = {};
+        if (!state.minigames.wisdom_dates || typeof state.minigames.wisdom_dates !== 'object') state.minigames.wisdom_dates = {};
+        if (typeof state.minigames.total_wisdom !== 'number') state.minigames.total_wisdom = 0;
       }
       driveFileId = p.driveFileId || null;
     }
@@ -3198,7 +3345,7 @@ function scheduleSave() {
 function saveToDrive() { saveLocal(); if (accessToken) saveToDriveNow(); }
 /* ═══ SCREEN NAVIGATION ═══ */
 // setup musí být v seznamu, aby se správně schoval při přechodu na nádvoří
-const NAV_SCREENS = ['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','admin'];
+const NAV_SCREENS = ['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','minigame','admin'];
 function showScreen(id, hideNav=false) {
   NAV_SCREENS.forEach(s => {
     const el = document.getElementById('screen-'+s);
@@ -3461,8 +3608,123 @@ function renderSecrets() {
       <div class="secret-name">${s.title}</div>
       ${unlocked ? `<div class="secret-text">„${s.secret}"</div>` : ''}
       ${!unlocked ? `<div class="secret-lock">🔒<div class="secret-lock-hint">Přečti příběh ${i+1}</div></div>` : ''}
+      ${unlocked ? renderMinigameSection(i) : ''}
     </div>`;
   }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// KROK 14 – Helper funkce pro Mistrovské hry
+// ═══════════════════════════════════════════════════════
+
+function renderMinigameSection(idx) {
+  var game = MINIGAMES[idx];
+  if (!game) return '';
+
+  // Hra ještě není implementovaná → info text, žádné tlačítko
+  if (!game.implemented) {
+    return `<div class="minigame-section">
+      <div class="minigame-divider"></div>
+      <div class="minigame-label">🎮 Mistrovská hra</div>
+      <div class="minigame-coming">Brzy přijde…</div>
+    </div>`;
+  }
+
+  // Hra je hotová a tajemství odemčené → nabídka
+  var bestScore = state.minigames.scores[idx] || 0;
+  var hasScore = state.minigames.plays[idx] > 0;
+  var canEarnToday = canEarnWisdomToday(idx);
+
+  return `<div class="minigame-section">
+    <div class="minigame-divider"></div>
+    <div class="minigame-label">🎮 Mistrovská hra</div>
+    <div class="minigame-name">${game.icon} ${game.title}</div>
+    <div class="minigame-short">${game.short}</div>
+    <div class="minigame-cta">
+      <button class="minigame-play-btn" onclick="startMinigame(${idx})">▶ Hrát</button>
+      ${hasScore ? `<span class="minigame-score">⭐ ${bestScore}/${game.max_wisdom}</span>` : ''}
+    </div>
+    ${!canEarnToday && hasScore ? `<div class="minigame-daily-note">Dnes už jsi Moudrost získal — zítra zase!</div>` : ''}
+  </div>`;
+}
+
+function isMinigameUnlocked(idx) {
+  return state.progression.unlocked_stories.includes(idx);
+}
+
+function isMinigameImplemented(idx) {
+  return MINIGAMES[idx] && MINIGAMES[idx].implemented;
+}
+
+function canEarnWisdomToday(idx) {
+  // Anti-grind: Moudrost lze získat za hru max 1× denně
+  var lastWisdomDate = state.minigames.wisdom_dates[idx];
+  if (!lastWisdomDate) return true;
+  var today = new Date().toISOString().slice(0,10);
+  return lastWisdomDate !== today;
+}
+
+function startMinigame(idx) {
+  if (!isMinigameUnlocked(idx)) {
+    toast('🔒 Nejdřív přečti příběh ' + (idx+1));
+    return;
+  }
+  if (!isMinigameImplemented(idx)) {
+    toast('🚧 Tato hra ještě není hotová');
+    return;
+  }
+
+  var game = MINIGAMES[idx];
+  showScreen('minigame');
+
+  var titleEl = document.getElementById('minigame-title');
+  if (titleEl) titleEl.textContent = game.icon + ' ' + game.title;
+
+  // Volá konkrétní render funkci dané hry — bude přidána v dalších krocích
+  var renderFn = window['renderMinigame_' + idx];
+  if (typeof renderFn === 'function') {
+    renderFn(idx);
+  } else {
+    var wrap = document.getElementById('minigame-canvas-wrap');
+    if (wrap) wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--sand);">🚧 Hra zatím není připravena.</div>';
+  }
+}
+
+function finishMinigame(idx, wisdomEarned) {
+  var game = MINIGAMES[idx];
+  if (!game) return;
+
+  // Aktualizace statistik
+  state.minigames.plays[idx] = (state.minigames.plays[idx] || 0) + 1;
+  state.minigames.last_played[idx] = new Date().toISOString().slice(0,10);
+
+  // Best score (nejvyšší dosažené)
+  var previousBest = state.minigames.scores[idx] || 0;
+  var isNewBest = wisdomEarned > previousBest;
+  if (isNewBest) {
+    state.minigames.scores[idx] = wisdomEarned;
+  }
+
+  // Perfect flag (pro pečeti Kategorie C)
+  if (wisdomEarned >= game.max_wisdom) {
+    state.minigames.perfect[idx] = true;
+  }
+
+  // Anti-grind: Moudrost se uděluje max 1× denně
+  var wisdomGiven = 0;
+  if (canEarnWisdomToday(idx)) {
+    wisdomGiven = wisdomEarned;
+    state.minigames.wisdom_dates[idx] = new Date().toISOString().slice(0,10);
+    state.minigames.total_wisdom += wisdomGiven;
+    if (typeof addWisdom === 'function' && wisdomGiven > 0) {
+      addWisdom(wisdomGiven, 'mistrovská hra: ' + game.title);
+    }
+  }
+
+  scheduleSave();
+  renderSecrets();
+
+  return { wisdomGiven: wisdomGiven, isNewBest: isNewBest, previousBest: previousBest };
 }
 
 function renderAdminPanel() {
@@ -3823,8 +4085,24 @@ function markStoryRead(idx) {
   setTimeout(() => openSecretModal(idx), 900);
 
   // KROK 12 — Arkád okomentuje přečtení příběhu (po modalu tajemství)
+  // KROK 14 — Pokud je k tomuto příběhu hotová mistrovská hra,
+  //           Arkád místo standardní reakce nabídne: "Chceš si zahrát?"
   setTimeout(() => {
-    if (typeof triggerArkadEvent === 'function') triggerArkadEvent('story_finish');
+    if (typeof isMinigameImplemented === 'function' && isMinigameImplemented(idx)) {
+      // Hra existuje → nabídka ke spuštění
+      var game = MINIGAMES[idx];
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      openArkadModal(
+        '🌟 Krásně, ' + name + '. Tvá moudrost právě rostla v tichosti. Chceš ji teď protrénovat prsty? Připravil jsem pro tebe hru — <strong>' + game.icon + ' ' + game.title + '</strong>.',
+        [
+          { label: '🎮 Pojďme!',     action: function(){ startMinigame(idx); } },
+          { label: 'Možná později',  response: 'Dobrá. Hra na tebe v tajemstvích počká, ' + name + '. Nikam neuteče.' }
+        ]
+      );
+    } else {
+      // Hra ještě není hotová → standardní reakce po dočtení
+      if (typeof triggerArkadEvent === 'function') triggerArkadEvent('story_finish');
+    }
   }, 3500);
 }
 
@@ -4082,6 +4360,10 @@ document.getElementById('modal-secret').addEventListener('click', e=>{
 
 // Make unlocked secret cards clickable → open modal
 document.getElementById('secrets-grid').addEventListener('click', e => {
+  // KROK 14 – kliky na herní tlačítka (a obecně na minigame sekci)
+  // se zpracovávají vlastními handlery a NEpouští se modal tajemství
+  if (e.target.closest('.minigame-section')) return;
+
   const card = e.target.closest('.secret-card');
   if (!card) return;
   const idx = parseInt(card.id.replace('secret-card-',''));
@@ -7043,7 +7325,15 @@ function openArkadModal(text, choices) {
         btn.className = 'arkad-choice-btn';
         btn.textContent = ch.label;
         btn.addEventListener('click', () => {
-          if (bubble) bubble.innerHTML = ch.response;
+          // KROK 14 – choice může mít akci (callback), která modal zavře a něco udělá
+          if (typeof ch.action === 'function') {
+            closeArkadModal();
+            // setTimeout aby zavření modalu proběhlo plynule před akcí
+            setTimeout(() => { try { ch.action(); } catch(e) { console.error(e); } }, 200);
+            return;
+          }
+          // Standardní chování — text odpovědi v bublině
+          if (bubble) bubble.innerHTML = ch.response || '';
           choicesEl.innerHTML = '';
         });
         choicesEl.appendChild(btn);
