@@ -3,9 +3,15 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.14.1'; // ← KROK 14.1: fix splash overlay [hidden]
+const VERSION = 'v2.14.2'; // ← KROK 14.2: PWA ikony + favicon
 const CACHE = `strazce-${VERSION}`;
-const ASSETS = ['./', './index.html', './manifest.json', './splash-bg.jpg', './intro.mp4'];
+const ASSETS = [
+  './', './index.html', './manifest.json',
+  './splash-bg.jpg', './intro.mp4',
+  './favicon.ico', './favicon.png',
+  './icons/icon-192.png', './icons/icon-512.png',
+  './icons/icon-180.png', './icons/icon-maskable-512.png'
+];
 
 // ═══ INSTALL ═══
 self.addEventListener('install', e => {
