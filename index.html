@@ -2565,7 +2565,7 @@ svg.jar{width:52px;height:72px;}
   <button class="parent-lock-btn" id="admin-float-btn" title="Rodičovský přístup">
     <span class="parent-lock-icon">🔐</span>
     <span class="parent-lock-text">Rodičovský přístup</span>
-    <span class="parent-lock-hint">Pro rodiče · vklady, výběry, nastavení</span>
+    <span class="parent-lock-hint">Nastavení a správa pro rodiče</span>
   </button>
 </div>
 </div>
@@ -2596,12 +2596,8 @@ svg.jar{width:52px;height:72px;}
     </div>
   </div>
 
-  <div class="locked-deposit" id="locked-deposit" style="display:none">
-    <div class="locked-deposit-text">🔐 Pro vklad/výběr: Rodičovský přístup</div>
-  </div>
-
   <div class="deposit-section" id="deposit-section">
-    <div class="deposit-title">🪙 Vložit mince (Admin)</div>
+    <div class="deposit-title">🪙 Vložit mince</div>
     <div class="deposit-row">
       <div class="deposit-wrap">
         <input type="number" id="deposit-input" placeholder="0" min="0" step="0.01" inputmode="decimal"/>
@@ -3792,13 +3788,12 @@ function renderPokladnice() {
   }
   if (treeSec) treeSec.textContent = secrets > 0 ? `Znalosti: ${secrets}/7 tajemství odemčeno ✨` : '';
 
-  // Admin deposit visibility
+  // Vklad/výběr je vždy přístupný — už nevyžaduje rodičovský přístup
+  // (rodič zamyká jen administraci, ne každodenní hospodaření)
   const depSec = document.getElementById('deposit-section');
   const locDep = document.getElementById('locked-deposit');
-  if (depSec && locDep) {
-    depSec.style.display = adminUnlocked ? '' : 'none';
-    locDep.style.display = adminUnlocked ? 'none' : '';
-  }
+  if (depSec) depSec.style.display = '';
+  if (locDep) locDep.style.display = 'none';
 
   // Pyramid overlay text (image-based, jen aktualizujeme popisky)
   const navzdy = n;
@@ -4554,11 +4549,17 @@ document.getElementById('deposit-btn').addEventListener('click', ()=>{
 });
 document.getElementById('deposit-input').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('deposit-btn').click(); });
 
-// Locked deposit click (shows admin screen)
-document.getElementById('locked-deposit').addEventListener('click', ()=>{
-  if (!adminUnlocked) resetAdminView();
-  showScreen('admin', true);
-});
+// Locked deposit element byl odstraněn (vklad už není zamčený rodičovským PIN-em).
+// Defenzivně podporujeme i případ, kdy element ještě v DOM existuje (starší cache).
+(function bindLegacyLockedDeposit(){
+  const el = document.getElementById('locked-deposit');
+  if (!el) return;
+  el.style.display = 'none';
+  el.addEventListener('click', () => {
+    if (!adminUnlocked) resetAdminView();
+    showScreen('admin', true);
+  });
+})();
 
 // Admin deposits/withdrawals
 document.getElementById('admin-deposit-btn').addEventListener('click', ()=>{
