@@ -1190,13 +1190,58 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 .pillar-desc{font-size:11px;color:var(--sand);opacity:.65;margin-bottom:6px;line-height:1.4;}
 .pillar-stat{font-family:'Cinzel',serif;font-size:12px;color:#FFD700;font-weight:700;}
 .pillar-arr{font-size:18px;color:rgba(245,166,35,.4);}
-.admin-float{
-  position:absolute;top:14px;right:14px;z-index:55;
-  background:rgba(0,0,0,.5);border:1px solid rgba(245,166,35,.25);
-  border-radius:50%;width:38px;height:38px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;cursor:pointer;backdrop-filter:blur(8px);
+/* Rodičovský přístup — na konci nádvoří (po scrollu dolů) */
+.parent-lock-section{
+  padding:24px 16px 36px;
+  position:relative;
+  z-index:2;
 }
+.parent-lock-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  width:100%;
+  max-width:340px;
+  margin:0 auto;
+  padding:14px 18px;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(245,166,35,.3);
+  border-radius:14px;
+  color:var(--gold);
+  font-family:'Cinzel',serif;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  transition:background .2s ease, transform .15s ease, border-color .2s ease;
+}
+.parent-lock-btn:hover{
+  background:rgba(245,166,35,.12);
+  border-color:rgba(245,166,35,.5);
+}
+.parent-lock-btn:active{
+  transform:scale(.98);
+}
+.parent-lock-icon{
+  font-size:20px;
+  margin-bottom:2px;
+}
+.parent-lock-text{
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:.08em;
+  color:var(--lgold);
+}
+.parent-lock-hint{
+  font-size:9.5px;
+  font-family:'Nunito',sans-serif;
+  color:var(--sand);
+  opacity:.65;
+  letter-spacing:.02em;
+}
+
+/* Stará admin-float třída — ponechána jako neaktivní (zpětná kompatibilita) */
+.admin-float{display:none;}
 
 /* ═══ POKLADNICE ═══ */
 .pokladnice-wrap{padding:0 14px;position:relative;z-index:2;}
@@ -2352,7 +2397,6 @@ svg.jar{width:52px;height:72px;}
   </div>
   <button class="drive-act-btn" id="drive-btn">⚙️ Drive</button>
 </div>
-<div class="admin-float" id="admin-float-btn" title="Rodičovský přístup">🔐</div>
 
 <div class="nadvorí-hero">
   <div class="nadvorí-badge">⚜️ Nádvoří Babylonu ⚜️</div>
@@ -2461,6 +2505,15 @@ svg.jar{width:52px;height:72px;}
     </div>
     <div class="pillar-arr">›</div>
   </div>
+</div>
+
+<!-- ══════════════ Rodičovský přístup (na konci nádvoří) ══════════════ -->
+<div class="parent-lock-section">
+  <button class="parent-lock-btn" id="admin-float-btn" title="Rodičovský přístup">
+    <span class="parent-lock-icon">🔐</span>
+    <span class="parent-lock-text">Rodičovský přístup</span>
+    <span class="parent-lock-hint">Pro rodiče · vklady, výběry, nastavení</span>
+  </button>
 </div>
 </div>
 
@@ -6258,14 +6311,22 @@ function ensureValidCustomization() {
 
 /** Otevře modal. */
 function openCustomizeModal() {
+  console.log('[customize] openCustomizeModal triggered');
   const modal = document.getElementById('modal-customize');
-  if (!modal) return;
+  if (!modal) {
+    console.warn('[customize] modal-customize element not found!');
+    return;
+  }
   modal.classList.remove('hidden');
+  // Force redraw — někdy mobile browsers nereagují bez explicitního triggeru
+  // (toto vyřeší případy kdy classList.remove proběhne ale prohlížeč to nevykreslí)
+  void modal.offsetHeight;
   renderCustomizeOptions('background');
   // přepni aktivní tab vizuálně na pozadí
   document.querySelectorAll('.cu-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.cuTab === 'background');
   });
+  console.log('[customize] modal should now be visible');
 }
 
 function closeCustomizeModal() {
@@ -6324,8 +6385,26 @@ function renderCustomizeOptions(group) {
 
 /** Event listeners pro modal. */
 (function bindCustomizeEvents(){
-  const btn = document.getElementById('customize-btn');
-  if (btn) btn.addEventListener('click', openCustomizeModal);
+  // Defenzivní binding — pokud customize-btn ještě není v DOM (race condition),
+  // zkusí se znovu po krátké chvíli
+  function attachListener() {
+    const btn = document.getElementById('customize-btn');
+    if (!btn) {
+      console.warn('[customize] customize-btn not found, retry in 100ms');
+      setTimeout(attachListener, 100);
+      return;
+    }
+    // Předejdi double-binding — zkontroluj, jestli už není připojený
+    if (btn._customizeBound) return;
+    btn._customizeBound = true;
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openCustomizeModal();
+    });
+    console.log('[customize] click listener attached to customize-btn');
+  }
+  attachListener();
 
   const closeBtn = document.getElementById('cu-close');
   if (closeBtn) closeBtn.addEventListener('click', closeCustomizeModal);
