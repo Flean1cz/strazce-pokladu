@@ -620,11 +620,37 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 .customize-btn:active{transform:scale(.96);}
 
 /* Theming vrstva – aplikuje se na #screen-nadvorí jako data atributy */
-/* Pozadí: data-bg (night / dawn / day / golden / babylon) */
-#screen-nadvorí[data-bg="night"]{background:linear-gradient(180deg,#050208 0%,#0d0507 25%,#1a0e04 55%,#2d1508 100%);}
-#screen-nadvorí[data-bg="dawn"]{background:linear-gradient(180deg,#1a0a2e 0%,#3b1a3d 25%,#6b2c3a 55%,#a84a2e 100%);}
-#screen-nadvorí[data-bg="day"]{background:linear-gradient(180deg,#1a2a4a 0%,#2a4680 25%,#5a80c0 60%,#8bb0d8 100%);}
-#screen-nadvorí[data-bg="golden"]{background:linear-gradient(180deg,#2a1508 0%,#5a3010 25%,#9a6820 60%,#d8a848 100%);}
+/* Pozadí: data-bg (night / dawn / day / golden / babylon)
+   "night" má obrázek (bg-night.jpg), ostatní zatím gradienty.
+   Obrázky se nastavují přes pseudo-element ::before, aby šly snadno škálovat
+   a překrývat decorací bez konfliktu s ::after (dlažba). */
+#screen-nadvorí{position:relative;}
+#screen-nadvorí[data-bg]::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background-size:cover;
+  background-position:center bottom;
+  background-repeat:no-repeat;
+  pointer-events:none;
+}
+#screen-nadvorí[data-bg="night"]{background:#050208;}
+#screen-nadvorí[data-bg="night"]::before{
+  background-image:url('bg-night.jpg');
+}
+#screen-nadvorí[data-bg="dawn"]{background:#3b1a3d;}
+#screen-nadvorí[data-bg="dawn"]::before{
+  background-image:url('bg-dawn.jpg');
+}
+#screen-nadvorí[data-bg="day"]{background:#2a4680;}
+#screen-nadvorí[data-bg="day"]::before{
+  background-image:url('bg-day.jpg');
+}
+#screen-nadvorí[data-bg="golden"]{background:#5a3010;}
+#screen-nadvorí[data-bg="golden"]::before{
+  background-image:url('bg-golden.jpg');
+}
 #screen-nadvorí[data-bg="babylon"]{
   background:
     radial-gradient(circle at 30% 20%, rgba(255,215,0,.18) 0%, transparent 40%),
@@ -6162,13 +6188,13 @@ setTimeout(() => {
  */
 var CUSTOM_OPTIONS = {
   background: [
-    { id:'night',   name:'Hvězdná noc',     unlock:'Výchozí',                  preview:'linear-gradient(180deg,#050208,#1a0e04,#2d1508)',
+    { id:'night',   name:'Hvězdná noc',     unlock:'Výchozí',                  preview:"url('bg-night.jpg') center/cover",
       check: () => true },
-    { id:'dawn',    name:'Babylonský úsvit',unlock:'Učedník',                  preview:'linear-gradient(180deg,#1a0a2e,#6b2c3a,#a84a2e)',
+    { id:'dawn',    name:'Babylonský úsvit',unlock:'Učedník',                  preview:"url('bg-dawn.jpg') center/cover",
       check: (s) => (s.rank && s.rank.current >= 1) },
-    { id:'day',     name:'Jasný den',       unlock:'Kupec',                    preview:'linear-gradient(180deg,#1a2a4a,#5a80c0,#8bb0d8)',
+    { id:'day',     name:'Jasný den',       unlock:'Kupec',                    preview:"url('bg-day.jpg') center/cover",
       check: (s) => (s.rank && s.rank.current >= 3) },
-    { id:'golden',  name:'Zlaté pole',      unlock:'Strážce keře',             preview:'linear-gradient(180deg,#2a1508,#9a6820,#d8a848)',
+    { id:'golden',  name:'Zlaté pole',      unlock:'Strážce keře',             preview:"url('bg-golden.jpg') center/cover",
       check: (s) => (s.rank && s.rank.current >= 5) },
     { id:'babylon', name:'Babylonská věž',  unlock:'Pán pokladnice',           preview:'radial-gradient(circle at 30% 30%,rgba(255,215,0,.3),transparent 40%),linear-gradient(180deg,#1a0a2e,#4a1a5a,#6b2a80)',
       check: (s) => (s.rank && s.rank.current >= 7) }
