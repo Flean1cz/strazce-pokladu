@@ -3,11 +3,12 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.15.0'; // ← KROK 14: Mistrovské hry – infrastruktura
+const VERSION = 'v2.16.1'; // ← KROK 14.5: Hra 0 v2 — fix bonusu (jen při splněném desátku)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
   './splash-bg.jpg', './intro.mp4',
+  './mg0-bg.jpg',
   './favicon.ico', './favicon.png',
   './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-180.png', './icons/icon-maskable-512.png'

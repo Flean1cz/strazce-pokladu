@@ -2027,6 +2027,158 @@ svg.jar{width:52px;height:72px;}
   padding:1rem;
 }
 
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 0: DESÁTEK (UI styles)
+═══════════════════════════════════════════════════════ */
+#minigame-canvas-wrap{
+  position:relative;
+  padding:0;
+  min-height:calc(100vh - 80px);
+  background:#0f0a07;
+  overflow:hidden;
+}
+.mg0-canvas{
+  display:block;
+  width:100%;
+  height:100%;
+  position:absolute;
+  inset:0;
+  touch-action:none;
+}
+.mg0-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  padding:1.5rem;
+  z-index:10;
+}
+.mg0-overlay > * { pointer-events:auto; }
+.mg0-card{
+  max-width:340px;
+  width:100%;
+  background:linear-gradient(135deg, rgba(42,31,21,0.95), rgba(20,14,8,0.95));
+  border:2px solid rgba(245,166,35,0.5);
+  border-radius:12px;
+  padding:1.5rem 1.25rem;
+  text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(245,166,35,0.2);
+  font-family:'Cinzel',serif;
+  animation:mg0CardIn 0.4s ease-out;
+}
+@keyframes mg0CardIn{
+  from { opacity:0; transform:translateY(20px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.mg0-card-icon{
+  font-size:2.4rem;
+  margin-bottom:0.5rem;
+}
+.mg0-card-title{
+  font-family:'Cinzel',serif;
+  font-size:1.3rem;
+  color:var(--lgold);
+  letter-spacing:0.05em;
+  margin-bottom:0.75rem;
+}
+.mg0-card-text{
+  font-size:0.95rem;
+  color:var(--sand);
+  line-height:1.5;
+  margin-bottom:1.25rem;
+}
+.mg0-card-text strong{
+  color:var(--lgold);
+  font-weight:600;
+}
+.mg0-card-end .mg0-card-title{
+  font-size:1.5rem;
+}
+.mg0-score{
+  font-family:'Cinzel',serif;
+  font-size:2rem;
+  color:var(--gold);
+  font-weight:600;
+  margin:0.5rem 0;
+  text-shadow:0 2px 12px rgba(245,166,35,0.4);
+}
+.mg0-twotrack{
+  display:flex;
+  gap:0.75rem;
+  margin:0.75rem 0 1rem;
+  justify-content:center;
+}
+.mg0-track{
+  flex:1;
+  background:rgba(245,166,35,0.08);
+  border:1px solid rgba(245,166,35,0.25);
+  border-radius:6px;
+  padding:0.5rem 0.4rem;
+  font-size:0.78rem;
+  color:var(--sand);
+  line-height:1.4;
+  text-align:center;
+}
+.mg0-track strong{
+  display:inline-block;
+  margin-top:2px;
+  color:var(--lgold);
+  font-size:0.95rem;
+  font-weight:600;
+}
+.mg0-card-wisdom{
+  background:rgba(245,166,35,0.15);
+  color:var(--lgold);
+  padding:0.5rem 1rem;
+  border-radius:6px;
+  margin:0.75rem 0;
+  font-weight:600;
+  font-size:0.95rem;
+  letter-spacing:0.03em;
+}
+.mg0-card-wisdom-note{
+  color:rgba(255,255,255,0.55);
+  font-style:italic;
+  font-size:0.85rem;
+  margin:0.5rem 0;
+}
+.mg0-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+  margin-top:1rem;
+}
+.mg0-btn{
+  font-family:'Cinzel',serif;
+  font-size:1rem;
+  font-weight:600;
+  padding:0.75rem 1.5rem;
+  border-radius:6px;
+  cursor:pointer;
+  letter-spacing:0.08em;
+  border:none;
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+.mg0-btn:active{ transform:scale(0.97); }
+.mg0-btn-primary{
+  background:linear-gradient(135deg, var(--gold), var(--dgold));
+  color:var(--dbrown);
+  box-shadow:0 4px 16px rgba(245,166,35,0.35);
+}
+.mg0-btn-primary:hover{
+  box-shadow:0 6px 24px rgba(245,166,35,0.55);
+}
+.mg0-btn-ghost{
+  background:transparent;
+  color:var(--sand);
+  border:1px solid rgba(245,166,35,0.4);
+}
+.mg0-btn-ghost:hover{
+  background:rgba(245,166,35,0.1);
+}
+
 /* confetti burst particles */
 @keyframes confettiFall{
   0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}
@@ -3022,7 +3174,7 @@ const STORIES = [
 // max_wisdom: maximální Moudrost dosažitelná za perfektní výkon
 // ═══════════════════════════════════════════════════════
 var MINIGAMES = [
-  { id: 0, title: "Desátek",            icon: "🪙", short: "Chytni jednu z deseti",     max_wisdom: 30, implemented: false },
+  { id: 0, title: "Desátek",            icon: "🪙", short: "Chytni jednu z deseti",     max_wisdom: 30, implemented: true  },
   { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty",             max_wisdom: 30, implemented: false },
   { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "Sleduj kouzlo úročení",     max_wisdom: 25, implemented: false },
   { id: 3, title: "Matějova nabídka",   icon: "🎭", short: "Pravda nebo podvod?",        max_wisdom: 30, implemented: false },
@@ -3347,6 +3499,16 @@ function saveToDrive() { saveLocal(); if (accessToken) saveToDriveNow(); }
 // setup musí být v seznamu, aby se správně schoval při přechodu na nádvoří
 const NAV_SCREENS = ['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','minigame','admin'];
 function showScreen(id, hideNav=false) {
+  // KROK 14 – Pokud opouštíme obrazovku mini-hry, spusť cleanup
+  if (currentScreen === 'minigame' && id !== 'minigame') {
+    if (typeof window._minigame_cleanup === 'function') {
+      try { window._minigame_cleanup(); } catch(e) { console.error(e); }
+      window._minigame_cleanup = null;
+    }
+  }
+  // Zaroveň skryj případně hide bottom-nav navíc na herní obrazovce
+  // (řeší se níže v sekci pro nav.classList.add('hidden'))
+
   NAV_SCREENS.forEach(s => {
     const el = document.getElementById('screen-'+s);
     if (!el) return;
@@ -3356,7 +3518,7 @@ function showScreen(id, hideNav=false) {
   currentScreen = id;
   const nav = document.getElementById('bottom-nav');
   if (nav) {
-    if (hideNav || id==='reader' || id==='admin' || id==='setup')
+    if (hideNav || id==='reader' || id==='admin' || id==='setup' || id==='minigame')
       nav.classList.add('hidden');
     else
       nav.classList.remove('hidden');
@@ -7850,6 +8012,891 @@ setTimeout(() => {
 })();
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 14
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 0: DESÁTEK
+   Padá 10 zlatých mincí (postupně rychleji), dítě má chytit
+   přesně jednu a přetáhnout ji do dřevěné truhly NAVŽDY.
+   Skóre: 1 mince = 30 ✨, 2 mince = 15, 0 nebo 3+ = 5.
+   Po dohrání animace stromu z desátku.
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_0 = function(idx) {
+  // Cleanup případného předchozího běhu
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ KONFIGURACE ════════
+  var COIN_SYMBOL = '§';   // změnit na '$', '★', '🏺' atd. dle vkusu
+  var TOTAL_COINS = 10;
+  var COIN_RADIUS = 30;    // poloměr v px
+  var TRACK_Y_RATIO = 0.32; // pozice dráhy (0 = top, 1 = bottom) — ⅓ od horního okraje
+  // Doba, za kterou mince přejede zprava doleva (sec) — jemnější zrychlování
+  // (10 mincí × 10 rozhodnutí = nesmí být moc rychlé)
+  var CROSS_DURATIONS = [5.0, 5.0, 5.0, 4.5, 4.5, 4.5, 4.0, 4.0, 4.0, 3.5];
+  // Mezera mezi spawn-em mincí (ms) — předvídatelná, dítě může plánovat
+  var SPAWN_DELAYS    = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 0];
+
+  // ════════ STATE ════════
+  var canvas, ctx;
+  var W, H, dpr;
+  var phase = 'intro';    // intro | playing | catching | animation | end
+  var coins = [];         // mince ve hře
+  var nowCount = 0;       // mincí v truhle TEĎ A POTOM
+  var foreverCount = 0;   // mincí v truhle NAVŽDY (max 1)
+  var droppedCount = 0;   // mincí, co prošly mimo (žádná truhla)
+  var spawnedCount = 0;
+  var startTime = 0;
+  var lastFrame = 0;
+  var rafId = null;
+  var active = true;
+  var draggedCoin = null;
+  var dragOffsetX = 0, dragOffsetY = 0;
+  // Truhla TEĎ A POTOM (velká, vlevo)
+  var nowChestX, nowChestY, nowChestW, nowChestH;
+  // Truhla NAVŽDY (malá, vpravo)
+  var foreverChestX, foreverChestY, foreverChestW, foreverChestH;
+  var nowChestGlow = 0;
+  var foreverChestGlow = 0;
+  var foreverLockAnim = 0;  // animace zámečku po naplnění (0..1)
+  var animationStartTime = 0;
+  var finalScore = 0;
+  var endShown = false;
+
+  // ════════ POMOCNÉ DOM PRVKY ════════
+  var overlayDiv = document.createElement('div');
+  overlayDiv.className = 'mg0-overlay';
+  wrap.appendChild(overlayDiv);
+
+  function clearOverlay() { overlayDiv.innerHTML = ''; }
+
+  function showIntro() {
+    phase = 'intro';
+    clearOverlay();
+    overlayDiv.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">📜</div>' +
+        '<div class="mg0-card-title">Pravidlo desátku</div>' +
+        '<div class="mg0-card-text">Kolem tebe projde <strong>10 zlatých mincí</strong>.<br><br>' +
+          '🏺 Jednu polož do <strong>NAVŽDY</strong> — to je tvůj desátek.<br>' +
+          '📦 Devět polož do <strong>TEĎ A POTOM</strong> — to si můžeš užít.</div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg0-start">▶ Začít</button>' +
+      '</div>';
+    var btn = document.getElementById('mg0-start');
+    if (btn) btn.addEventListener('click', startGame, { once: true });
+  }
+
+  function startGame() {
+    phase = 'playing';
+    clearOverlay();
+    spawnedCount = 0;
+    nowCount = 0;
+    foreverCount = 0;
+    droppedCount = 0;
+    foreverLockAnim = 0;
+    coins = [];
+    startTime = performance.now();
+    lastFrame = startTime;
+    schedulNextSpawn();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ════════ SPAWN MINCÍ ════════
+  function schedulNextSpawn() {
+    if (!active) return;
+    if (spawnedCount >= TOTAL_COINS) return;
+    setTimeout(function(){
+      if (!active || phase !== 'playing') return;
+      spawnCoin(spawnedCount);
+      spawnedCount++;
+      schedulNextSpawn();
+    }, spawnedCount === 0 ? 200 : SPAWN_DELAYS[spawnedCount - 1]);
+  }
+
+  function spawnCoin(i) {
+    // Mince přijíždí zprava (mimo obrazovku) a putuje doleva
+    var trackY = H * TRACK_Y_RATIO;
+    var startX = W + COIN_RADIUS + 10;
+    var endX = -COIN_RADIUS - 10;
+    var duration = CROSS_DURATIONS[i] * 1000;
+    var vx = (endX - startX) / duration; // px/ms (záporná)
+    coins.push({
+      id: i, x: startX, y: trackY, vx: vx,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.003,
+      bobPhase: Math.random() * Math.PI * 2, // jemné houpání nahoru-dolů
+      caught: false, dropped: false, dragging: false, sparkle: 0
+    });
+  }
+
+  // ════════ POMOCNÉ: BACKGROUND IMAGE ════════
+  // Obrázek karavany jako pozadí hry
+  var bgImg = new Image();
+  var bgImgLoaded = false;
+  bgImg.onload = function(){ bgImgLoaded = true; };
+  bgImg.onerror = function(){ console.warn('[mg0] Background image failed to load'); };
+  bgImg.src = 'mg0-bg.jpg';
+
+  // ════════ TŘÍDA: KRESLENÍ ════════
+  function drawBackground() {
+    if (bgImgLoaded) {
+      // Kresli obrázek tak, aby pokryl celou plochu (cover)
+      var iw = bgImg.naturalWidth;
+      var ih = bgImg.naturalHeight;
+      var scale = Math.max(W / iw, H / ih);
+      var dw = iw * scale;
+      var dh = ih * scale;
+      var dx = (W - dw) / 2;
+      var dy = (H - dh) / 2;
+      ctx.drawImage(bgImg, dx, dy, dw, dh);
+
+      // Tmavší overlay pro čitelnost mincí a textu
+      // (gradient: tmavší nahoře a dole, jasnější uprostřed)
+      var overlayGrad = ctx.createLinearGradient(0, 0, 0, H);
+      overlayGrad.addColorStop(0,    'rgba(15,10,7,0.55)');
+      overlayGrad.addColorStop(0.25, 'rgba(15,10,7,0.30)');
+      overlayGrad.addColorStop(0.5,  'rgba(15,10,7,0.20)');
+      overlayGrad.addColorStop(0.75, 'rgba(15,10,7,0.45)');
+      overlayGrad.addColorStop(1,    'rgba(15,10,7,0.75)');
+      ctx.fillStyle = overlayGrad;
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      // Fallback: gradient (než se obrázek načte)
+      var grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+      grad.addColorStop(0, '#2a1f15');
+      grad.addColorStop(1, '#0f0a07');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // Dráha mincí (horizontální linka v horní třetině)
+    var trackY = H * TRACK_Y_RATIO;
+    var trackGrad = ctx.createLinearGradient(0, trackY, W, trackY);
+    trackGrad.addColorStop(0,    'rgba(245,166,35,0)');
+    trackGrad.addColorStop(0.15, 'rgba(245,166,35,0.35)');
+    trackGrad.addColorStop(0.5,  'rgba(245,166,35,0.55)');
+    trackGrad.addColorStop(0.85, 'rgba(245,166,35,0.35)');
+    trackGrad.addColorStop(1,    'rgba(245,166,35,0)');
+    ctx.fillStyle = trackGrad;
+    ctx.fillRect(0, trackY + COIN_RADIUS + 8, W, 2);
+
+    // Decorativní zlatá linka pod hracím polem (nad truhlami)
+    var lineY = H - nowChestH - 50;
+    var lineGrad = ctx.createLinearGradient(0, lineY, W, lineY);
+    lineGrad.addColorStop(0,    'rgba(245,166,35,0)');
+    lineGrad.addColorStop(0.5,  'rgba(245,166,35,0.4)');
+    lineGrad.addColorStop(1,    'rgba(245,166,35,0)');
+    ctx.fillStyle = lineGrad;
+    ctx.fillRect(0, lineY, W, 1);
+  }
+
+  function drawCoin(coin) {
+    ctx.save();
+    ctx.translate(coin.x, coin.y);
+    ctx.rotate(coin.rot);
+
+    // Stín
+    ctx.beginPath();
+    ctx.ellipse(0, COIN_RADIUS + 10, COIN_RADIUS * 0.6, 4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fill();
+
+    // Mince — vnější kruh
+    var grad = ctx.createRadialGradient(-COIN_RADIUS*0.3, -COIN_RADIUS*0.3, 2, 0, 0, COIN_RADIUS);
+    grad.addColorStop(0, '#FFE57E');
+    grad.addColorStop(0.5, '#F5A623');
+    grad.addColorStop(1, '#8B6000');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, COIN_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Vnitřní kruh
+    ctx.strokeStyle = 'rgba(139,96,0,0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, COIN_RADIUS * 0.75, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Symbol
+    ctx.fillStyle = '#5A3A0A';
+    ctx.font = 'bold ' + Math.floor(COIN_RADIUS * 1.0) + 'px Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(COIN_SYMBOL, 0, 2);
+
+    // Sparkle pokud chycená
+    if (coin.sparkle > 0) {
+      ctx.globalAlpha = coin.sparkle;
+      ctx.fillStyle = '#FFFFE0';
+      ctx.beginPath();
+      ctx.arc(-COIN_RADIUS*0.4, -COIN_RADIUS*0.4, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();
+  }
+
+  // ════════ KRESLENÍ TRUHEL ════════
+  // Truhla TEĎ A POTOM — velká, hnědá, vlevo, vždy otevřená
+  function drawNowChest() {
+    var x = nowChestX, y = nowChestY, w = nowChestW, h = nowChestH;
+    ctx.save();
+
+    if (nowChestGlow > 0) {
+      ctx.shadowColor = '#FFD700';
+      ctx.shadowBlur = 15 + nowChestGlow;
+    }
+
+    // Tělo truhly
+    var bodyGrad = ctx.createLinearGradient(x, y, x, y + h);
+    bodyGrad.addColorStop(0, '#8B5E3C');
+    bodyGrad.addColorStop(1, '#5C3A1E');
+    ctx.fillStyle = bodyGrad;
+    ctx.fillRect(x, y + h * 0.35, w, h * 0.65);
+
+    // Otevřené víko (naklánené dozadu)
+    ctx.fillStyle = '#7A4F30';
+    ctx.beginPath();
+    ctx.moveTo(x, y + h * 0.4);
+    ctx.lineTo(x + w * 0.08, y - h * 0.05);
+    ctx.lineTo(x + w * 0.92, y - h * 0.05);
+    ctx.lineTo(x + w, y + h * 0.4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Vnitřek truhly (tmavý)
+    ctx.fillStyle = '#2a1f15';
+    ctx.fillRect(x + 4, y + h * 0.36, w - 8, 14);
+
+    // Mince uvnitř truhly (vizualizace počtu)
+    if (nowCount > 0) {
+      var coinSize = 8;
+      var spacing = 11;
+      var maxPerRow = Math.floor((w - 12) / spacing);
+      for (var i = 0; i < Math.min(nowCount, 9); i++) {
+        var row = Math.floor(i / maxPerRow);
+        var col = i % maxPerRow;
+        var cx = x + 8 + col * spacing + spacing/2;
+        var cy = y + h * 0.55 + row * spacing;
+        ctx.fillStyle = '#F5A623';
+        ctx.beginPath();
+        ctx.arc(cx, cy, coinSize/2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#8B6000';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // Kovové okování
+    ctx.fillStyle = '#D4A038';
+    ctx.fillRect(x, y + h * 0.35 - 2, w, 4);
+    ctx.fillRect(x + 4, y + h * 0.7, w - 8, 3);
+    // Hřebíky
+    ctx.fillStyle = '#FFE57E';
+    [0.1, 0.5, 0.9].forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(x + w * p, y + h * 0.35 - 1, 2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.restore();
+
+    // Etiketa "TEĎ A POTOM" + počítadlo
+    ctx.fillStyle = 'rgba(220,200,160,0.9)';
+    ctx.font = 'bold 11px Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('TEĎ A POTOM', x + w/2, y + h + 14);
+    ctx.fillStyle = nowCount === 9 ? '#FFD700' : 'rgba(220,200,160,0.7)';
+    ctx.font = 'bold 12px Cinzel, serif';
+    ctx.fillText(nowCount + ' / 9', x + w/2, y + h + 28);
+  }
+
+  // Truhla NAVŽDY — menší, zlatá, vpravo, zavírá se po 1. minci
+  function drawForeverChest() {
+    var x = foreverChestX, y = foreverChestY, w = foreverChestW, h = foreverChestH;
+    var locked = foreverCount >= 1;
+
+    ctx.save();
+
+    // Glow efekt
+    if (foreverChestGlow > 0) {
+      ctx.shadowColor = '#FFD700';
+      ctx.shadowBlur = 20 + foreverChestGlow;
+    } else if (!locked) {
+      // Stálá jemná zlatá záře (zve k použití)
+      ctx.shadowColor = 'rgba(245,166,35,0.5)';
+      ctx.shadowBlur = 8;
+    }
+
+    // Tělo truhly — zlatohnědá
+    var bodyGrad = ctx.createLinearGradient(x, y, x, y + h);
+    bodyGrad.addColorStop(0, '#A87A48');
+    bodyGrad.addColorStop(1, '#6E4A28');
+    ctx.fillStyle = bodyGrad;
+    ctx.fillRect(x, y + h * 0.35, w, h * 0.65);
+
+    if (locked) {
+      // ZAVŘENO — víko nahoře
+      ctx.fillStyle = '#8E6438';
+      ctx.fillRect(x, y, w, h * 0.4);
+      // Zlatý pruh na víku
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(x, y + h * 0.18, w, 4);
+      // Animace zámečku
+      var lockSize = 14 + foreverLockAnim * 6;
+      var lockX = x + w/2;
+      var lockY = y + h * 0.28;
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(lockX, lockY - 4, lockSize * 0.35, Math.PI, 2 * Math.PI);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#8B6000';
+      ctx.stroke();
+      ctx.fillRect(lockX - lockSize * 0.35, lockY - 4, lockSize * 0.7, lockSize * 0.5);
+      ctx.strokeRect(lockX - lockSize * 0.35, lockY - 4, lockSize * 0.7, lockSize * 0.5);
+    } else {
+      // OTEVŘENO
+      ctx.fillStyle = '#8E6438';
+      ctx.beginPath();
+      ctx.moveTo(x, y + h * 0.4);
+      ctx.lineTo(x + w * 0.08, y - h * 0.05);
+      ctx.lineTo(x + w * 0.92, y - h * 0.05);
+      ctx.lineTo(x + w, y + h * 0.4);
+      ctx.closePath();
+      ctx.fill();
+      // Vnitřek
+      ctx.fillStyle = '#2a1f15';
+      ctx.fillRect(x + 4, y + h * 0.36, w - 8, 12);
+    }
+
+    // Zlaté okování (silnější než u TEĎ A POTOM)
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(x, y + h * 0.35 - 2, w, 5);
+    ctx.fillRect(x + 3, y + h * 0.7, w - 6, 4);
+    // Zlaté hřebíky
+    ctx.fillStyle = '#FFE57E';
+    [0.15, 0.5, 0.85].forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(x + w * p, y + h * 0.35 - 1, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.restore();
+
+    // Etiketa "NAVŽDY" — zlatým fontem
+    ctx.fillStyle = locked ? '#FFD700' : 'rgba(245,166,35,0.95)';
+    ctx.font = 'bold 11px Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('NAVŽDY', x + w/2, y + h + 14);
+    ctx.fillStyle = locked ? '#FFD700' : 'rgba(245,166,35,0.7)';
+    ctx.font = 'bold 12px Cinzel, serif';
+    ctx.fillText(foreverCount + ' / 1', x + w/2, y + h + 28);
+  }
+
+  function drawHud() {
+    // Pozadí pro lepší čitelnost na obrázku karavany
+    ctx.fillStyle = 'rgba(15,10,7,0.65)';
+    ctx.fillRect(0, 0, W, 50);
+
+    // Dvě paralelní disciplíny
+    ctx.font = 'bold 13px Cinzel, serif';
+    ctx.textAlign = 'center';
+
+    // Levá strana: Desátek (NAVŽDY)
+    ctx.fillStyle = foreverCount === 1 ? '#FFD700' : 'rgba(245,166,35,0.85)';
+    ctx.fillText('🏺 Desátek: ' + foreverCount + '/1', W * 0.27, 22);
+
+    // Pravá strana: Hospodář (TEĎ)
+    ctx.fillStyle = nowCount === 9 ? '#FFD700' : 'rgba(220,200,160,0.85)';
+    ctx.fillText('📦 Hospodář: ' + nowCount + '/9', W * 0.73, 22);
+
+    // Status pod tím
+    ctx.font = '10px Cinzel, serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.textAlign = 'center';
+    var processed = nowCount + foreverCount + droppedCount;
+    ctx.fillText('Mincí: ' + processed + ' / ' + TOTAL_COINS, W/2, 42);
+  }
+
+  // ════════ HLAVNÍ SMYČKA ════════
+  function loop(t) {
+    if (!active) return;
+    var dt = t - lastFrame;
+    lastFrame = t;
+
+    drawBackground();
+
+    if (phase === 'playing' || phase === 'catching') {
+      // Update pozic
+      var trackY = H * TRACK_Y_RATIO;
+      coins.forEach(function(c){
+        if (c.caught || c.dropped) return;
+        if (c.dragging) return; // dragging nejde dál sám
+        c.x += c.vx * dt;
+        c.rot += c.vrot * dt;
+        // Jemné vlnění nahoru-dolů (zdání pohybu, ne mrtvý vodorovný)
+        c.bobPhase += dt * 0.003;
+        c.y = trackY + Math.sin(c.bobPhase) * 8;
+        // Mimo obrazovku doleva → propasla se
+        if (c.x < -COIN_RADIUS * 1.5) {
+          c.dropped = true;
+          droppedCount++;
+        }
+      });
+
+      drawCoins();
+      drawNowChest();
+      drawForeverChest();
+      drawHud();
+
+      // Konec hry?
+      var processed = nowCount + foreverCount + droppedCount;
+      if (spawnedCount >= TOTAL_COINS && processed >= TOTAL_COINS) {
+        finishPhase1();
+      }
+    }
+    else if (phase === 'animation') {
+      drawAnimationPhase(t - animationStartTime);
+    }
+
+    // Update glow & lock animation
+    if (nowChestGlow > 0) nowChestGlow -= dt * 0.05;
+    if (nowChestGlow < 0) nowChestGlow = 0;
+    if (foreverChestGlow > 0) foreverChestGlow -= dt * 0.05;
+    if (foreverChestGlow < 0) foreverChestGlow = 0;
+    if (foreverLockAnim < 1 && foreverCount >= 1) {
+      foreverLockAnim += dt * 0.003;
+      if (foreverLockAnim > 1) foreverLockAnim = 1;
+    }
+
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function drawCoins() {
+    // Nejprve nedragované, pak dragovaná navrch
+    coins.forEach(function(c){
+      if (c.caught || c.dropped) return;
+      if (c.dragging) return;
+      drawCoin(c);
+    });
+    coins.forEach(function(c){
+      if (c.dragging) drawCoin(c);
+    });
+  }
+
+  // ════════ FÁZE 1 — KONEC, VYHODNOCENÍ ════════
+  function finishPhase1() {
+    if (phase !== 'playing' && phase !== 'catching') return;
+    phase = 'animation';
+    animationStartTime = performance.now();
+  }
+
+  // ════════ FÁZE 2 — ANIMACE STROMU ════════
+  function drawAnimationPhase(elapsed) {
+    var totalDuration = 10000; // 10s
+
+    // Zachovej truhly viditelné
+    drawNowChest();
+    drawForeverChest();
+
+    if (foreverCount === 0) {
+      // BEZ DESÁTKU — žádný strom, jen suchá zem + zpráva
+      drawDryGround();
+
+      ctx.fillStyle = 'rgba(180,80,40,0.95)';
+      ctx.font = 'bold 16px Cinzel, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Bez desátku se strom hojnosti neurodí.', W/2, 60);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '13px Cinzel, serif';
+      ctx.fillText('Příště dej jednu minci do NAVŽDY.', W/2, 84);
+
+      // Po krátké chvíli rovnou výsledek
+      if (elapsed > 4000 && !endShown) showEnd();
+      return;
+    }
+
+    // Strom roste z desátku
+    var t = Math.min(elapsed / totalDuration, 1);
+    drawTree(t);
+
+    // Po skončení animace ukáž výsledek
+    if (t >= 1 && !endShown) {
+      showEnd();
+    }
+  }
+
+  function drawDryGround() {
+    // Suchá popraskaná zem pod truhlou NAVŽDY
+    var cx = foreverChestX + foreverChestW/2;
+    var groundY = foreverChestY + foreverChestH + 40;
+    ctx.fillStyle = 'rgba(120,80,40,0.5)';
+    ctx.fillRect(cx - 60, groundY, 120, 6);
+    // Praskliny
+    ctx.strokeStyle = 'rgba(60,40,20,0.6)';
+    ctx.lineWidth = 1;
+    [-30, -10, 15, 35].forEach(function(off){
+      ctx.beginPath();
+      ctx.moveTo(cx + off, groundY + 3);
+      ctx.lineTo(cx + off + (Math.random()-0.5)*10, groundY + 14);
+      ctx.stroke();
+    });
+  }
+
+  function drawTree(t) {
+    // t: 0..1, 0 = semínko, 1 = strom s plody
+    // Strom roste nad truhlou NAVŽDY
+    var cx = foreverChestX + foreverChestW/2;
+    var groundY = foreverChestY - 5;
+
+    // Stem
+    var stemHeight = 60 + 70 * t;
+    var stemWidth = 3 + 7 * t;
+    ctx.fillStyle = '#4A2E15';
+    ctx.fillRect(cx - stemWidth/2, groundY - stemHeight, stemWidth, stemHeight);
+
+    // Větve & koruna
+    if (t > 0.3) {
+      var crownT = (t - 0.3) / 0.7; // 0..1
+      var crownR = 8 + crownT * 50;
+      var crownY = groundY - stemHeight - crownR * 0.3;
+      // Listy
+      ctx.fillStyle = '#2D5016';
+      ctx.beginPath();
+      ctx.arc(cx, crownY, crownR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#3D6B1F';
+      ctx.beginPath();
+      ctx.arc(cx - crownR*0.4, crownY - crownR*0.2, crownR*0.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + crownR*0.4, crownY - crownR*0.2, crownR*0.7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Plody (zlaté tečky) — od t > 0.7
+      if (t > 0.7) {
+        var fruitT = (t - 0.7) / 0.3;
+        var fruitCount = Math.floor(8 * fruitT);
+        for (var i = 0; i < fruitCount; i++) {
+          var angle = (i / 8) * Math.PI * 2 + i;
+          var fr = crownR * 0.65;
+          var fx = cx + Math.cos(angle) * fr;
+          var fy = crownY + Math.sin(angle) * fr * 0.7;
+          ctx.fillStyle = '#FFD700';
+          ctx.beginPath();
+          ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#8B6000';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Skóre nadpis
+    ctx.fillStyle = 'rgba(245,166,35,0.95)';
+    ctx.font = 'bold 16px Cinzel, serif';
+    ctx.textAlign = 'center';
+    if (t < 0.4) {
+      ctx.fillText('Z tvého desátku roste poklad...', W/2, 60);
+    } else if (t < 0.85) {
+      ctx.fillText('Strom hojnosti se rozrůstá...', W/2, 60);
+    } else {
+      ctx.fillText('A nese plody!', W/2, 60);
+    }
+  }
+
+  // ════════ KONEC HRY ════════
+  function showEnd() {
+    if (endShown) return;
+    endShown = true;
+    phase = 'end';
+
+    // ─── TWO-TRACK SKÓROVÁNÍ ───
+    // Disciplína 1: Desátek (NAVŽDY) — 0 nebo 15
+    var titheScore = (foreverCount === 1) ? 15 : 0;
+    // Disciplína 2: Hospodář (TEĎ) — 1 ✨ za každou minci
+    // Bonus +6 za 9/9 SE PŘIČÍTÁ JEN POKUD je desátek splněný
+    // (jinak by "0 + 9 = 15 ✨" bylo stejně jako "1 + 0 = 15 ✨", což je
+    //  pedagogická past — pak by dítě nepocítilo, že chybějící desátek je problém)
+    var stewardScore = nowCount; // 0..9
+    if (nowCount === 9 && titheScore === 15) stewardScore += 6; // bonus jen při kompletním úspěchu
+
+    finalScore = titheScore + stewardScore; // max 30 (15+15), bez desátku max 9
+
+    // Volej generický finisher (zaznamenat statistiky a Moudrost)
+    var result = null;
+    try {
+      result = finishMinigame(0, finalScore);
+    } catch(e) {
+      console.error('finishMinigame chyba:', e);
+      result = { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+    }
+
+    // Vibrace dle výsledku
+    try {
+      if (navigator.vibrate) {
+        if (finalScore === 30) navigator.vibrate([20, 40, 20, 40, 20]);
+        else if (finalScore >= 19) navigator.vibrate([15, 60, 15]);
+        else if (finalScore >= 9) navigator.vibrate(20);
+        else navigator.vibrate(10);
+      }
+    } catch(e){}
+
+    // ─── REAKCE PODLE VÝSLEDKU ───
+    var titleText, subText, iconText;
+
+    if (titheScore === 15 && stewardScore === 15) {
+      // 30/30: Mistrovský!
+      iconText = '⭐';
+      titleText = 'Mistrovský!';
+      subText = 'Desátek odložen, devět rozdáno. Tak hospodaří moudří.';
+    } else if (titheScore === 15 && nowCount >= 5) {
+      // 20-29: Skvělý
+      iconText = '✨';
+      titleText = 'Skvělý!';
+      subText = 'Desátek máš v truhle. Pár mincí ti uniklo, ale to nic.';
+    } else if (titheScore === 15) {
+      // 15-19: Polovičatý — jen desátek
+      iconText = '🌱';
+      titleText = 'Polovičatý';
+      subText = 'Desátek máš — to je půlka cesty. Příště zachyť i ostatní mince do TEĎ A POTOM.';
+    } else if (titheScore === 0 && nowCount === 9) {
+      // 9: Bez desátku! (varování)
+      iconText = '⚠️';
+      titleText = 'Bez desátku!';
+      subText = 'Devět mincí jsi rozdal, ale do NAVŽDY nepatřila ani jedna. To je past, do které kluci v příběhu málem padli.';
+    } else {
+      // 0-8: Více pozornosti
+      iconText = '🌾';
+      titleText = 'Více pozornosti';
+      subText = 'Mince ti utíkaly. Příště si je zkus chytit a poslat na správné místo.';
+    }
+
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames.plays[0] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost dostal — zítra zase!</div>';
+    }
+
+    clearOverlay();
+    overlayDiv.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + finalScore + ' / 30 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">🏺 Desátek<br><strong>' + titheScore + ' / 15</strong></div>' +
+          '<div class="mg0-track">📦 Hospodář<br><strong>' + stewardScore + ' / 15</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg0-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg0-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg0-replay');
+    var bb = document.getElementById('mg0-back');
+    if (rb) rb.addEventListener('click', function(){
+      endShown = false;
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkádova reakce JEN při 30/30
+    if (finalScore === 30) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = result.isNewBest && state.minigames.plays[0] === 1
+        ? '🎉 Krásně, ' + name + '! Jeden desátek do truhly NAVŽDY a devět do TEĎ A POTOM. Přesně tak hospodaří moudří. Tak roste pravé bohatství: z malých semen, neustálou pílí.'
+        : '✨ Pořád to ovládáš, mistře ' + name + '! Desátek i hospodaření máš v jednom prstu.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [{ label: 'Děkuji, Arkáde', response: 'Vrať se kdykoliv. Hra na tebe počká.' }]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ EVENT HANDLERS — POINTER (touch + mouse) ════════
+  function getPointerPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX, clientY;
+    if (e.touches && e.touches[0]) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches[0]) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    return {
+      x: (clientX - rect.left) * (W / rect.width),
+      y: (clientY - rect.top)  * (H / rect.height)
+    };
+  }
+
+  function findCoinAt(x, y) {
+    // Hledej od posledního (top-most)
+    for (var i = coins.length - 1; i >= 0; i--) {
+      var c = coins[i];
+      if (c.caught || c.dropped) continue;
+      var dx = x - c.x, dy = y - c.y;
+      if (dx*dx + dy*dy <= COIN_RADIUS * COIN_RADIUS * 1.4) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  function onPointerDown(e) {
+    if (phase !== 'playing' && phase !== 'catching') return;
+    var p = getPointerPos(e);
+    var coin = findCoinAt(p.x, p.y);
+    if (coin) {
+      coin.dragging = true;
+      draggedCoin = coin;
+      dragOffsetX = p.x - coin.x;
+      dragOffsetY = p.y - coin.y;
+      try { if (navigator.vibrate) navigator.vibrate(10); } catch(_){}
+      e.preventDefault();
+    }
+  }
+
+  function onPointerMove(e) {
+    if (!draggedCoin) return;
+    var p = getPointerPos(e);
+    draggedCoin.x = p.x - dragOffsetX;
+    draggedCoin.y = p.y - dragOffsetY;
+    e.preventDefault();
+  }
+
+  function onPointerUp(e) {
+    if (!draggedCoin) return;
+    var p = getPointerPos(e);
+
+    // Hit-test: která truhla?
+    var insideNow =
+      p.x > nowChestX && p.x < nowChestX + nowChestW &&
+      p.y > nowChestY - 20 && p.y < nowChestY + nowChestH;
+    var insideForever =
+      p.x > foreverChestX && p.x < foreverChestX + foreverChestW &&
+      p.y > foreverChestY - 20 && p.y < foreverChestY + foreverChestH;
+
+    if (insideForever && foreverCount >= 1) {
+      // NAVŽDY je plná — odraz: vibrace + mince zůstane v ruce dole
+      try { if (navigator.vibrate) navigator.vibrate(15); } catch(_){}
+      // Mince se vrátí na stranu (jako "ne ne") — pošli ji vlevo aby spadla mimo
+      draggedCoin.dragging = false;
+      draggedCoin.dropped = true;
+      droppedCount++;
+      draggedCoin = null;
+      return;
+    }
+
+    if (insideForever) {
+      // CHYCENO do NAVŽDY (max 1)
+      draggedCoin.caught = true;
+      foreverCount++;
+      foreverChestGlow = 30;
+      try { if (navigator.vibrate) navigator.vibrate(40); } catch(_){}
+    } else if (insideNow) {
+      // CHYCENO do TEĎ A POTOM
+      draggedCoin.caught = true;
+      nowCount++;
+      nowChestGlow = 25;
+      try { if (navigator.vibrate) navigator.vibrate(25); } catch(_){}
+    } else {
+      // Pustit mimo truhly — mince se ztratí (počítá se jako "propasla")
+      draggedCoin.dragging = false;
+      draggedCoin.dropped = true;
+      droppedCount++;
+    }
+    draggedCoin = null;
+  }
+
+  // ════════ SETUP ════════
+  function setup() {
+    // Vytvoř canvas a nacenter ho
+    canvas = document.createElement('canvas');
+    canvas.className = 'mg0-canvas';
+    wrap.insertBefore(canvas, overlayDiv);
+
+    function resize() {
+      var rect = wrap.getBoundingClientRect();
+      W = Math.max(280, Math.floor(rect.width));
+      H = Math.max(400, Math.floor(rect.height));
+      dpr = window.devicePixelRatio || 1;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      // ─── Layout truhel (TEĎ A POTOM velká vlevo, NAVŽDY malá vpravo) ───
+      var bottomMargin = 50;        // odsazení od spodního okraje (na etikety)
+      var sideMargin = 12;
+      var gap = 14;                  // mezera mezi truhlami
+
+      // TEĎ A POTOM: ~62% šířky, vyšší
+      nowChestW = Math.floor((W - sideMargin*2 - gap) * 0.62);
+      nowChestH = 100;
+      nowChestX = sideMargin;
+      nowChestY = H - nowChestH - bottomMargin;
+
+      // NAVŽDY: zbytek (~36%), o něco menší (vzácnější)
+      foreverChestW = (W - sideMargin*2 - gap) - nowChestW;
+      foreverChestH = 80;
+      foreverChestX = nowChestX + nowChestW + gap;
+      // Vystředit svisle vůči TEĎ A POTOM (NAVŽDY je menší, tak je o něco výš/níž)
+      foreverChestY = H - foreverChestH - bottomMargin;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Eventy — touch + mouse pomocí pointer events kdy možno
+    canvas.addEventListener('mousedown', onPointerDown);
+    canvas.addEventListener('mousemove', onPointerMove);
+    canvas.addEventListener('mouseup', onPointerUp);
+    canvas.addEventListener('mouseleave', onPointerUp);
+    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+    canvas.addEventListener('touchend', onPointerUp);
+    canvas.addEventListener('touchcancel', onPointerUp);
+
+    // Cleanup pro showScreen hook
+    window._minigame_cleanup = function() {
+      active = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', resize);
+      try { if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas); } catch(_){}
+      try { if (overlayDiv && overlayDiv.parentNode) overlayDiv.parentNode.removeChild(overlayDiv); } catch(_){}
+    };
+
+    // Start s introem
+    showIntro();
+  }
+
+  // Drobné zpoždění aby se DOM stabilizoval po showScreen()
+  setTimeout(setup, 50);
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 0
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
