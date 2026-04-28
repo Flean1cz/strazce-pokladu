@@ -621,34 +621,29 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 
 /* Theming vrstva – aplikuje se na #screen-nadvorí jako data atributy */
 /* Pozadí: data-bg (night / dawn / day / golden / babylon)
-   "night" má obrázek (bg-night.jpg), ostatní zatím gradienty.
-   Obrázky se nastavují přes pseudo-element ::before, aby šly snadno škálovat
-   a překrývat decorací bez konfliktu s ::after (dlažba). */
-#screen-nadvorí{position:relative;}
-#screen-nadvorí[data-bg]::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  background-size:cover;
-  background-position:center bottom;
-  background-repeat:no-repeat;
-  pointer-events:none;
+   Obrázky jsou nasazené přímo jako background na #screen-nadvorí,
+   aby nenarušovaly scrollování. Klíčový atribut je background-attachment:
+   "scroll" (nikoliv "fixed") aby fungovalo na mobilu. */
+#screen-nadvorí[data-bg]{
+  background-size:cover !important;
+  background-position:center bottom !important;
+  background-repeat:no-repeat !important;
+  background-attachment:scroll !important;
 }
-#screen-nadvorí[data-bg="night"]{background:#050208;}
-#screen-nadvorí[data-bg="night"]::before{
+#screen-nadvorí[data-bg="night"]{
+  background-color:#050208;
   background-image:url('bg-night.jpg');
 }
-#screen-nadvorí[data-bg="dawn"]{background:#3b1a3d;}
-#screen-nadvorí[data-bg="dawn"]::before{
+#screen-nadvorí[data-bg="dawn"]{
+  background-color:#3b1a3d;
   background-image:url('bg-dawn.jpg');
 }
-#screen-nadvorí[data-bg="day"]{background:#2a4680;}
-#screen-nadvorí[data-bg="day"]::before{
+#screen-nadvorí[data-bg="day"]{
+  background-color:#2a4680;
   background-image:url('bg-day.jpg');
 }
-#screen-nadvorí[data-bg="golden"]{background:#5a3010;}
-#screen-nadvorí[data-bg="golden"]::before{
+#screen-nadvorí[data-bg="golden"]{
+  background-color:#5a3010;
   background-image:url('bg-golden.jpg');
 }
 #screen-nadvorí[data-bg="babylon"]{
@@ -1143,7 +1138,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 }
 
 /* ═══ NÁDVOŘÍ ═══ */
-#screen-nadvorí{background:linear-gradient(180deg,#050208 0%,#0d0507 25%,#1a0e04 55%,#2d1508 100%);}
+/* Pozadí je definováno výše přes data-bg atribut. */
 .nadvorí-hero{text-align:center;padding:50px 20px 28px;position:relative;z-index:2;}
 .nadvorí-badge{
   display:inline-block;background:linear-gradient(135deg,var(--gold),var(--dgold));
@@ -6280,7 +6275,17 @@ function renderCustomizeOptions(group) {
     card.className = 'cu-opt' + (unlocked ? '' : ' locked') + (active ? ' active' : '');
     card.setAttribute('data-id', opt.id);
 
-    const preview = '<div class="cu-opt-preview" style="background:' + opt.preview + ';"></div>';
+    // Preview může být buď gradient (CSS funkce) nebo url() s parametry.
+    // Inline style vyžaduje správné escapování, použijeme escapeHtml-like přístup.
+    var previewStyle;
+    if (opt.preview.indexOf('url(') !== -1) {
+      // Image preview - použij background shorthand
+      previewStyle = 'background:' + opt.preview.replace(/"/g, "'");
+    } else {
+      // Gradient preview
+      previewStyle = 'background:' + opt.preview;
+    }
+    const preview = '<div class="cu-opt-preview" style="' + previewStyle + ';"></div>';
     const lock = unlocked ? '' : '<div class="cu-opt-lock">🔒</div>';
     const check = active ? '<div class="cu-opt-check">✓</div>' : '';
     const hint = unlocked ? 'Získáno ✓' : opt.unlock;
