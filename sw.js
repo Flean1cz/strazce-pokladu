@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.16.6'; // ← KROK 14.10: Fix Upravit tlačítka — odstranění konfliktního CSS pravidla
+const VERSION = 'v2.16.7'; // ← KROK 14.11: Fixed parallax pozadí + scroll obsahu
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',

@@ -621,32 +621,43 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 
 /* Theming vrstva – aplikuje se na #screen-nadvorí jako data atributy */
 /* Pozadí: data-bg (night / dawn / day / golden / babylon)
-   Obrázky jsou nasazené přímo jako background na #screen-nadvorí,
-   aby nenarušovaly scrollování. Klíčový atribut je background-attachment:
-   "scroll" (nikoliv "fixed") aby fungovalo na mobilu. */
-#screen-nadvorí[data-bg]{
-  background-size:cover !important;
-  background-position:center bottom !important;
-  background-repeat:no-repeat !important;
-  background-attachment:scroll !important;
+   Pozadí je vykreslené v separátním FIXED divu (#nadvori-bg-layer),
+   který se nehýbe při scrollování — obsah se scrolluje nad ním (parallax). */
+#nadvori-bg-layer{
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  z-index:0;
+  pointer-events:none;
+  background-size:cover;
+  background-position:center bottom;
+  background-repeat:no-repeat;
+  background-color:#050208;
+  /* Plynulý přechod při změně pozadí */
+  transition:background-image .35s ease-in-out;
 }
-#screen-nadvorí[data-bg="night"]{
+/* Obsah nad pozadím */
+#screen-nadvorí > *:not(#nadvori-bg-layer) {
+  position:relative;
+  z-index:1;
+}
+/* Aplikace obrázku podle data-bg atributu na #screen-nadvorí */
+#screen-nadvorí[data-bg="night"]  #nadvori-bg-layer{
   background-color:#050208;
   background-image:url('bg-night.jpg');
 }
-#screen-nadvorí[data-bg="dawn"]{
+#screen-nadvorí[data-bg="dawn"]   #nadvori-bg-layer{
   background-color:#3b1a3d;
   background-image:url('bg-dawn.jpg');
 }
-#screen-nadvorí[data-bg="day"]{
+#screen-nadvorí[data-bg="day"]    #nadvori-bg-layer{
   background-color:#2a4680;
   background-image:url('bg-day.jpg');
 }
-#screen-nadvorí[data-bg="golden"]{
+#screen-nadvorí[data-bg="golden"] #nadvori-bg-layer{
   background-color:#5a3010;
   background-image:url('bg-golden.jpg');
 }
-#screen-nadvorí[data-bg="babylon"]{
+#screen-nadvorí[data-bg="babylon"] #nadvori-bg-layer{
   background:
     radial-gradient(circle at 30% 20%, rgba(255,215,0,.18) 0%, transparent 40%),
     radial-gradient(circle at 70% 80%, rgba(206,147,216,.15) 0%, transparent 40%),
@@ -2325,6 +2336,8 @@ svg.jar{width:52px;height:72px;}
 
 <!-- ══════════════ NÁDVOŘÍ ══════════════ -->
 <div id="screen-nadvorí" class="screen hidden">
+<!-- Fixed pozadí (parallax) — neexistuje při scrollování -->
+<div id="nadvori-bg-layer" aria-hidden="true"></div>
 <div id="drive-bar">
   <div class="drive-dot offline" id="drive-dot"></div>
   <span id="drive-status-text">Lokální úložiště</span>
