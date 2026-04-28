@@ -1150,23 +1150,76 @@ body{font-family:'Nunito',sans-serif;background:var(--bg1);min-height:100dvh;col
 
 /* ═══ NÁDVOŘÍ ═══ */
 /* Pozadí je definováno výše přes data-bg atribut. */
-.nadvorí-hero{text-align:center;padding:50px 20px 28px;position:relative;z-index:2;}
+/* ═══════════════════════════════════════════════════════
+   ČITELNOST TEXTŮ NA PESTRÉM POZADÍ
+   Stíny pro hero sekci a další texty přímo na pozadí.
+   Všechny texty na obrázkových pozadích dostanou silný stín
+   pro dobrou čitelnost přes světlé i tmavé části.
+═══════════════════════════════════════════════════════ */
+.nadvorí-hero{
+  text-align:center;
+  padding:50px 20px 28px;
+  position:relative;
+  z-index:2;
+}
+/* Subtilní zatmavený "halo" za hero sekcí pro maximální čitelnost */
+.nadvorí-hero::before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  width:120%;
+  height:110%;
+  background:radial-gradient(ellipse at center,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.35) 40%,
+    rgba(0,0,0,0.15) 70%,
+    transparent 100%);
+  z-index:-1;
+  pointer-events:none;
+}
 .nadvorí-badge{
   display:inline-block;background:linear-gradient(135deg,var(--gold),var(--dgold));
   color:var(--dbrown);font-family:'Cinzel',serif;font-weight:700;
   font-size:9px;letter-spacing:3px;padding:4px 12px;border-radius:20px;margin-bottom:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.5);
 }
 .nadvorí-title{
   font-family:'Cinzel Decorative',cursive;font-size:clamp(20px,6vw,30px);line-height:1.2;
   background:linear-gradient(135deg,#FFD700,#F5A623,#FFD700);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 2px 14px rgba(245,166,35,.6));margin-bottom:6px;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,0.85)) drop-shadow(0 2px 14px rgba(245,166,35,.4));
+  margin-bottom:6px;
 }
 .user-greeting{
   font-family:'Cinzel',serif;font-size:14px;color:var(--gold);
   margin-top:6px;letter-spacing:1px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.6);
 }
-.user-motto{font-size:11px;color:var(--sand);opacity:.6;margin-top:4px;}
+.user-motto{
+  font-size:11px;color:#e8d5a8;opacity:.95;margin-top:4px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.7);
+}
+/* Hodnostní kartička — přidat stín pro čitelnost */
+.rank-badge{
+  text-shadow:0 2px 8px rgba(0,0,0,0.9);
+  box-shadow:0 4px 16px rgba(0,0,0,0.4);
+}
+.rank-name{
+  text-shadow:0 1px 4px rgba(0,0,0,0.85);
+}
+/* Progress bar text — pod hero sekcí, ale stejně potřebuje stín */
+.rank-progress-text{
+  text-shadow:0 1px 4px rgba(0,0,0,0.9);
+}
+.rank-progress.maxed .rank-progress-text{
+  text-shadow:0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(245,166,35,.4);
+}
+/* Tree label — popis stromu na nádvoří */
+.tree-label{
+  text-shadow:0 1px 6px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.6);
+}
 .pillars{padding:0 14px;display:flex;flex-direction:column;gap:11px;margin-bottom:20px;position:relative;z-index:2;}
 .pillar-card{
   background:linear-gradient(135deg,rgba(139,94,60,.38),rgba(42,26,8,.72));

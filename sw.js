@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.16.9'; // ← KROK 14.13: Robustní binding Upravit + diagnostika
+const VERSION = 'v2.16.10'; // ← KROK 14.14: Stíny textů na nádvoří pro čitelnost
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
