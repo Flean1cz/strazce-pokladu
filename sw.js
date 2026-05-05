@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.16.11'; // ← KROK 14.15: Vklad mincí bez zámku (PIN jen pro admin obrazovku)
+const VERSION = 'v2.17.0'; // ← KROK 14.16: Hra 0 — 3 úrovně, sčítání skóre 0-90
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',

@@ -3310,7 +3310,7 @@ const STORIES = [
 // max_wisdom: maximální Moudrost dosažitelná za perfektní výkon
 // ═══════════════════════════════════════════════════════
 var MINIGAMES = [
-  { id: 0, title: "Desátek",            icon: "🪙", short: "Chytni jednu z deseti",     max_wisdom: 30, implemented: true  },
+  { id: 0, title: "Desátek",            icon: "🪙", short: "3 kola — chytni jednu z deseti", max_wisdom: 90, implemented: true  },
   { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty",             max_wisdom: 30, implemented: false },
   { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "Sleduj kouzlo úročení",     max_wisdom: 25, implemented: false },
   { id: 3, title: "Matějova nabídka",   icon: "🎭", short: "Pravda nebo podvod?",        max_wisdom: 30, implemented: false },
@@ -8213,11 +8213,20 @@ window.renderMinigame_0 = function(idx) {
   var TOTAL_COINS = 10;
   var COIN_RADIUS = 30;    // poloměr v px
   var TRACK_Y_RATIO = 0.32; // pozice dráhy (0 = top, 1 = bottom) — ⅓ od horního okraje
-  // Doba, za kterou mince přejede zprava doleva (sec) — jemnější zrychlování
-  // (10 mincí × 10 rozhodnutí = nesmí být moc rychlé)
-  var CROSS_DURATIONS = [5.0, 5.0, 5.0, 4.5, 4.5, 4.5, 4.0, 4.0, 4.0, 3.5];
-  // Mezera mezi spawn-em mincí (ms) — předvídatelná, dítě může plánovat
-  var SPAWN_DELAYS    = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 0];
+
+  // ─── 3 ÚROVNĚ — rychlost roste ───
+  // Level 1 (pomalu): cca 5.5s přelet, 1.1s mezera = klidné, dítě stíhá uvážit
+  // Level 2 (středně): cca 4.0s přelet, 0.8s mezera
+  // Level 3 (rychle): cca 2.5s přelet, 0.55s mezera = napínavé
+  var LEVEL_CONFIGS = [
+    { CROSS_DURATIONS: [5.5,5.5,5.5,5.5,5.5,5.5,5.5,5.5,5.5,5.5], SPAWN_DELAYS: [1100,1100,1100,1100,1100,1100,1100,1100,1100,0] },
+    { CROSS_DURATIONS: [4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0], SPAWN_DELAYS: [800,800,800,800,800,800,800,800,800,0] },
+    { CROSS_DURATIONS: [2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5], SPAWN_DELAYS: [550,550,550,550,550,550,550,550,550,0] }
+  ];
+  var TOTAL_LEVELS = 3;
+  // CROSS_DURATIONS a SPAWN_DELAYS se nastaví v startGame() podle currentLevel
+  var CROSS_DURATIONS = LEVEL_CONFIGS[0].CROSS_DURATIONS;
+  var SPAWN_DELAYS    = LEVEL_CONFIGS[0].SPAWN_DELAYS;
 
   // ════════ STATE ════════
   var canvas, ctx;
@@ -8245,6 +8254,11 @@ window.renderMinigame_0 = function(idx) {
   var finalScore = 0;
   var endShown = false;
 
+  // ─── SÉRIE 3 KOLA ───
+  var currentLevel = 1;          // 1, 2, 3
+  var levelScores = [0, 0, 0];   // skóre jednotlivých kol (0..30 každé)
+  var seriesScore = 0;           // součet 0..90
+
   // ════════ POMOCNÉ DOM PRVKY ════════
   var overlayDiv = document.createElement('div');
   overlayDiv.className = 'mg0-overlay';
@@ -8259,10 +8273,11 @@ window.renderMinigame_0 = function(idx) {
       '<div class="mg0-card">' +
         '<div class="mg0-card-icon">📜</div>' +
         '<div class="mg0-card-title">Pravidlo desátku</div>' +
-        '<div class="mg0-card-text">Kolem tebe projde <strong>10 zlatých mincí</strong>.<br><br>' +
+        '<div class="mg0-card-text">Tahle hra má <strong>3 kola</strong>. V každém projde kolem tebe <strong>10 zlatých mincí</strong>.<br><br>' +
           '🏺 Jednu polož do <strong>NAVŽDY</strong> — to je tvůj desátek.<br>' +
-          '📦 Devět polož do <strong>TEĎ A POTOM</strong> — to si můžeš užít.</div>' +
-        '<button class="mg0-btn mg0-btn-primary" id="mg0-start">▶ Začít</button>' +
+          '📦 Devět polož do <strong>TEĎ A POTOM</strong> — to si můžeš užít.<br><br>' +
+          '<em>Každé kolo je rychlejší než to předchozí. Skóre se sčítá.</em></div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg0-start">▶ Začít kolo 1</button>' +
       '</div>';
     var btn = document.getElementById('mg0-start');
     if (btn) btn.addEventListener('click', startGame, { once: true });
@@ -8271,16 +8286,28 @@ window.renderMinigame_0 = function(idx) {
   function startGame() {
     phase = 'playing';
     clearOverlay();
+    // Aplikuj konfiguraci aktuálního kola
+    var cfg = LEVEL_CONFIGS[currentLevel - 1];
+    CROSS_DURATIONS = cfg.CROSS_DURATIONS;
+    SPAWN_DELAYS    = cfg.SPAWN_DELAYS;
+    // Reset stavu pouze pro toto kolo (NE série)
     spawnedCount = 0;
     nowCount = 0;
     foreverCount = 0;
     droppedCount = 0;
     foreverLockAnim = 0;
     coins = [];
+    endShown = false;
     startTime = performance.now();
     lastFrame = startTime;
     schedulNextSpawn();
     rafId = requestAnimationFrame(loop);
+  }
+
+  function resetSeries() {
+    currentLevel = 1;
+    levelScores = [0, 0, 0];
+    seriesScore = 0;
   }
 
   // ════════ SPAWN MINCÍ ════════
@@ -8579,9 +8606,15 @@ window.renderMinigame_0 = function(idx) {
   }
 
   function drawHud() {
-    // Pozadí pro lepší čitelnost na obrázku karavany
+    // Pozadí pro lepší čitelnost na obrázku karavany (vyšší kvůli novému řádku)
     ctx.fillStyle = 'rgba(15,10,7,0.65)';
-    ctx.fillRect(0, 0, W, 50);
+    ctx.fillRect(0, 0, W, 68);
+
+    // Horní řádek: Kolo X/3 · Σ XX ✨
+    ctx.font = 'bold 12px Cinzel, serif';
+    ctx.fillStyle = '#FFD700';
+    ctx.textAlign = 'center';
+    ctx.fillText('Kolo ' + currentLevel + '/' + TOTAL_LEVELS + '   ·   Σ ' + seriesScore + ' ✨', W/2, 16);
 
     // Dvě paralelní disciplíny
     ctx.font = 'bold 13px Cinzel, serif';
@@ -8589,18 +8622,18 @@ window.renderMinigame_0 = function(idx) {
 
     // Levá strana: Desátek (NAVŽDY)
     ctx.fillStyle = foreverCount === 1 ? '#FFD700' : 'rgba(245,166,35,0.85)';
-    ctx.fillText('🏺 Desátek: ' + foreverCount + '/1', W * 0.27, 22);
+    ctx.fillText('🏺 Desátek: ' + foreverCount + '/1', W * 0.27, 38);
 
     // Pravá strana: Hospodář (TEĎ)
     ctx.fillStyle = nowCount === 9 ? '#FFD700' : 'rgba(220,200,160,0.85)';
-    ctx.fillText('📦 Hospodář: ' + nowCount + '/9', W * 0.73, 22);
+    ctx.fillText('📦 Hospodář: ' + nowCount + '/9', W * 0.73, 38);
 
     // Status pod tím
     ctx.font = '10px Cinzel, serif';
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.textAlign = 'center';
     var processed = nowCount + foreverCount + droppedCount;
-    ctx.fillText('Mincí: ' + processed + ' / ' + TOTAL_COINS, W/2, 42);
+    ctx.fillText('Mincí: ' + processed + ' / ' + TOTAL_COINS, W/2, 58);
   }
 
   // ════════ HLAVNÍ SMYČKA ════════
@@ -8672,8 +8705,15 @@ window.renderMinigame_0 = function(idx) {
   // ════════ FÁZE 1 — KONEC, VYHODNOCENÍ ════════
   function finishPhase1() {
     if (phase !== 'playing' && phase !== 'catching') return;
-    phase = 'animation';
-    animationStartTime = performance.now();
+    if (currentLevel === TOTAL_LEVELS) {
+      // Po posledním kole spusť animaci stromu, pak showSeriesEnd
+      phase = 'animation';
+      animationStartTime = performance.now();
+    } else {
+      // Po kole 1 a 2 jdi rychle na mezikolový panel
+      phase = 'roundEnd';
+      setTimeout(showEnd, 600);
+    }
   }
 
   // ════════ FÁZE 2 — ANIMACE STROMU ════════
@@ -8791,71 +8831,110 @@ window.renderMinigame_0 = function(idx) {
     }
   }
 
-  // ════════ KONEC HRY ════════
+  // ════════ KONEC KOLA / SÉRIE ════════
+  // Router: spočítá skóre kola, uloží do levelScores a pošle dál.
   function showEnd() {
     if (endShown) return;
     endShown = true;
     phase = 'end';
 
-    // ─── TWO-TRACK SKÓROVÁNÍ ───
+    // ─── TWO-TRACK SKÓROVÁNÍ (per kolo) ───
     // Disciplína 1: Desátek (NAVŽDY) — 0 nebo 15
     var titheScore = (foreverCount === 1) ? 15 : 0;
     // Disciplína 2: Hospodář (TEĎ) — 1 ✨ za každou minci
     // Bonus +6 za 9/9 SE PŘIČÍTÁ JEN POKUD je desátek splněný
-    // (jinak by "0 + 9 = 15 ✨" bylo stejně jako "1 + 0 = 15 ✨", což je
-    //  pedagogická past — pak by dítě nepocítilo, že chybějící desátek je problém)
     var stewardScore = nowCount; // 0..9
     if (nowCount === 9 && titheScore === 15) stewardScore += 6; // bonus jen při kompletním úspěchu
 
-    finalScore = titheScore + stewardScore; // max 30 (15+15), bez desátku max 9
+    var roundScore = titheScore + stewardScore; // 0..30
+    levelScores[currentLevel - 1] = roundScore;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
 
-    // Volej generický finisher (zaznamenat statistiky a Moudrost)
+    if (currentLevel < TOTAL_LEVELS) {
+      showRoundEnd(roundScore, titheScore, stewardScore);
+    } else {
+      showSeriesEnd();
+    }
+  }
+
+  // Mezikolový panel: krátké shrnutí + tlačítko pokračovat na další kolo.
+  function showRoundEnd(roundScore, titheScore, stewardScore) {
+    try {
+      if (navigator.vibrate) {
+        if (roundScore === 30) navigator.vibrate([20, 40, 20]);
+        else if (roundScore >= 15) navigator.vibrate(20);
+        else navigator.vibrate(10);
+      }
+    } catch(e){}
+
+    var iconText = roundScore === 30 ? '⭐' : (roundScore >= 15 ? '✨' : '🌱');
+    var nextLevel = currentLevel + 1;
+    var nextLabel = nextLevel === 2 ? 'středně' : 'rychle';
+
+    clearOverlay();
+    overlayDiv.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">Kolo ' + currentLevel + ' hotovo!</div>' +
+        '<div class="mg0-score">+' + roundScore + ' / 30 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">🏺 Desátek<br><strong>' + titheScore + ' / 15</strong></div>' +
+          '<div class="mg0-track">📦 Hospodář<br><strong>' + stewardScore + ' / 15</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">Série zatím: <strong>' + seriesScore + ' / 90 ✨</strong></div>' +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg0-next">▶ Pokračovat na kolo ' + nextLevel + ' (' + nextLabel + ')</button>' +
+        '</div>' +
+      '</div>';
+
+    var nb = document.getElementById('mg0-next');
+    if (nb) nb.addEventListener('click', function(){
+      currentLevel++;
+      startGame();
+    }, { once: true });
+  }
+
+  // Závěr celé série — souhrn 3 kol + finishMinigame + Arkád.
+  function showSeriesEnd() {
+    finalScore = seriesScore; // pro zpětnou kompatibilitu UI
+
+    // Volej generický finisher JEN JEDNOU za celou sérii
     var result = null;
     try {
-      result = finishMinigame(0, finalScore);
+      result = finishMinigame(0, seriesScore);
     } catch(e) {
       console.error('finishMinigame chyba:', e);
       result = { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
     }
 
-    // Vibrace dle výsledku
+    // Vibrace dle série (0-90)
     try {
       if (navigator.vibrate) {
-        if (finalScore === 30) navigator.vibrate([20, 40, 20, 40, 20]);
-        else if (finalScore >= 19) navigator.vibrate([15, 60, 15]);
-        else if (finalScore >= 9) navigator.vibrate(20);
-        else navigator.vibrate(10);
+        if (seriesScore === 90) navigator.vibrate([20, 40, 20, 40, 20, 40, 20]);
+        else if (seriesScore >= 60) navigator.vibrate([15, 60, 15, 60, 15]);
+        else if (seriesScore >= 30) navigator.vibrate([15, 60, 15]);
+        else navigator.vibrate(20);
       }
     } catch(e){}
 
-    // ─── REAKCE PODLE VÝSLEDKU ───
+    // ─── REAKCE PODLE SÉRIOVÉHO SKÓRE (0..90) ───
     var titleText, subText, iconText;
-
-    if (titheScore === 15 && stewardScore === 15) {
-      // 30/30: Mistrovský!
+    if (seriesScore === 90) {
+      iconText = '🏆';
+      titleText = 'Mistr desátku!';
+      subText = 'Tři kola, třicet mincí na desátek, devadesát hvězd. Tak hospodaří moudří.';
+    } else if (seriesScore >= 60) {
       iconText = '⭐';
-      titleText = 'Mistrovský!';
-      subText = 'Desátek odložen, devět rozdáno. Tak hospodaří moudří.';
-    } else if (titheScore === 15 && nowCount >= 5) {
-      // 20-29: Skvělý
+      titleText = 'Skvělé!';
+      subText = 'Hospodaříš dobře. Přesnost roste s pílí — i v rychlejších kolech.';
+    } else if (seriesScore >= 30) {
       iconText = '✨';
-      titleText = 'Skvělý!';
-      subText = 'Desátek máš v truhle. Pár mincí ti uniklo, ale to nic.';
-    } else if (titheScore === 15) {
-      // 15-19: Polovičatý — jen desátek
-      iconText = '🌱';
-      titleText = 'Polovičatý';
-      subText = 'Desátek máš — to je půlka cesty. Příště zachyť i ostatní mince do TEĎ A POTOM.';
-    } else if (titheScore === 0 && nowCount === 9) {
-      // 9: Bez desátku! (varování)
-      iconText = '⚠️';
-      titleText = 'Bez desátku!';
-      subText = 'Devět mincí jsi rozdal, ale do NAVŽDY nepatřila ani jedna. To je past, do které kluci v příběhu málem padli.';
+      titleText = 'Dobrý začátek';
+      subText = 'Sérii jsi dokončil. Příště zkus chytat víc mincí, hlavně v rychlejších kolech.';
     } else {
-      // 0-8: Více pozornosti
-      iconText = '🌾';
+      iconText = '🌱';
       titleText = 'Více pozornosti';
-      subText = 'Mince ti utíkaly. Příště si je zkus chytit a poslat na správné místo.';
+      subText = 'Tři kola jsou dlouhá cesta. Příště zachyť víc mincí a nezapomeň na desátek.';
     }
 
     var wisdomLine = '';
@@ -8870,10 +8949,11 @@ window.renderMinigame_0 = function(idx) {
       '<div class="mg0-card mg0-card-end">' +
         '<div class="mg0-card-icon">' + iconText + '</div>' +
         '<div class="mg0-card-title">' + titleText + '</div>' +
-        '<div class="mg0-score">' + finalScore + ' / 30 ✨</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
         '<div class="mg0-twotrack">' +
-          '<div class="mg0-track">🏺 Desátek<br><strong>' + titheScore + ' / 15</strong></div>' +
-          '<div class="mg0-track">📦 Hospodář<br><strong>' + stewardScore + ' / 15</strong></div>' +
+          '<div class="mg0-track">Kolo 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
         '</div>' +
         '<div class="mg0-card-text">' + subText + '</div>' +
         wisdomLine +
@@ -8886,19 +8966,19 @@ window.renderMinigame_0 = function(idx) {
     var rb = document.getElementById('mg0-replay');
     var bb = document.getElementById('mg0-back');
     if (rb) rb.addEventListener('click', function(){
-      endShown = false;
+      resetSeries();
       showIntro();
     }, { once: true });
     if (bb) bb.addEventListener('click', function(){
       if (typeof showScreen === 'function') showScreen('tajemstvi');
     }, { once: true });
 
-    // Arkádova reakce JEN při 30/30
-    if (finalScore === 30) {
+    // Arkádova reakce JEN při 90/90 (mistrovství celé série)
+    if (seriesScore === 90) {
       var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
       var arkadText = result.isNewBest && state.minigames.plays[0] === 1
-        ? '🎉 Krásně, ' + name + '! Jeden desátek do truhly NAVŽDY a devět do TEĎ A POTOM. Přesně tak hospodaří moudří. Tak roste pravé bohatství: z malých semen, neustálou pílí.'
-        : '✨ Pořád to ovládáš, mistře ' + name + '! Desátek i hospodaření máš v jednom prstu.';
+        ? '🎉 Krásně, ' + name + '! Tři kola, tři desátky, devadesát hvězd. Přesně tak hospodaří moudří. Tak roste pravé bohatství: z malých semen, neustálou pílí.'
+        : '✨ Pořád to ovládáš, mistře ' + name + '! Desátek i hospodaření máš v jednom prstu — a to ve všech třech kolech.';
       setTimeout(function(){
         if (typeof openArkadModal === 'function') {
           openArkadModal(arkadText, [{ label: 'Děkuji, Arkáde', response: 'Vrať se kdykoliv. Hra na tebe počká.' }]);
