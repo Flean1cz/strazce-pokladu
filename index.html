@@ -2319,6 +2319,161 @@ svg.jar{width:52px;height:72px;}
   animation:confettiFall 1.1s ease-in forwards;
 }
 
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 1: POTŘEBA × PŘÁNÍ (UI styles)
+═══════════════════════════════════════════════════════ */
+
+/* Kontejner herního pole */
+.mg1-board{
+  max-width:380px;
+  width:100%;
+  margin:0 auto;
+  padding:1rem 0.75rem 2rem;
+  min-height:calc(100vh - 100px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1rem;
+}
+
+/* Ukazatel průběhu (karta 3/6, kolo 2/3) */
+.mg1-progress{
+  font-family:'Cinzel',serif;
+  font-size:0.8rem;
+  color:var(--sand);
+  opacity:0.6;
+  letter-spacing:0.06em;
+  text-align:center;
+}
+
+/* Karta s předmětem */
+.mg1-item-card{
+  width:100%;
+  background:linear-gradient(135deg, rgba(42,31,21,0.92), rgba(20,14,8,0.92));
+  border:2px solid rgba(245,166,35,0.4);
+  border-radius:14px;
+  padding:1.5rem 1.25rem 1.25rem;
+  text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,166,35,0.15);
+  animation:mg1CardIn 0.35s ease-out;
+}
+@keyframes mg1CardIn{
+  from { opacity:0; transform:translateY(16px) scale(0.95); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.mg1-item-icon{
+  font-size:3rem;
+  margin-bottom:0.4rem;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.mg1-item-label{
+  font-family:'Cinzel',serif;
+  font-size:1.15rem;
+  color:var(--lgold);
+  letter-spacing:0.04em;
+  line-height:1.35;
+}
+
+/* Dvě zóny — POTŘEBA / PŘÁNÍ */
+.mg1-zones{
+  display:flex;
+  gap:0.75rem;
+  width:100%;
+  margin-top:0.5rem;
+}
+.mg1-zone{
+  flex:1;
+  padding:1rem 0.5rem;
+  border-radius:10px;
+  text-align:center;
+  cursor:pointer;
+  font-family:'Cinzel',serif;
+  font-size:1rem;
+  font-weight:600;
+  letter-spacing:0.06em;
+  transition:transform 0.15s, box-shadow 0.15s, background 0.15s;
+  user-select:none;
+  -webkit-user-select:none;
+  border:2px solid transparent;
+}
+.mg1-zone:active{ transform:scale(0.96); }
+
+.mg1-zone-need{
+  background:linear-gradient(135deg, rgba(76,140,80,0.25), rgba(46,100,52,0.35));
+  color:#8fdc8f;
+  border-color:rgba(76,140,80,0.5);
+  box-shadow:0 4px 16px rgba(46,100,52,0.2);
+}
+.mg1-zone-need:active{
+  background:linear-gradient(135deg, rgba(76,140,80,0.45), rgba(46,100,52,0.55));
+}
+
+.mg1-zone-want{
+  background:linear-gradient(135deg, rgba(180,100,40,0.25), rgba(160,80,20,0.35));
+  color:#f0b060;
+  border-color:rgba(180,100,40,0.5);
+  box-shadow:0 4px 16px rgba(160,80,20,0.2);
+}
+.mg1-zone-want:active{
+  background:linear-gradient(135deg, rgba(180,100,40,0.45), rgba(160,80,20,0.55));
+}
+
+/* Emoji v tlačítkách zón */
+.mg1-zone-emoji{
+  display:block;
+  font-size:1.6rem;
+  margin-bottom:0.3rem;
+}
+
+/* Feedback panel (po odpovědi) */
+.mg1-feedback{
+  width:100%;
+  padding:1rem 1.25rem;
+  border-radius:10px;
+  text-align:center;
+  animation:mg1FeedIn 0.3s ease-out;
+}
+@keyframes mg1FeedIn{
+  from { opacity:0; transform:scale(0.92); }
+  to   { opacity:1; transform:scale(1); }
+}
+.mg1-feedback-correct{
+  background:rgba(76,140,80,0.18);
+  border:1px solid rgba(76,140,80,0.45);
+}
+.mg1-feedback-wrong{
+  background:rgba(200,60,50,0.15);
+  border:1px solid rgba(200,60,50,0.4);
+}
+.mg1-feedback-icon{
+  font-size:2rem;
+  margin-bottom:0.3rem;
+}
+.mg1-feedback-verdict{
+  font-family:'Cinzel',serif;
+  font-size:1.05rem;
+  font-weight:600;
+  margin-bottom:0.4rem;
+}
+.mg1-feedback-correct .mg1-feedback-verdict{ color:#8fdc8f; }
+.mg1-feedback-wrong .mg1-feedback-verdict{ color:#f08070; }
+.mg1-feedback-text{
+  font-size:0.88rem;
+  color:var(--sand);
+  line-height:1.5;
+  opacity:0.85;
+}
+
+/* Skóre v průběhu hry */
+.mg1-scorebar{
+  font-family:'Cinzel',serif;
+  font-size:0.9rem;
+  color:var(--gold);
+  text-align:center;
+  letter-spacing:0.04em;
+  margin-top:0.25rem;
+}
+
 /* ═══════════════════════════════════
    FÁZE 5 – ADMIN EXPORT/DRIVE CSS
 ═══════════════════════════════════ */
@@ -3311,7 +3466,7 @@ const STORIES = [
 // ═══════════════════════════════════════════════════════
 var MINIGAMES = [
   { id: 0, title: "Desátek",            icon: "🪙", short: "3 kola — chytni jednu z deseti", max_wisdom: 90, implemented: true  },
-  { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty",             max_wisdom: 30, implemented: false },
+  { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty — 3 kola",      max_wisdom: 90, implemented: true  },
   { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "Sleduj kouzlo úročení",     max_wisdom: 25, implemented: false },
   { id: 3, title: "Matějova nabídka",   icon: "🎭", short: "Pravda nebo podvod?",        max_wisdom: 30, implemented: false },
   { id: 4, title: "Stavitel",           icon: "🏗️", short: "Zařiď pokoj v rozpočtu",    max_wisdom: 30, implemented: false },
@@ -9154,6 +9309,360 @@ window.renderMinigame_0 = function(idx) {
 };
 /* ═══════════════════════════════════════════════════════
    KONEC HRY 0
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 1: POTŘEBA × PŘÁNÍ — datový model
+   18 karet rozdělených do 3 kol (po 6).
+   type: 'need' (potřeba) | 'want' (přání)
+   level: 1 (jasné) | 2 (kontextové) | 3 (nuance)
+   explanation: pedagogický feedback po odpovědi
+   VAR kvůli hoisting — konzistentní s SEALS, CHALLENGES.
+═══════════════════════════════════════════════════════ */
+var MG1_CARDS = [
+  // ──────────── KOLO 1 — JASNÉ PŘÍPADY ────────────
+  { id:'l1_bread',    label:'Chleba',           icon:'🍞', type:'need', level:1,
+    explanation:'Bez jídla bys neměl sílu. Chleba je potřeba.' },
+  { id:'l1_candy',    label:'Bonbón',           icon:'🍬', type:'want', level:1,
+    explanation:'Sladkost je jen pro radost. Bez ní se obejdeš.' },
+  { id:'l1_water',    label:'Voda na pití',     icon:'💧', type:'need', level:1,
+    explanation:'Voda je nezbytná pro život. Žádná otázka.' },
+  { id:'l1_toy',      label:'Nová hračka',      icon:'🎁', type:'want', level:1,
+    explanation:'Hračku bys chtěl, ale nepotřebuješ ji k životu.' },
+  { id:'l1_textbook', label:'Učebnice do školy',icon:'📚', type:'need', level:1,
+    explanation:'Ve škole bez ní budeš pozadu. Učebnice je potřeba.' },
+  { id:'l1_balloon',  label:'Barevný balónek',  icon:'🎈', type:'want', level:1,
+    explanation:'Hezký, ale za hodinu splaskne. Čisté přání.' },
+
+  // ──────────── KOLO 2 — KONTEXTOVÉ ────────────
+  { id:'l2_shoes_broken',  label:'Nové boty (staré děravé)',           icon:'👟', type:'need', level:2,
+    explanation:'Když staré protékají, nové boty jsou potřeba.' },
+  { id:'l2_shoes_fashion', label:'Nové boty (staré jen starší značky)',icon:'👟', type:'want', level:2,
+    explanation:'Když staré ještě slouží, nová značka je přání.' },
+  { id:'l2_winter_coat',   label:'Zimní bunda (přijde mráz)',         icon:'🧥', type:'need', level:2,
+    explanation:'V mraze bez bundy onemocníš. Potřeba.' },
+  { id:'l2_third_hoodie',  label:'Třetí mikina (dvě už máš)',         icon:'👕', type:'want', level:2,
+    explanation:'Dvě stačí. Třetí je jen pro radost.' },
+  { id:'l2_glasses',       label:'Brýle (špatně vidíš)',              icon:'👓', type:'need', level:2,
+    explanation:'Bez brýlí se ti špatně učí i hraje. Potřeba.' },
+  { id:'l2_soda',          label:'Sladká limonáda',                   icon:'🥤', type:'want', level:2,
+    explanation:'Žízeň zaženeš vodou. Limonáda je přání.' },
+
+  // ──────────── KOLO 3 — NUANCE ────────────
+  { id:'l3_phone_first',    label:'První mobil (jezdíš sám tramvají)',icon:'📱', type:'need', level:3,
+    explanation:'Když jezdíš sám, mobil je bezpečí. Takhle je to potřeba.' },
+  { id:'l3_phone_newer',    label:'Novější mobil (starý funguje)',    icon:'📱', type:'want', level:3,
+    explanation:'Když starý funguje, nový je jen přání. Babylon by řekl: počkej.' },
+  { id:'l3_book_school',    label:'Kniha do školního projektu',       icon:'📖', type:'need', level:3,
+    explanation:'Potřebuješ ji k učení. Knihovna ji ale možná půjčí.' },
+  { id:'l3_book_collection',label:'Další díl série, kterou sbíráš',  icon:'📕', type:'want', level:3,
+    explanation:'Sbírání je krásný koníček, ale knížka navíc je přání.' },
+  { id:'l3_haircut',        label:'Stříhání (vlasy padají do očí)',   icon:'💇', type:'need', level:3,
+    explanation:'Když nevidíš na učení, stříhání je potřeba.' },
+  { id:'l3_game_skin',      label:'Skin do hry',                     icon:'🎮', type:'want', level:3,
+    explanation:'Skin nehraje hru za tebe. Přání jak vyšité.' }
+];
+
+/**
+ * Vrátí pole 6 karet pro dané kolo (1, 2 nebo 3), náhodně promíchaných.
+ * Fisher-Yates shuffle — každý call vrátí jiné pořadí.
+ */
+function mg1_getCardsForLevel(level) {
+  var pool = MG1_CARDS.filter(function(c){ return c.level === level; });
+  for (var i = pool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+  return pool;
+}
+/* ═══════════════════════════════════════════════════════
+   KONEC DAT HRY 1
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 1: POTŘEBA × PŘÁNÍ — herní logika
+   DOM-based (ne Canvas) — karty s předměty, dvě zóny.
+   3 kola po 6 kartách, 5 ✨ za správnou odpověď = max 90.
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_1 = function(idx) {
+  // Cleanup případného předchozího běhu
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ STATE SÉRIE ════════
+  var TOTAL_LEVELS = 3;
+  var CARDS_PER_LEVEL = 6;
+  var POINTS_PER_CORRECT = 5;  // 6 × 5 = 30 per kolo, 3 × 30 = 90 celkem
+  var currentLevel = 1;
+  var levelScores = [0, 0, 0];
+  var seriesScore = 0;
+
+  // ════════ STATE KOLA ════════
+  var currentCards = [];   // pole 6 karet pro aktuální kolo
+  var cardIndex = 0;       // 0..5 — která karta se právě hraje
+  var roundScore = 0;      // skóre aktuálního kola (0..30)
+  var active = true;       // false po cleanup
+
+  // ════════ BOARD DOM ════════
+  var board = document.createElement('div');
+  board.className = 'mg1-board';
+  wrap.appendChild(board);
+
+  // ════════ INTRO ════════
+  function showIntro() {
+    board.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">⚖️</div>' +
+        '<div class="mg0-card-title">Potřeba, nebo přání?</div>' +
+        '<div class="mg0-card-text">' +
+          'Hra má <strong>3 kola</strong>. V&nbsp;každém uvidíš <strong>6 věcí</strong>.<br><br>' +
+          '🏠 Je to <strong>POTŘEBA</strong>? Bez toho se neobejdeš.<br>' +
+          '⭐ Nebo <strong>PŘÁNÍ</strong>? Hezké, ale žít bez toho jde.<br><br>' +
+          '<em>Každé kolo je těžší. Skóre se sčítá.</em>' +
+        '</div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg1-start">▶ Začít kolo 1</button>' +
+      '</div>';
+
+    var btn = document.getElementById('mg1-start');
+    if (btn) btn.addEventListener('click', function() {
+      startRound();
+    }, { once: true });
+  }
+
+  // ════════ START KOLA ════════
+  function startRound() {
+    currentCards = mg1_getCardsForLevel(currentLevel);
+    cardIndex = 0;
+    roundScore = 0;
+    showCard();
+  }
+
+  // ════════ ZOBRAZENÍ KARTY ════════
+  function showCard() {
+    if (!active) return;
+    if (cardIndex >= CARDS_PER_LEVEL) {
+      showRoundEnd();
+      return;
+    }
+    var card = currentCards[cardIndex];
+    board.innerHTML =
+      '<div class="mg1-progress">Kolo ' + currentLevel + ' / 3 · Karta ' + (cardIndex + 1) + ' / ' + CARDS_PER_LEVEL + '</div>' +
+      '<div class="mg1-scorebar">✨ ' + roundScore + ' / 30</div>' +
+      '<div class="mg1-item-card">' +
+        '<div class="mg1-item-icon">' + card.icon + '</div>' +
+        '<div class="mg1-item-label">' + card.label + '</div>' +
+      '</div>' +
+      '<div class="mg1-zones">' +
+        '<button class="mg1-zone mg1-zone-need" id="mg1-btn-need">' +
+          '<span class="mg1-zone-emoji">🏠</span>Potřeba' +
+        '</button>' +
+        '<button class="mg1-zone mg1-zone-want" id="mg1-btn-want">' +
+          '<span class="mg1-zone-emoji">⭐</span>Přání' +
+        '</button>' +
+      '</div>';
+
+    var btnNeed = document.getElementById('mg1-btn-need');
+    var btnWant = document.getElementById('mg1-btn-want');
+    if (btnNeed) btnNeed.addEventListener('click', function(){ handleAnswer('need'); }, { once: true });
+    if (btnWant) btnWant.addEventListener('click', function(){ handleAnswer('want'); }, { once: true });
+  }
+
+  // ════════ ZPRACOVÁNÍ ODPOVĚDI ════════
+  function handleAnswer(answer) {
+    if (!active) return;
+    var card = currentCards[cardIndex];
+    var correct = (answer === card.type);
+    if (correct) roundScore += POINTS_PER_CORRECT;
+    showFeedback(card, correct);
+  }
+
+  // ════════ FEEDBACK PO KARTĚ ════════
+  function showFeedback(card, correct) {
+    if (!active) return;
+    var verdictText = correct ? 'Správně!' : ('To je ' + (card.type === 'need' ? 'potřeba' : 'přání') + '.');
+    var cssClass = correct ? 'mg1-feedback-correct' : 'mg1-feedback-wrong';
+    var feedIcon = correct ? '✅' : '❌';
+
+    board.innerHTML =
+      '<div class="mg1-progress">Kolo ' + currentLevel + ' / 3 · Karta ' + (cardIndex + 1) + ' / ' + CARDS_PER_LEVEL + '</div>' +
+      '<div class="mg1-scorebar">✨ ' + roundScore + ' / 30</div>' +
+      '<div class="mg1-item-card">' +
+        '<div class="mg1-item-icon">' + card.icon + '</div>' +
+        '<div class="mg1-item-label">' + card.label + '</div>' +
+      '</div>' +
+      '<div class="mg1-feedback ' + cssClass + '">' +
+        '<div class="mg1-feedback-icon">' + feedIcon + '</div>' +
+        '<div class="mg1-feedback-verdict">' + verdictText + '</div>' +
+        '<div class="mg1-feedback-text">' + card.explanation + '</div>' +
+      '</div>';
+
+    setTimeout(function(){
+      if (!active) return;
+      cardIndex++;
+      showCard();
+    }, 2000);
+  }
+
+  // ════════ KONEC KOLA ════════
+  function showRoundEnd() {
+    levelScores[currentLevel - 1] = roundScore;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+
+    var correctCount = roundScore / POINTS_PER_CORRECT;
+    var iconText = roundScore === 30 ? '⭐' : (roundScore >= 20 ? '✨' : '🌱');
+
+    // Vibrace
+    try {
+      if (navigator.vibrate) {
+        if (roundScore === 30) navigator.vibrate([20, 40, 20]);
+        else if (roundScore >= 20) navigator.vibrate(20);
+        else navigator.vibrate(10);
+      }
+    } catch(e){}
+
+    if (currentLevel < TOTAL_LEVELS) {
+      // Mezikolový panel — pokračuj na další kolo
+      var nextLevel = currentLevel + 1;
+      var nextLabel = nextLevel === 2 ? 'těžší' : 'nejtěžší';
+
+      board.innerHTML =
+        '<div class="mg0-card">' +
+          '<div class="mg0-card-icon">' + iconText + '</div>' +
+          '<div class="mg0-card-title">Kolo ' + currentLevel + ' hotovo!</div>' +
+          '<div class="mg0-score">' + roundScore + ' / 30 ✨</div>' +
+          '<div class="mg0-card-text">' + correctCount + ' z ' + CARDS_PER_LEVEL + ' správně</div>' +
+          '<div class="mg0-card-text">Série zatím: <strong>' + seriesScore + ' / 90 ✨</strong></div>' +
+          '<div class="mg0-buttons">' +
+            '<button class="mg0-btn mg0-btn-primary" id="mg1-next">▶ Pokračovat na kolo ' + nextLevel + ' (' + nextLabel + ')</button>' +
+          '</div>' +
+        '</div>';
+
+      var nb = document.getElementById('mg1-next');
+      if (nb) nb.addEventListener('click', function(){
+        currentLevel++;
+        startRound();
+      }, { once: true });
+
+    } else {
+      // Poslední kolo → závěr série
+      showSeriesEnd();
+    }
+  }
+
+  // ════════ KONEC SÉRIE ════════
+  function showSeriesEnd() {
+    levelScores[currentLevel - 1] = roundScore;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+
+    // Zavolej generický finisher (Moudrost, best score, perfect flag)
+    var result = null;
+    try {
+      result = finishMinigame(1, seriesScore);
+    } catch(e) {
+      console.error('finishMinigame chyba:', e);
+      result = { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+    }
+
+    // Vibrace
+    try {
+      if (navigator.vibrate) {
+        if (seriesScore === 90) navigator.vibrate([20, 40, 20, 40, 20, 40, 20]);
+        else if (seriesScore >= 60) navigator.vibrate([15, 60, 15, 60, 15]);
+        else if (seriesScore >= 30) navigator.vibrate([15, 60, 15]);
+        else navigator.vibrate(20);
+      }
+    } catch(e){}
+
+    // Reakce podle sériového skóre
+    var titleText, subText, iconText;
+    if (seriesScore === 90) {
+      iconText = '🏆';
+      titleText = 'Mistr rozlišování!';
+      subText = 'Tři kola bez chyby. Přesně víš, co je potřeba a co přání.';
+    } else if (seriesScore >= 60) {
+      iconText = '⭐';
+      titleText = 'Skvělé!';
+      subText = 'Většinu věcí jsi roztřídil správně. S praxí to bude ještě lepší.';
+    } else if (seriesScore >= 30) {
+      iconText = '✨';
+      titleText = 'Dobrý začátek';
+      subText = 'Některé věci jsou záludné. Příště zkus přemýšlet, jestli se bez toho dá žít.';
+    } else {
+      iconText = '🌱';
+      titleText = 'Zkus to znovu';
+      subText = 'Potřeba je to, bez čeho se opravdu neobejdeš. Přání je to ostatní.';
+    }
+
+    // Řádek Moudrosti
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames && state.minigames.plays && state.minigames.plays[1] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost získal — zítra zase!</div>';
+    }
+
+    board.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">Kolo 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg1-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg1-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg1-replay');
+    var bb = document.getElementById('mg1-back');
+    if (rb) rb.addEventListener('click', function(){
+      currentLevel = 1;
+      levelScores = [0, 0, 0];
+      seriesScore = 0;
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkádova reakce při perfektním skóre
+    if (seriesScore === 90) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = result.isNewBest && state.minigames.plays[1] === 1
+        ? '🎉 Výborně, ' + name + '! Roztřídil jsi všechno bez chyby — ve všech třech kolech. Kdo rozezná potřebu od přání, tomu pokladnice nikdy nedojde.'
+        : '✨ Stále to umíš, ' + name + '! Potřeba a přání — pro tebe už žádná záhada.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [{ label: 'Děkuji, Arkáde', response: 'Moudrost roste s každým rozhodnutím.' }]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ CLEANUP ════════
+  window._minigame_cleanup = function() {
+    active = false;
+    if (board && board.parentNode) {
+      try { board.parentNode.removeChild(board); } catch(_){}
+    }
+  };
+
+  // Start
+  showIntro();
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 1
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>

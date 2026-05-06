@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.17.0'; // ← KROK 14.16: Hra 0 — 3 úrovně, sčítání skóre 0-90
+const VERSION = 'v2.18.0'; // ← KROK 14.17: Hra 1 — Potřeba × přání, 3 kola, skóre 0-90
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
