@@ -2474,6 +2474,442 @@ svg.jar{width:52px;height:72px;}
   margin-top:0.25rem;
 }
 
+/* ═══════════════════════════════════════════════════════
+   HRA 2 — ROSTOUCÍ HROMADA (kouzlo úročení)
+   3 kola — tutorial, predikce, velká volba
+   max_wisdom: 90 (3 × 30)
+═══════════════════════════════════════════════════════ */
+
+.mg2-board {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ═══ MĚSÍČNÍ POČÍTADLO ═══ */
+.mg2-month-counter {
+  display: inline-block;
+  padding: 6px 18px;
+  background: rgba(58,36,16,0.85);
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  color: var(--lgold);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* ═══ SCÉNA S AMFORAMI ═══ */
+.mg2-stage {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 12px;
+  position: relative;
+  min-height: 280px;
+  background: linear-gradient(180deg, #0E1A2B 0%, #1a2540 100%);
+  border-radius: 12px;
+  padding: 16px 8px 12px;
+  border: 1px solid rgba(245,166,35,0.2);
+  overflow: hidden;
+}
+
+/* Hvězdy v pozadí */
+.mg2-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,233,163,0.7) 0.5px, transparent 1px),
+    radial-gradient(circle at 28% 35%, rgba(255,233,163,0.5) 0.5px, transparent 1px),
+    radial-gradient(circle at 47% 12%, rgba(255,233,163,0.6) 0.5px, transparent 1px),
+    radial-gradient(circle at 64% 28%, rgba(255,233,163,0.5) 0.5px, transparent 1px),
+    radial-gradient(circle at 82% 16%, rgba(255,233,163,0.7) 0.5px, transparent 1px),
+    radial-gradient(circle at 92% 38%, rgba(255,233,163,0.5) 0.5px, transparent 1px);
+  background-size: 100% 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Měsíc/slunce v rohu */
+.mg2-celestial {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  font-size: 24px;
+  filter: drop-shadow(0 0 6px rgba(255,233,163,0.4));
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.mg2-amphora-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 200px;
+  z-index: 2;
+}
+
+.mg2-amphora-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--sand);
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.mg2-amphora-label.is-temple {
+  color: var(--lgold);
+  opacity: 1;
+}
+
+/* SVG amfora */
+.mg2-amphora-svg {
+  width: 110px;
+  height: 140px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+.mg2-amphora-count {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--lgold);
+  margin-top: 4px;
+  min-height: 36px;
+  transition: transform 0.25s ease;
+}
+
+.mg2-amphora-count.is-bumped {
+  transform: scale(1.12);
+}
+
+.mg2-amphora-delta {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(245,166,35,0.7);
+  min-height: 14px;
+}
+
+.mg2-amphora-delta.is-zero {
+  color: rgba(139,115,64,0.7);
+}
+
+/* "VS" oddělovač */
+.mg2-vs {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: rgba(245,166,35,0.4);
+  align-self: center;
+  padding-bottom: 60px;
+  z-index: 2;
+}
+
+/* Padající mince (animace) */
+.mg2-falling-coin {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFE066, #C88A14);
+  box-shadow: 0 0 4px rgba(255,215,0,0.6);
+  pointer-events: none;
+  z-index: 3;
+  animation: mg2-coin-fall 0.6s ease-in forwards;
+}
+
+@keyframes mg2-coin-fall {
+  0%   { opacity: 0; transform: translateY(-30px) scale(0.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0.4; transform: translateY(80px) scale(0.9); }
+}
+
+/* ═══ OVLÁDÁNÍ ═══ */
+.mg2-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.mg2-btn-month {
+  background: linear-gradient(160deg, var(--gold), var(--dgold));
+  color: var(--dbrown);
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(245,166,35,0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mg2-btn-month:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(245,166,35,0.45);
+}
+
+.mg2-btn-month:active {
+  transform: scale(0.97);
+}
+
+.mg2-btn-month:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.mg2-btn-fast {
+  background: transparent;
+  color: var(--sand);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mg2-btn-fast:hover {
+  border-color: var(--gold);
+  color: var(--lgold);
+}
+
+/* ═══ ALGAMEŠ HLÁŠKA ═══ */
+.mg2-narrator {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--sand);
+  line-height: 1.6;
+  text-align: center;
+  padding: 10px 16px;
+  background: rgba(58,36,16,0.45);
+  border-left: 2px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  max-width: 480px;
+  margin: 4px auto;
+}
+
+.mg2-narrator strong {
+  color: var(--lgold);
+  font-style: normal;
+}
+
+/* ═══ KOLA 2 A 3 — VOLBY ═══ */
+.mg2-question {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--lgold);
+  text-align: center;
+  line-height: 1.6;
+  padding: 0 12px;
+  max-width: 480px;
+}
+
+.mg2-question strong {
+  color: var(--gold);
+}
+
+.mg2-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 8px;
+}
+
+.mg2-choice {
+  background: rgba(58,36,16,0.65);
+  border: 1.5px solid rgba(245,166,35,0.35);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: 'Cinzel', serif;
+  color: var(--sand);
+  text-align: left;
+  width: 100%;
+}
+
+.mg2-choice:hover:not(.is-disabled) {
+  border-color: var(--gold);
+  background: rgba(58,36,16,0.85);
+  transform: translateX(2px);
+}
+
+.mg2-choice:active:not(.is-disabled) {
+  transform: scale(0.98);
+}
+
+.mg2-choice.is-disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.mg2-choice.is-correct {
+  border-color: #81C784;
+  background: rgba(60,90,50,0.55);
+}
+
+.mg2-choice.is-near {
+  border-color: #FFB347;
+  background: rgba(120,80,30,0.55);
+}
+
+.mg2-choice.is-far {
+  border-color: rgba(180,90,90,0.55);
+  background: rgba(80,40,40,0.45);
+}
+
+.mg2-choice-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.mg2-choice-text {
+  flex: 1;
+}
+
+.mg2-choice-num {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--lgold);
+  display: block;
+}
+
+.mg2-choice-hint {
+  font-size: 11px;
+  color: var(--sand);
+  opacity: 0.7;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ═══ KOLO 3 — DVĚ CESTY ═══ */
+.mg2-paths {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.mg2-path {
+  flex: 1;
+  background: rgba(58,36,16,0.65);
+  border: 1.5px solid rgba(245,166,35,0.35);
+  border-radius: 10px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+}
+
+.mg2-path:hover:not(.is-disabled) {
+  border-color: var(--gold);
+  background: rgba(58,36,16,0.9);
+  transform: translateY(-2px);
+}
+
+.mg2-path.is-disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.mg2-path-icon {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+
+.mg2-path-name {
+  font-size: 14px;
+  color: var(--lgold);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.mg2-path-detail {
+  font-size: 11px;
+  color: var(--sand);
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* ═══ DUÁLNÍ SCÉNA PRO KOLO 3 (oba běhy paralelně) ═══ */
+.mg2-stage-dual {
+  flex-direction: row;
+}
+
+.mg2-stage-dual .mg2-amphora-wrap.is-winner {
+  animation: mg2-winner-glow 1.2s ease-in-out 3;
+}
+
+@keyframes mg2-winner-glow {
+  0%, 100% { filter: none; }
+  50%      { filter: drop-shadow(0 0 12px rgba(255,215,0,0.8)); }
+}
+
+/* ═══ PROGRESS DOTS (kola 1/2/3) ═══ */
+.mg2-progress {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.mg2-progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(245,166,35,0.2);
+  border: 1px solid rgba(245,166,35,0.4);
+  transition: all 0.2s ease;
+}
+
+.mg2-progress-dot.is-active {
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(245,166,35,0.6);
+}
+
+.mg2-progress-dot.is-done {
+  background: var(--lgold);
+  border-color: var(--lgold);
+}
+
+/* Responsive — menší obrazovky */
+@media (max-width: 480px) {
+  .mg2-amphora-svg { width: 88px; height: 112px; }
+  .mg2-amphora-count { font-size: 24px; }
+  .mg2-vs { font-size: 14px; padding-bottom: 50px; }
+  .mg2-narrator { font-size: 12px; }
+  .mg2-paths { flex-direction: column; }
+}
+
 /* ═══════════════════════════════════
    FÁZE 5 – ADMIN EXPORT/DRIVE CSS
 ═══════════════════════════════════ */
@@ -3467,7 +3903,7 @@ const STORIES = [
 var MINIGAMES = [
   { id: 0, title: "Desátek",            icon: "🪙", short: "3 kola — chytni jednu z deseti", max_wisdom: 90, implemented: true  },
   { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty — 3 kola",      max_wisdom: 90, implemented: true  },
-  { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "Sleduj kouzlo úročení",     max_wisdom: 25, implemented: false },
+  { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "3 kola — kouzlo úročení",  max_wisdom: 90, implemented: true  },
   { id: 3, title: "Matějova nabídka",   icon: "🎭", short: "Pravda nebo podvod?",        max_wisdom: 30, implemented: false },
   { id: 4, title: "Stavitel",           icon: "🏗️", short: "Zařiď pokoj v rozpočtu",    max_wisdom: 30, implemented: false },
   { id: 5, title: "Zadní vrátka",       icon: "🛡️", short: "Použij rezervu moudře",     max_wisdom: 30, implemented: false },
@@ -9661,6 +10097,647 @@ window.renderMinigame_1 = function(idx) {
   // Start
   showIntro();
 };
+/* ═══════════════════════════════════════════════════════
+   HRA 2 — ROSTOUCÍ HROMADA (kouzlo úročení)
+   3 kola: tutorial závod / hádanka kupce / velká volba
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_2 = function(idx) {
+  // Cleanup případného předchozího běhu
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ STATE SÉRIE ════════
+  var TOTAL_LEVELS = 3;
+  var currentLevel = 1;
+  var levelScores = [0, 0, 0];
+  var seriesScore = 0;
+  var active = true;
+  var animFrame = null;
+  var animTimer = null;
+
+  // ════════ BOARD DOM ════════
+  var board = document.createElement('div');
+  board.className = 'mg2-board';
+  wrap.appendChild(board);
+
+  // ════════ HELPER: ZAOKROUHLENÍ ════════
+  function mg2_round(n) {
+    return Math.round(n);
+  }
+
+  // ════════ HELPER: COMPOUND INTEREST ════════
+  function mg2_compound(principal, monthlyRate, months) {
+    return principal * Math.pow(1 + monthlyRate / 100, months);
+  }
+
+  // ════════ HELPER: AMFORA SVG ════════
+  function mg2_buildAmphora(uniqueId, fillPercent) {
+    fillPercent = Math.max(0, Math.min(100, fillPercent || 0));
+    // Náplň: y od 78 (skoro dno) po 42 (skoro plná)
+    var fillTopY = 78 - (fillPercent / 100) * 36;
+
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 130');
+    svg.setAttribute('class', 'mg2-amphora-svg');
+
+    svg.innerHTML =
+      '<defs>' +
+        '<clipPath id="mg2clip-' + uniqueId + '">' +
+          '<ellipse cx="50" cy="80" rx="38" ry="42"/>' +
+        '</clipPath>' +
+        '<linearGradient id="mg2gold-' + uniqueId + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#FFE066"/>' +
+          '<stop offset="100%" stop-color="#C88A14"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      // Ucha
+      '<path d="M 12 50 Q -3 80 12 110" fill="none" stroke="#5C2800" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M 88 50 Q 103 80 88 110" fill="none" stroke="#5C2800" stroke-width="5" stroke-linecap="round"/>' +
+      // Tělo
+      '<ellipse cx="50" cy="80" rx="38" ry="42" fill="#A85C10" stroke="#3A1200" stroke-width="0.8"/>' +
+      // Hrdlo
+      '<rect x="38" y="20" width="24" height="14" fill="#A85C10" stroke="#3A1200" stroke-width="0.8"/>' +
+      '<ellipse cx="50" cy="20" rx="14" ry="4" fill="#6B3A0E" stroke="#3A1200" stroke-width="0.8"/>' +
+      '<ellipse cx="50" cy="17" rx="14" ry="4" fill="#A85C10" stroke="#3A1200" stroke-width="0.8"/>' +
+      // Klínopisné dekorace
+      '<g fill="#3A1200" opacity="0.55">' +
+        '<path d="M 30 60 L 32 60 L 31 62 Z"/>' +
+        '<path d="M 36 60 L 38 60 L 37 62 Z"/>' +
+        '<path d="M 42 60 L 44 60 L 43 62 Z"/>' +
+        '<path d="M 48 60 L 50 60 L 49 62 Z"/>' +
+        '<path d="M 54 60 L 56 60 L 55 62 Z"/>' +
+        '<path d="M 60 60 L 62 60 L 61 62 Z"/>' +
+        '<path d="M 66 60 L 68 60 L 67 62 Z"/>' +
+        '<path d="M 33 67 L 35 67 L 34 69 Z"/>' +
+        '<path d="M 39 67 L 41 67 L 40 69 Z"/>' +
+        '<path d="M 45 67 L 47 67 L 46 69 Z"/>' +
+        '<path d="M 51 67 L 53 67 L 52 69 Z"/>' +
+        '<path d="M 57 67 L 59 67 L 58 69 Z"/>' +
+        '<path d="M 63 67 L 65 67 L 64 69 Z"/>' +
+      '</g>' +
+      // Náplň (clip-pathed)
+      '<g clip-path="url(#mg2clip-' + uniqueId + ')">' +
+        '<rect class="mg2-fill-rect" x="12" y="' + fillTopY + '" width="76" height="100" fill="url(#mg2gold-' + uniqueId + ')"/>' +
+      '</g>';
+
+    return svg;
+  }
+
+  function mg2_setFill(amphoraSvg, fillPercent) {
+    if (!amphoraSvg) return;
+    fillPercent = Math.max(0, Math.min(100, fillPercent));
+    var fillTopY = 78 - (fillPercent / 100) * 36;
+    var rect = amphoraSvg.querySelector('.mg2-fill-rect');
+    if (rect) rect.setAttribute('y', fillTopY);
+  }
+
+  // ════════ HELPER: PADAJÍCÍ MINCE ════════
+  function mg2_dropCoin(stageEl, targetXPercent) {
+    if (!active || !stageEl) return;
+    var coin = document.createElement('div');
+    coin.className = 'mg2-falling-coin';
+    coin.style.left = (targetXPercent + (Math.random() * 8 - 4)) + '%';
+    coin.style.top = '20px';
+    stageEl.appendChild(coin);
+    setTimeout(function(){
+      if (coin.parentNode) coin.parentNode.removeChild(coin);
+    }, 700);
+  }
+
+  // ════════ HELPER: BUMP ČÍSLA ════════
+  function mg2_bumpCount(el) {
+    if (!el) return;
+    el.classList.add('is-bumped');
+    setTimeout(function(){ if(el) el.classList.remove('is-bumped'); }, 250);
+  }
+
+  // ════════ HELPER: PROGRESS DOTS ════════
+  function mg2_progressHTML(level) {
+    var html = '<div class="mg2-progress">';
+    for (var i = 1; i <= TOTAL_LEVELS; i++) {
+      var cls = 'mg2-progress-dot';
+      if (i < level) cls += ' is-done';
+      else if (i === level) cls += ' is-active';
+      html += '<div class="' + cls + '"></div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ════════ INTRO ════════
+  function showIntro() {
+    if (!active) return;
+    board.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">📈</div>' +
+        '<div class="mg0-card-title">Rostoucí hromada</div>' +
+        '<div class="mg0-card-text">' +
+          'Slyšel jsi pověst o kupci, jehož <strong>hromada zlata rostla i ve spánku</strong>?<br><br>' +
+          'Ukážu ti <strong>kouzlo úročení</strong> — sílu, která dělá z malého velké, když jí dáš čas.<br><br>' +
+          '<em>Hra má 3 kola. V každém poznáš jiné tajemství.</em>' +
+        '</div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg2-start">▶ Začít kolo 1</button>' +
+      '</div>';
+
+    var btn = document.getElementById('mg2-start');
+    if (btn) btn.addEventListener('click', function(){
+      currentLevel = 1;
+      startLevel1();
+    }, { once: true });
+  }
+
+  // ════════ KOLO 1 — ZÁVOD AMFOR (TUTORIÁL) ════════
+  function startLevel1() {
+    if (!active) return;
+
+    var TOTAL_MONTHS = 12;
+    var RATE = 1; // 1 % měsíčně
+    var month = 0;
+    var leftCount = 100;   // bez úroku
+    var rightCount = 100;  // s úrokem
+    var locked = false;    // mid-animation lock
+
+    board.innerHTML =
+      mg2_progressHTML(1) +
+      '<div class="mg2-month-counter" id="mg2-month">MĚSÍC 0 / ' + TOTAL_MONTHS + '</div>' +
+      '<div class="mg2-stage" id="mg2-stage">' +
+        '<span class="mg2-celestial" id="mg2-celestial">☀</span>' +
+        '<div class="mg2-amphora-wrap" id="mg2-wrap-L">' +
+          '<div class="mg2-amphora-label">🛏️ Pod polštářem</div>' +
+          '<div id="mg2-amph-L"></div>' +
+          '<div class="mg2-amphora-count" id="mg2-count-L">100</div>' +
+          '<div class="mg2-amphora-delta is-zero">beze změny</div>' +
+        '</div>' +
+        '<div class="mg2-vs">VS</div>' +
+        '<div class="mg2-amphora-wrap" id="mg2-wrap-R">' +
+          '<div class="mg2-amphora-label is-temple">🏛️ Chrám růstu</div>' +
+          '<div id="mg2-amph-R"></div>' +
+          '<div class="mg2-amphora-count" id="mg2-count-R">100</div>' +
+          '<div class="mg2-amphora-delta" id="mg2-delta-R">1 % měsíčně</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg2-narrator">Klepni na tlačítko a <strong>pošli další měsíc</strong>. Sleduj, co se stane.</div>' +
+      '<div class="mg2-controls">' +
+        '<button class="mg2-btn-month" id="mg2-next">▶ POŠLI DALŠÍ MĚSÍC</button>' +
+        '<button class="mg2-btn-fast" id="mg2-fast">⏩ Rychle dopředu</button>' +
+      '</div>';
+
+    var amphL = mg2_buildAmphora('L1', 50);
+    var amphR = mg2_buildAmphora('R1', 50);
+    document.getElementById('mg2-amph-L').appendChild(amphL);
+    document.getElementById('mg2-amph-R').appendChild(amphR);
+
+    var stageEl = document.getElementById('mg2-stage');
+    var monthEl = document.getElementById('mg2-month');
+    var countL = document.getElementById('mg2-count-L');
+    var countR = document.getElementById('mg2-count-R');
+    var deltaR = document.getElementById('mg2-delta-R');
+    var celest = document.getElementById('mg2-celestial');
+    var btnNext = document.getElementById('mg2-next');
+    var btnFast = document.getElementById('mg2-fast');
+
+    function updateCelestial(m) {
+      // Den/noc cyklus podle měsíce
+      var phase = m % 4;
+      celest.textContent = phase < 2 ? '☀' : '☾';
+    }
+
+    function tickMonth(animate) {
+      if (!active || month >= TOTAL_MONTHS) return;
+      month++;
+      rightCount = 100 * Math.pow(1 + RATE / 100, month);
+      var newFill = 50 + (rightCount - 100) * 0.5; // 100→50%, +12 mincí → +6%
+
+      monthEl.textContent = 'MĚSÍC ' + month + ' / ' + TOTAL_MONTHS;
+      countR.textContent = mg2_round(rightCount);
+      deltaR.textContent = '+' + mg2_round(rightCount - 100) + ' mincí · 1 % měsíčně';
+      mg2_setFill(amphR, newFill);
+      updateCelestial(month);
+
+      if (animate) {
+        mg2_dropCoin(stageEl, 72);
+        mg2_bumpCount(countR);
+      }
+
+      if (month >= TOTAL_MONTHS) {
+        finishLevel1();
+      }
+    }
+
+    function finishLevel1() {
+      if (!active) return;
+      btnNext.disabled = true;
+      btnFast.disabled = true;
+      levelScores[0] = 30;
+      seriesScore = 30;
+
+      setTimeout(function(){
+        if (!active) return;
+        var diff = mg2_round(rightCount - 100);
+        var narr = document.querySelector('.mg2-narrator');
+        if (narr) {
+          narr.innerHTML = 'Vidíš? Levá amfora <strong>dřímá</strong>. Pravá <strong>roste</strong>, i když se na ni nedíváš. Za rok přibylo <strong>' + diff + ' mincí</strong> — z ničeho.';
+        }
+        var ctrls = document.querySelector('.mg2-controls');
+        if (ctrls) {
+          ctrls.innerHTML = '<button class="mg2-btn-month" id="mg2-toL2">▶ Kolo 2 — Hádanka kupce</button>' +
+            '<div style="font-size:11px;color:var(--lgold);letter-spacing:1px;">+30 / 30 ✨</div>';
+          var b = document.getElementById('mg2-toL2');
+          if (b) b.addEventListener('click', function(){
+            currentLevel = 2;
+            startLevel2();
+          }, { once: true });
+        }
+      }, 800);
+    }
+
+    btnNext.addEventListener('click', function(){
+      if (locked || !active) return;
+      locked = true;
+      tickMonth(true);
+      setTimeout(function(){ locked = false; }, 350);
+    });
+
+    btnFast.addEventListener('click', function(){
+      if (!active || month >= TOTAL_MONTHS) return;
+      btnFast.disabled = true;
+      btnNext.disabled = true;
+      animTimer = setInterval(function(){
+        if (!active || month >= TOTAL_MONTHS) {
+          clearInterval(animTimer);
+          animTimer = null;
+          return;
+        }
+        tickMonth(true);
+      }, 220);
+    });
+  }
+
+  // ════════ KOLO 2 — HÁDANKA KUPCE ════════
+  function startLevel2() {
+    if (!active) return;
+
+    var PRINCIPAL = 100;
+    var RATE = 1;
+    var YEARS = 5;
+    var MONTHS = YEARS * 12;
+    var CORRECT = mg2_compound(PRINCIPAL, RATE, MONTHS); // 181.67
+
+    board.innerHTML =
+      mg2_progressHTML(2) +
+      '<div class="mg2-narrator">' +
+        '„Kupec uložil v Chrámu <strong>100 mincí</strong>. Chrám platí <strong>1 % měsíčně</strong>. Kolik bude mít po <strong>5 letech</strong>?"' +
+      '</div>' +
+      '<div class="mg2-question">Vyber svůj odhad. Pak uvidíš pravdu.</div>' +
+      '<div class="mg2-choices" id="mg2-choices">' +
+        '<button class="mg2-choice" data-pick="160">' +
+          '<span class="mg2-choice-icon">🟦</span>' +
+          '<span class="mg2-choice-text">' +
+            '<span class="mg2-choice-num">160 mincí</span>' +
+            '<span class="mg2-choice-hint">přírůstek 60 % za 5 let</span>' +
+          '</span>' +
+        '</button>' +
+        '<button class="mg2-choice" data-pick="182">' +
+          '<span class="mg2-choice-icon">🟩</span>' +
+          '<span class="mg2-choice-text">' +
+            '<span class="mg2-choice-num">182 mincí</span>' +
+            '<span class="mg2-choice-hint">úrok rostoucí z úroku</span>' +
+          '</span>' +
+        '</button>' +
+        '<button class="mg2-choice" data-pick="300">' +
+          '<span class="mg2-choice-icon">🟨</span>' +
+          '<span class="mg2-choice-text">' +
+            '<span class="mg2-choice-num">300 mincí</span>' +
+            '<span class="mg2-choice-hint">trojnásobek za 5 let</span>' +
+          '</span>' +
+        '</button>' +
+      '</div>';
+
+    var choices = board.querySelectorAll('.mg2-choice');
+    choices.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (!active) return;
+        var pick = parseInt(btn.dataset.pick, 10);
+        choices.forEach(function(b){ b.classList.add('is-disabled'); b.disabled = true; });
+        // Označení správné/špatné
+        var pickedClass = (pick === 182) ? 'is-correct' : (pick === 160 ? 'is-near' : 'is-far');
+        btn.classList.add(pickedClass);
+        // Skóre
+        var pts = (pick === 182) ? 30 : (pick === 160 ? 15 : 15);
+        levelScores[1] = pts;
+        seriesScore = levelScores[0] + levelScores[1];
+
+        setTimeout(function(){ runLevel2Simulation(pick, pts); }, 600);
+      }, { once: true });
+    });
+  }
+
+  function runLevel2Simulation(pick, pts) {
+    if (!active) return;
+    var PRINCIPAL = 100;
+    var RATE = 1;
+    var MONTHS = 60;
+    var DURATION_MS = 5500;
+    var FRAMES = 50;
+    var FRAME_MS = DURATION_MS / FRAMES;
+
+    board.innerHTML =
+      mg2_progressHTML(2) +
+      '<div class="mg2-month-counter" id="mg2-month">MĚSÍC 0 / 60 — 5 let</div>' +
+      '<div class="mg2-stage">' +
+        '<span class="mg2-celestial">☾</span>' +
+        '<div class="mg2-amphora-wrap" style="max-width:240px;">' +
+          '<div class="mg2-amphora-label is-temple">🏛️ Chrám růstu</div>' +
+          '<div id="mg2-amph-sim"></div>' +
+          '<div class="mg2-amphora-count" id="mg2-count-sim">100</div>' +
+          '<div class="mg2-amphora-delta" id="mg2-delta-sim">1 % měsíčně</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg2-narrator">Sleduj, jak hromada roste měsíc po měsíci...</div>';
+
+    var amph = mg2_buildAmphora('SIM', 50);
+    document.getElementById('mg2-amph-sim').appendChild(amph);
+    var stageEl = document.querySelector('.mg2-stage');
+    var monthEl = document.getElementById('mg2-month');
+    var countEl = document.getElementById('mg2-count-sim');
+    var deltaEl = document.getElementById('mg2-delta-sim');
+
+    var frame = 0;
+    animTimer = setInterval(function(){
+      if (!active) { clearInterval(animTimer); return; }
+      frame++;
+      var month = Math.floor((frame / FRAMES) * MONTHS);
+      var current = mg2_compound(PRINCIPAL, RATE, month);
+      monthEl.textContent = 'MĚSÍC ' + month + ' / 60 — ' + (month/12).toFixed(1) + ' roku';
+      countEl.textContent = mg2_round(current);
+      deltaEl.textContent = '+' + mg2_round(current - 100) + ' mincí';
+      var fillPct = 50 + (current - 100) * 0.5;
+      mg2_setFill(amph, Math.min(100, fillPct));
+      if (frame % 4 === 0) mg2_dropCoin(stageEl, 50);
+      if (frame >= FRAMES) {
+        clearInterval(animTimer);
+        animTimer = null;
+        showLevel2Result(pick, pts, mg2_round(current));
+      }
+    }, FRAME_MS);
+  }
+
+  function showLevel2Result(pick, pts, finalCount) {
+    if (!active) return;
+    var feedback;
+    if (pick === 182) {
+      feedback = '<strong>Hodný odhad!</strong> Většina lidí by přestřelila nebo podstřelila — ty jsi byl přesně.';
+    } else if (pick === 160) {
+      feedback = 'Tak to počítá <strong>většina dospělých</strong> — sčítají úrok lineárně. Ale úrok rostl i z úroku — proto je výsledek vyšší než 160.';
+    } else {
+      feedback = 'Růst má <strong>hranice</strong> — kupec by si přál víc, ale příroda úročení je trpělivá, ne raketová.';
+    }
+
+    var narr = document.querySelector('.mg2-narrator');
+    if (narr) narr.innerHTML = 'Pravda: <strong>' + finalCount + ' mincí</strong>. ' + feedback;
+
+    setTimeout(function(){
+      if (!active) return;
+      var stage = document.querySelector('.mg2-stage');
+      if (stage) {
+        var btnWrap = document.createElement('div');
+        btnWrap.className = 'mg2-controls';
+        btnWrap.style.marginTop = '8px';
+        btnWrap.innerHTML =
+          '<button class="mg2-btn-month" id="mg2-toL3">▶ Kolo 3 — Velká volba</button>' +
+          '<div style="font-size:11px;color:var(--lgold);letter-spacing:1px;">+' + pts + ' / 30 ✨ &nbsp; · &nbsp; celkem ' + (levelScores[0]+levelScores[1]) + ' / 60</div>';
+        board.appendChild(btnWrap);
+        var b = document.getElementById('mg2-toL3');
+        if (b) b.addEventListener('click', function(){
+          currentLevel = 3;
+          startLevel3();
+        }, { once: true });
+      }
+    }, 1400);
+  }
+
+  // ════════ KOLO 3 — VELKÁ VOLBA ════════
+  function startLevel3() {
+    if (!active) return;
+
+    board.innerHTML =
+      mg2_progressHTML(3) +
+      '<div class="mg2-narrator">' +
+        '„Stojíš před dvěma cestami, poutníku. <strong>Která hromada bude větší</strong>?"' +
+      '</div>' +
+      '<div class="mg2-question">Vyber moudře. Uvidíš oba osudy.</div>' +
+      '<div class="mg2-paths" id="mg2-paths">' +
+        '<button class="mg2-path" data-pick="A">' +
+          '<div class="mg2-path-icon">🔥</div>' +
+          '<div class="mg2-path-name">Cesta A</div>' +
+          '<div class="mg2-path-detail">100 mincí<br><strong>5 % měsíčně</strong><br>1 rok</div>' +
+        '</button>' +
+        '<button class="mg2-path" data-pick="B">' +
+          '<div class="mg2-path-icon">🐢</div>' +
+          '<div class="mg2-path-name">Cesta B</div>' +
+          '<div class="mg2-path-detail">100 mincí<br><strong>1 % měsíčně</strong><br>5 let</div>' +
+        '</button>' +
+      '</div>';
+
+    var paths = board.querySelectorAll('.mg2-path');
+    paths.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (!active) return;
+        var pick = btn.dataset.pick;
+        paths.forEach(function(b){ b.classList.add('is-disabled'); b.disabled = true; });
+        var pts = (pick === 'B') ? 30 : 15;
+        levelScores[2] = pts;
+        seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+        setTimeout(function(){ runLevel3Simulation(pick, pts); }, 500);
+      }, { once: true });
+    });
+  }
+
+  function runLevel3Simulation(pick, pts) {
+    if (!active) return;
+    var DURATION_MS = 6500;
+    var FRAMES = 60;
+    var FRAME_MS = DURATION_MS / FRAMES;
+    var A_FINAL = mg2_compound(100, 5, 12);   // ≈ 179.59
+    var B_FINAL = mg2_compound(100, 1, 60);   // ≈ 181.67
+
+    board.innerHTML =
+      mg2_progressHTML(3) +
+      '<div class="mg2-month-counter" id="mg2-month">PRŮBĚH ZÁVODU</div>' +
+      '<div class="mg2-stage mg2-stage-dual">' +
+        '<span class="mg2-celestial">☾</span>' +
+        '<div class="mg2-amphora-wrap" id="mg2-wrap-A">' +
+          '<div class="mg2-amphora-label">🔥 Cesta A · 1 rok</div>' +
+          '<div id="mg2-amph-A"></div>' +
+          '<div class="mg2-amphora-count" id="mg2-count-A">100</div>' +
+          '<div class="mg2-amphora-delta">5 % měsíčně</div>' +
+        '</div>' +
+        '<div class="mg2-vs">VS</div>' +
+        '<div class="mg2-amphora-wrap" id="mg2-wrap-B">' +
+          '<div class="mg2-amphora-label is-temple">🐢 Cesta B · 5 let</div>' +
+          '<div id="mg2-amph-B"></div>' +
+          '<div class="mg2-amphora-count" id="mg2-count-B">100</div>' +
+          '<div class="mg2-amphora-delta">1 % měsíčně</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg2-narrator">Sleduj — obě cesty běží zároveň...</div>';
+
+    var amphA = mg2_buildAmphora('A3', 50);
+    var amphB = mg2_buildAmphora('B3', 50);
+    document.getElementById('mg2-amph-A').appendChild(amphA);
+    document.getElementById('mg2-amph-B').appendChild(amphB);
+    var stageEl = document.querySelector('.mg2-stage');
+    var countA = document.getElementById('mg2-count-A');
+    var countB = document.getElementById('mg2-count-B');
+
+    var frame = 0;
+    animTimer = setInterval(function(){
+      if (!active) { clearInterval(animTimer); return; }
+      frame++;
+      var t = frame / FRAMES;
+      var monthA = t * 12;
+      var monthB = t * 60;
+      var curA = mg2_compound(100, 5, monthA);
+      var curB = mg2_compound(100, 1, monthB);
+      countA.textContent = mg2_round(curA);
+      countB.textContent = mg2_round(curB);
+      mg2_setFill(amphA, Math.min(100, 50 + (curA - 100) * 0.5));
+      mg2_setFill(amphB, Math.min(100, 50 + (curB - 100) * 0.5));
+      if (frame % 5 === 0) {
+        mg2_dropCoin(stageEl, 25);
+        mg2_dropCoin(stageEl, 70);
+      }
+      if (frame >= FRAMES) {
+        clearInterval(animTimer);
+        animTimer = null;
+        // Highlight winner
+        var wrapB = document.getElementById('mg2-wrap-B');
+        if (wrapB) wrapB.classList.add('is-winner');
+        showLevel3Result(pick, pts, mg2_round(A_FINAL), mg2_round(B_FINAL));
+      }
+    }, FRAME_MS);
+  }
+
+  function showLevel3Result(pick, pts, aFinal, bFinal) {
+    if (!active) return;
+    var narr = document.querySelector('.mg2-narrator');
+    if (narr) {
+      var msg = 'Cesta A: <strong>' + aFinal + '</strong>, Cesta B: <strong>' + bFinal + '</strong>. ';
+      if (pick === 'B') {
+        msg += '<strong>Trpělivost porazila i pětinásobný úrok.</strong> To si pamatuj na celý život.';
+      } else {
+        msg += 'Velký úrok lákal, ale čas zvítězil. Ponaučení stojí za 15 mincí Moudrosti.';
+      }
+      narr.innerHTML = msg;
+    }
+
+    setTimeout(function(){
+      if (!active) return;
+      showFinish();
+    }, 2200);
+  }
+
+  // ════════ FINISH KARTA ════════
+  function showFinish() {
+    if (!active) return;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+    var result = (typeof finishMinigame === 'function')
+      ? finishMinigame(idx, seriesScore)
+      : { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+
+    var iconText, titleText, subText;
+    if (seriesScore === 90) {
+      iconText = '🏆';
+      titleText = 'Mistr trpělivosti!';
+      subText = 'Hromada tě bude poslouchat celý život. Pochopil jsi tajemství úročení.';
+    } else if (seriesScore >= 60) {
+      iconText = '⭐';
+      titleText = 'Skvěle!';
+      subText = 'Cítíš sílu času. S každou hrou poroste i tvá moudrost.';
+    } else if (seriesScore >= 30) {
+      iconText = '✨';
+      titleText = 'Dobrý začátek';
+      subText = 'Úročení je zrádné — i dospělí mu nerozumí. Přijď zítra a uvidíš víc.';
+    } else {
+      iconText = '🌱';
+      titleText = 'Zkus to znovu';
+      subText = 'Čas dělá z malého velké, když vydržíš. To je celé tajemství.';
+    }
+
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames && state.minigames.plays && state.minigames.plays[2] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost získal — zítra zase!</div>';
+    }
+
+    board.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">Kolo 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg2-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg2-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg2-replay');
+    var bb = document.getElementById('mg2-back');
+    if (rb) rb.addEventListener('click', function(){
+      currentLevel = 1;
+      levelScores = [0, 0, 0];
+      seriesScore = 0;
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkádova reakce při perfektním skóre
+    if (seriesScore === 90) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = result.isNewBest && state.minigames.plays[2] === 1
+        ? '🎉 Mistře trpělivosti, ' + name + '! Tři kola, tři tajemství úročení — všechna pochopena. Tvá hromada bude v Babylonu legendou.'
+        : '✨ Stále to umíš, ' + name + '! Čas a moudrost — tvoji nejlepší přátelé.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [{ label: 'Děkuji, Arkáde', response: 'Trpělivý kupec sklízí dvojnásob.' }]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ CLEANUP ════════
+  window._minigame_cleanup = function() {
+    active = false;
+    if (animTimer) { clearInterval(animTimer); animTimer = null; }
+    if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+    if (board && board.parentNode) {
+      try { board.parentNode.removeChild(board); } catch(_){}
+    }
+  };
+
+  // Start
+  showIntro();
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 2
+═══════════════════════════════════════════════════════ */
+
 /* ═══════════════════════════════════════════════════════
    KONEC HRY 1
 ═══════════════════════════════════════════════════════ */
