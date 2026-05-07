@@ -1,0 +1,435 @@
+/* ═══════════════════════════════════════════════════════
+   HRA 2 — ROSTOUCÍ HROMADA (kouzlo úročení)
+   3 kola — tutorial, predikce, velká volba
+   max_wisdom: 90 (3 × 30)
+═══════════════════════════════════════════════════════ */
+
+.mg2-board {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ═══ MĚSÍČNÍ POČÍTADLO ═══ */
+.mg2-month-counter {
+  display: inline-block;
+  padding: 6px 18px;
+  background: rgba(58,36,16,0.85);
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  color: var(--lgold);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* ═══ SCÉNA S AMFORAMI ═══ */
+.mg2-stage {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 12px;
+  position: relative;
+  min-height: 280px;
+  background: linear-gradient(180deg, #0E1A2B 0%, #1a2540 100%);
+  border-radius: 12px;
+  padding: 16px 8px 12px;
+  border: 1px solid rgba(245,166,35,0.2);
+  overflow: hidden;
+}
+
+/* Hvězdy v pozadí */
+.mg2-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,233,163,0.7) 0.5px, transparent 1px),
+    radial-gradient(circle at 28% 35%, rgba(255,233,163,0.5) 0.5px, transparent 1px),
+    radial-gradient(circle at 47% 12%, rgba(255,233,163,0.6) 0.5px, transparent 1px),
+    radial-gradient(circle at 64% 28%, rgba(255,233,163,0.5) 0.5px, transparent 1px),
+    radial-gradient(circle at 82% 16%, rgba(255,233,163,0.7) 0.5px, transparent 1px),
+    radial-gradient(circle at 92% 38%, rgba(255,233,163,0.5) 0.5px, transparent 1px);
+  background-size: 100% 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Měsíc/slunce v rohu */
+.mg2-celestial {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  font-size: 24px;
+  filter: drop-shadow(0 0 6px rgba(255,233,163,0.4));
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.mg2-amphora-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 200px;
+  z-index: 2;
+}
+
+.mg2-amphora-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--sand);
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.mg2-amphora-label.is-temple {
+  color: var(--lgold);
+  opacity: 1;
+}
+
+/* SVG amfora */
+.mg2-amphora-svg {
+  width: 110px;
+  height: 140px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+.mg2-amphora-count {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--lgold);
+  margin-top: 4px;
+  min-height: 36px;
+  transition: transform 0.25s ease;
+}
+
+.mg2-amphora-count.is-bumped {
+  transform: scale(1.12);
+}
+
+.mg2-amphora-delta {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(245,166,35,0.7);
+  min-height: 14px;
+}
+
+.mg2-amphora-delta.is-zero {
+  color: rgba(139,115,64,0.7);
+}
+
+/* "VS" oddělovač */
+.mg2-vs {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: rgba(245,166,35,0.4);
+  align-self: center;
+  padding-bottom: 60px;
+  z-index: 2;
+}
+
+/* Padající mince (animace) */
+.mg2-falling-coin {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFE066, #C88A14);
+  box-shadow: 0 0 4px rgba(255,215,0,0.6);
+  pointer-events: none;
+  z-index: 3;
+  animation: mg2-coin-fall 0.6s ease-in forwards;
+}
+
+@keyframes mg2-coin-fall {
+  0%   { opacity: 0; transform: translateY(-30px) scale(0.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0.4; transform: translateY(80px) scale(0.9); }
+}
+
+/* ═══ OVLÁDÁNÍ ═══ */
+.mg2-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.mg2-btn-month {
+  background: linear-gradient(160deg, var(--gold), var(--dgold));
+  color: var(--dbrown);
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(245,166,35,0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mg2-btn-month:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(245,166,35,0.45);
+}
+
+.mg2-btn-month:active {
+  transform: scale(0.97);
+}
+
+.mg2-btn-month:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.mg2-btn-fast {
+  background: transparent;
+  color: var(--sand);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mg2-btn-fast:hover {
+  border-color: var(--gold);
+  color: var(--lgold);
+}
+
+/* ═══ ALGAMEŠ HLÁŠKA ═══ */
+.mg2-narrator {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--sand);
+  line-height: 1.6;
+  text-align: center;
+  padding: 10px 16px;
+  background: rgba(58,36,16,0.45);
+  border-left: 2px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  max-width: 480px;
+  margin: 4px auto;
+}
+
+.mg2-narrator strong {
+  color: var(--lgold);
+  font-style: normal;
+}
+
+/* ═══ KOLA 2 A 3 — VOLBY ═══ */
+.mg2-question {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--lgold);
+  text-align: center;
+  line-height: 1.6;
+  padding: 0 12px;
+  max-width: 480px;
+}
+
+.mg2-question strong {
+  color: var(--gold);
+}
+
+.mg2-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 8px;
+}
+
+.mg2-choice {
+  background: rgba(58,36,16,0.65);
+  border: 1.5px solid rgba(245,166,35,0.35);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: 'Cinzel', serif;
+  color: var(--sand);
+  text-align: left;
+  width: 100%;
+}
+
+.mg2-choice:hover:not(.is-disabled) {
+  border-color: var(--gold);
+  background: rgba(58,36,16,0.85);
+  transform: translateX(2px);
+}
+
+.mg2-choice:active:not(.is-disabled) {
+  transform: scale(0.98);
+}
+
+.mg2-choice.is-disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.mg2-choice.is-correct {
+  border-color: #81C784;
+  background: rgba(60,90,50,0.55);
+}
+
+.mg2-choice.is-near {
+  border-color: #FFB347;
+  background: rgba(120,80,30,0.55);
+}
+
+.mg2-choice.is-far {
+  border-color: rgba(180,90,90,0.55);
+  background: rgba(80,40,40,0.45);
+}
+
+.mg2-choice-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.mg2-choice-text {
+  flex: 1;
+}
+
+.mg2-choice-num {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--lgold);
+  display: block;
+}
+
+.mg2-choice-hint {
+  font-size: 11px;
+  color: var(--sand);
+  opacity: 0.7;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ═══ KOLO 3 — DVĚ CESTY ═══ */
+.mg2-paths {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.mg2-path {
+  flex: 1;
+  background: rgba(58,36,16,0.65);
+  border: 1.5px solid rgba(245,166,35,0.35);
+  border-radius: 10px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+}
+
+.mg2-path:hover:not(.is-disabled) {
+  border-color: var(--gold);
+  background: rgba(58,36,16,0.9);
+  transform: translateY(-2px);
+}
+
+.mg2-path.is-disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.mg2-path-icon {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+
+.mg2-path-name {
+  font-size: 14px;
+  color: var(--lgold);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.mg2-path-detail {
+  font-size: 11px;
+  color: var(--sand);
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* ═══ DUÁLNÍ SCÉNA PRO KOLO 3 (oba běhy paralelně) ═══ */
+.mg2-stage-dual {
+  flex-direction: row;
+}
+
+.mg2-stage-dual .mg2-amphora-wrap.is-winner {
+  animation: mg2-winner-glow 1.2s ease-in-out 3;
+}
+
+@keyframes mg2-winner-glow {
+  0%, 100% { filter: none; }
+  50%      { filter: drop-shadow(0 0 12px rgba(255,215,0,0.8)); }
+}
+
+/* ═══ PROGRESS DOTS (kola 1/2/3) ═══ */
+.mg2-progress {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.mg2-progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(245,166,35,0.2);
+  border: 1px solid rgba(245,166,35,0.4);
+  transition: all 0.2s ease;
+}
+
+.mg2-progress-dot.is-active {
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(245,166,35,0.6);
+}
+
+.mg2-progress-dot.is-done {
+  background: var(--lgold);
+  border-color: var(--lgold);
+}
+
+/* Responsive — menší obrazovky */
+@media (max-width: 480px) {
+  .mg2-amphora-svg { width: 88px; height: 112px; }
+  .mg2-amphora-count { font-size: 24px; }
+  .mg2-vs { font-size: 14px; padding-bottom: 50px; }
+  .mg2-narrator { font-size: 12px; }
+  .mg2-paths { flex-direction: column; }
+}
