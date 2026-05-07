@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.19.0'; // ← KROK 14.18: Hra 2 — Rostoucí hromada, hybrid 3 kola, skóre 0-90
+const VERSION = 'v2.20.0'; // ← KROK 14.19: Skip intro video tapem na overlay
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',

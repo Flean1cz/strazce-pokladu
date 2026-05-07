@@ -8777,6 +8777,12 @@ setTimeout(() => {
     console.warn('[Intro] Chyba při načítání videa, skrývám overlay.');
     hideOverlay(videoOverlay);
   });
+
+  // ═══ SKIP: tap/klik kdekoli na video overlay přeskočí intro ═══
+  videoOverlay.addEventListener('click', function(){
+    try { video.pause(); } catch(_){}
+    hideOverlay(videoOverlay);
+  }, { once: true });
 })();
 /* ═══════════════════════════════════════════════════════
    KONEC KROKU 14
