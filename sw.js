@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.21.0'; // ← KROK 14.20: HRA 3 Poradna u kováře (4. tajemství)
+const VERSION = 'v2.22.0'; // ← KROK 14.21: HRA 4 Stavitel (5. tajemství) + úklid zbytkového KONEC HRY 1
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',

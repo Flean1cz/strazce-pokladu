@@ -3260,6 +3260,355 @@ svg.jar{width:52px;height:72px;}
   transform:translateY(-1px);
 }
 .mg3-next-btn:active{ transform:scale(0.97); }
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 4: STAVITEL (UI styles)
+   3 pokoje × 30 ✨ — tap-to-buy košík.
+   max_wisdom: 90 (3 × 30)
+═══════════════════════════════════════════════════════ */
+
+/* Hlavní kontejner */
+.mg4-board{
+  max-width:420px;
+  width:100%;
+  margin:0 auto;
+  padding:0.9rem 0.6rem 2rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.7rem;
+}
+
+/* Hlavička kola — kolo X/3 + ikona + jméno pokoje */
+.mg4-header{
+  width:100%;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+  margin-bottom:0.2rem;
+}
+.mg4-progress{
+  font-family:'Cinzel',serif;
+  font-size:0.72rem;
+  color:var(--sand);
+  opacity:0.55;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+}
+.mg4-room-name{
+  font-family:'Cinzel',serif;
+  font-size:1.1rem;
+  color:var(--lgold);
+  letter-spacing:0.06em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+}
+.mg4-room-icon{ font-size:1.4rem; }
+
+/* Krátké intro k pokoji */
+.mg4-intro-text{
+  width:100%;
+  font-size:0.85rem;
+  color:rgba(245,230,195,0.78);
+  text-align:center;
+  font-style:italic;
+  line-height:1.4;
+  padding:0 0.4rem;
+}
+
+/* ═══ ROZPOČET LIŠTA ═══ */
+.mg4-budget{
+  width:100%;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.45);
+  border-radius:12px;
+  padding:0.6rem 0.9rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:0.5rem;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+.mg4-budget-label{
+  font-family:'Cinzel',serif;
+  font-size:0.78rem;
+  color:var(--sand);
+  letter-spacing:0.08em;
+  opacity:0.8;
+}
+.mg4-budget-value{
+  font-family:'Cinzel',serif;
+  font-size:1.15rem;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:0.04em;
+  transition:color 0.25s;
+  white-space:nowrap;
+}
+.mg4-budget-value .mg4-budget-spent{
+  color:var(--lgold);
+}
+
+/* Nad rozpočtem — červená výstraha */
+.mg4-budget.is-over{
+  border-color:rgba(229,57,53,0.7);
+  box-shadow:0 4px 14px rgba(229,57,53,0.3), 0 0 16px rgba(229,57,53,0.2);
+  animation:mg4BudgetShake 0.4s ease-out;
+}
+.mg4-budget.is-over .mg4-budget-value{ color:#ff7060; }
+@keyframes mg4BudgetShake{
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-3px); }
+  75%{ transform:translateX(3px); }
+}
+
+/* Varovná řádka nad lištu */
+.mg4-warning{
+  width:100%;
+  text-align:center;
+  font-size:0.78rem;
+  color:#ff7060;
+  font-family:'Cinzel',serif;
+  letter-spacing:0.04em;
+  height:1.1rem;
+  opacity:0;
+  transition:opacity 0.25s;
+}
+.mg4-warning.show{ opacity:1; }
+
+/* ═══ MŘÍŽKA PŘEDMĚTŮ ═══ */
+.mg4-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.55rem;
+}
+
+.mg4-item{
+  background:linear-gradient(135deg, rgba(42,31,21,0.85), rgba(20,14,8,0.9));
+  border:1.5px solid rgba(245,166,35,0.32);
+  border-radius:12px;
+  padding:0.75rem 0.5rem 0.6rem;
+  text-align:center;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  position:relative;
+  transition:transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.25rem;
+  min-height:120px;
+}
+.mg4-item:hover{
+  border-color:rgba(245,166,35,0.55);
+  box-shadow:0 4px 12px rgba(245,166,35,0.15);
+}
+.mg4-item:active{ transform:scale(0.96); }
+
+/* Vybraný předmět — zlatý glow + checkmark */
+.mg4-item.is-selected{
+  border-color:var(--gold);
+  background:linear-gradient(135deg, rgba(245,166,35,0.22), rgba(160,80,20,0.3));
+  box-shadow:0 0 16px rgba(245,166,35,0.4), inset 0 0 8px rgba(255,215,0,0.15);
+}
+.mg4-item.is-selected::after{
+  content:'✓';
+  position:absolute;
+  top:4px;
+  right:6px;
+  width:20px;
+  height:20px;
+  background:var(--gold);
+  color:#2a1a08;
+  border-radius:50%;
+  font-size:0.85rem;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  animation:mg4CheckIn 0.25s ease-out;
+}
+@keyframes mg4CheckIn{
+  from{ transform:scale(0); }
+  to{ transform:scale(1); }
+}
+
+.mg4-item-icon{
+  font-size:2.1rem;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  line-height:1.1;
+}
+.mg4-item-name{
+  font-family:'Cinzel',serif;
+  font-size:0.82rem;
+  color:var(--sand);
+  line-height:1.25;
+  letter-spacing:0.01em;
+}
+.mg4-item-price{
+  font-family:'Cinzel',serif;
+  font-size:0.9rem;
+  color:var(--gold);
+  font-weight:700;
+  margin-top:0.1rem;
+  display:flex;
+  align-items:center;
+  gap:0.15rem;
+}
+.mg4-item.is-selected .mg4-item-price{ color:var(--lgold); }
+
+/* ═══ FINISH TLAČÍTKO ═══ */
+.mg4-finish-wrap{
+  width:100%;
+  text-align:center;
+  margin-top:0.5rem;
+}
+.mg4-finish-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:24px;
+  padding:0.75rem 1.8rem;
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(245,166,35,0.35);
+  transition:transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+}
+.mg4-finish-btn:hover:not(:disabled){
+  box-shadow:0 6px 18px rgba(245,166,35,0.5);
+  transform:translateY(-1px);
+}
+.mg4-finish-btn:active:not(:disabled){ transform:scale(0.97); }
+.mg4-finish-btn:disabled{
+  background:linear-gradient(180deg, #555, #333);
+  color:rgba(255,255,255,0.4);
+  box-shadow:none;
+  cursor:not-allowed;
+  opacity:0.6;
+}
+
+/* ═══ VÝSLEDEK KOLA (breakdown) ═══ */
+.mg4-result{
+  width:100%;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.45);
+  border-radius:14px;
+  padding:1.2rem 1rem;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,166,35,0.18);
+  animation:mg4ResultIn 0.4s ease-out;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+}
+@keyframes mg4ResultIn{
+  from{ opacity:0; transform:translateY(14px) scale(0.96); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+.mg4-result-icon{ font-size:2.6rem; line-height:1; }
+.mg4-result-title{
+  font-family:'Cinzel',serif;
+  font-size:1.2rem;
+  color:var(--lgold);
+  letter-spacing:0.04em;
+}
+.mg4-result-score{
+  font-family:'Cinzel',serif;
+  font-size:1.6rem;
+  color:var(--gold);
+  font-weight:700;
+  letter-spacing:0.05em;
+  text-shadow:0 2px 8px rgba(245,166,35,0.4);
+}
+
+/* Breakdown 4 kritérií */
+.mg4-criteria{
+  display:flex;
+  flex-direction:column;
+  gap:0.4rem;
+  text-align:left;
+  margin-top:0.3rem;
+}
+.mg4-criterion{
+  display:flex;
+  align-items:center;
+  gap:0.55rem;
+  padding:0.45rem 0.6rem;
+  background:rgba(20,14,8,0.5);
+  border-radius:8px;
+  font-size:0.82rem;
+  color:var(--sand);
+  line-height:1.3;
+}
+.mg4-criterion-icon{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.8rem;
+  font-weight:900;
+  flex-shrink:0;
+}
+.mg4-criterion.is-ok .mg4-criterion-icon{
+  background:rgba(76,140,80,0.4);
+  color:#8fdc8f;
+  border:1px solid rgba(76,140,80,0.7);
+}
+.mg4-criterion.is-fail .mg4-criterion-icon{
+  background:rgba(200,60,50,0.3);
+  color:#f08070;
+  border:1px solid rgba(200,60,50,0.6);
+}
+.mg4-criterion-text{ flex:1; }
+.mg4-criterion-pts{
+  font-family:'Cinzel',serif;
+  font-size:0.78rem;
+  color:var(--gold);
+  font-weight:700;
+  letter-spacing:0.04em;
+  white-space:nowrap;
+}
+.mg4-criterion.is-fail .mg4-criterion-pts{
+  color:rgba(245,230,195,0.4);
+  text-decoration:line-through;
+}
+
+/* Tlačítko "Další kolo" pod výsledkem */
+.mg4-next-wrap{
+  width:100%;
+  text-align:center;
+  margin-top:0.5rem;
+}
+.mg4-next-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:24px;
+  padding:0.7rem 1.6rem;
+  font-family:'Cinzel',serif;
+  font-size:0.92rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(245,166,35,0.35);
+  transition:transform 0.15s, box-shadow 0.2s;
+}
+.mg4-next-btn:hover{
+  box-shadow:0 6px 18px rgba(245,166,35,0.5);
+  transform:translateY(-1px);
+}
+.mg4-next-btn:active{ transform:scale(0.97); }
 </style>
 </head>
 <body>
@@ -4206,7 +4555,7 @@ var MINIGAMES = [
   { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty — 3 kola",      max_wisdom: 90, implemented: true  },
   { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "3 kola — kouzlo úročení",  max_wisdom: 90, implemented: true  },
   { id: 3, title: "Poradna u kováře",   icon: "🎭", short: "3 scénáře — pravda nebo podvod?", max_wisdom: 90, implemented: true  },
-  { id: 4, title: "Stavitel",           icon: "🏗️", short: "Zařiď pokoj v rozpočtu",    max_wisdom: 30, implemented: false },
+  { id: 4, title: "Stavitel",           icon: "🏗️", short: "3 pokoje — vlastní hrad",      max_wisdom: 90, implemented: true  },
   { id: 5, title: "Zadní vrátka",       icon: "🛡️", short: "Použij rezervu moudře",     max_wisdom: 30, implemented: false },
   { id: 6, title: "Bazar",              icon: "🛒", short: "Hospodař s Moudrostí",       max_wisdom: 30, implemented: false }
 ];
@@ -11453,7 +11802,423 @@ window.renderMinigame_3 = function(idx) {
 ═══════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════
-   KONEC HRY 1
+   KROK 14 – HRA 4: STAVITEL — datový model
+   3 pokoje, tap-to-buy košík, rozpočet ohraničený.
+   cat: 'must' (nutné ⭐) | 'nice' (útulné 💚) | 'luxury' (zbytečnost ❌)
+   VAR kvůli hoisting — konzistentní s ostatními hrami.
+═══════════════════════════════════════════════════════ */
+var MG4_ROOMS = [
+  // ──────────── KOLO 1: MŮJ POKOJÍČEK ────────────
+  {
+    level: 1,
+    title: 'Můj pokojíček',
+    icon: '🛏️',
+    intro: 'Stěhuješ se do vlastního pokoje. Tatínek ti dal 100 mincí. Co si koupíš?',
+    budget: 100,
+    items: [
+      { id:'r1_bed',     icon:'🛏️', name:'Postel',           price:40, cat:'must' },
+      { id:'r1_desk',    icon:'📚', name:'Stůl na učení',    price:25, cat:'must' },
+      { id:'r1_lamp',    icon:'💡', name:'Lampa',            price:10, cat:'must' },
+      { id:'r1_shelf',   icon:'🪑', name:'Polička na knihy', price:15, cat:'nice' },
+      { id:'r1_rug',     icon:'🟫', name:'Koberec',          price:15, cat:'nice' },
+      { id:'r1_curtain', icon:'🪟', name:'Závěsy',           price:10, cat:'nice' },
+      { id:'r1_tv',      icon:'📺', name:'Plazmová televize', price:60, cat:'luxury' },
+      { id:'r1_chandel', icon:'🕯️', name:'Pozlacený svícen', price:50, cat:'luxury' }
+    ]
+  },
+  // ──────────── KOLO 2: STUDOVNA ────────────
+  {
+    level: 2,
+    title: 'Studovna',
+    icon: '📚',
+    intro: 'Tvůj bratr potřebuje místo, kde se bude moct soustředit. Sestav mu studovnu.',
+    budget: 150,
+    items: [
+      { id:'r2_desk',    icon:'🪑', name:'Pracovní stůl',    price:40, cat:'must' },
+      { id:'r2_chair',   icon:'💺', name:'Židle',            price:30, cat:'must' },
+      { id:'r2_lamp',    icon:'💡', name:'Stolní lampa',     price:20, cat:'must' },
+      { id:'r2_library', icon:'📚', name:'Knihovna',         price:35, cat:'nice' },
+      { id:'r2_globe',   icon:'🌍', name:'Globus',           price:20, cat:'nice' },
+      { id:'r2_curtain', icon:'🪟', name:'Závěsy',           price:15, cat:'nice' },
+      { id:'r2_aquar',   icon:'🐠', name:'Akvárium',         price:60, cat:'luxury' },
+      { id:'r2_console', icon:'🎮', name:'Herní konzole',    price:80, cat:'luxury' }
+    ]
+  },
+  // ──────────── KOLO 3: SPOLEČNÝ KOUT ────────────
+  {
+    level: 3,
+    title: 'Společný kout pro rodinu',
+    icon: '🏰',
+    intro: 'Maminka chce, aby v obýváku byl útulný kout, kde si rodina povídá. 200 mincí — pozor, ne všechno se vejde.',
+    budget: 200,
+    items: [
+      { id:'r3_sofa',    icon:'🛋️', name:'Pohovka',          price:80,  cat:'must' },
+      { id:'r3_table',   icon:'🪵', name:'Konferenční stůl', price:30,  cat:'must' },
+      { id:'r3_lamp',    icon:'💡', name:'Stojací lampa',    price:25,  cat:'must' },
+      { id:'r3_rug',     icon:'🟫', name:'Velký koberec',    price:30,  cat:'nice' },
+      { id:'r3_shelf',   icon:'📦', name:'Polička na hry',   price:20,  cat:'nice' },
+      { id:'r3_curtain', icon:'🪟', name:'Závěsy',           price:15,  cat:'nice' },
+      { id:'r3_flowers', icon:'🌷', name:'Vázička s květy',  price:10,  cat:'nice' },
+      { id:'r3_tv',      icon:'📺', name:'Plazma 100"',      price:120, cat:'luxury' },
+      { id:'r3_chandel', icon:'💎', name:'Pozlacený lustr',  price:80,  cat:'luxury' },
+      { id:'r3_pool',    icon:'🏊', name:'Vnitřní bazének',  price:150, cat:'luxury' }
+    ]
+  }
+];
+/* ═══════════════════════════════════════════════════════
+   KONEC DAT HRY 4
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 4: STAVITEL — herní logika
+   Tap-to-buy košík. 3 pokoje, 30 ✨ za kolo. Bez kováře.
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_4 = function(idx) {
+  // Cleanup případného předchozího běhu
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ STATE SÉRIE ════════
+  var TOTAL_LEVELS = 3;
+  var currentLevel = 1;
+  var levelScores = [0, 0, 0];
+  var seriesScore = 0;
+  var active = true;
+  var cart = {};  // { itemId: true } pro vybrané položky aktuálního kola
+
+  // ════════ BOARD DOM ════════
+  var board = document.createElement('div');
+  board.className = 'mg4-board';
+  wrap.appendChild(board);
+
+  // ════════ INTRO KARTA ════════
+  function showIntro() {
+    if (!active) return;
+    board.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">🏗️</div>' +
+        '<div class="mg0-card-title">Stavitel</div>' +
+        '<div class="mg0-card-text">' +
+          'Zařídíš <strong>3 pokoje</strong>. Každý má svůj <strong>rozpočet</strong>.<br><br>' +
+          '🛏️ <strong>Nutné věci</strong> potřebuješ na bydlení.<br>' +
+          '💚 <strong>Útulné věci</strong> dělají z domu hrad.<br>' +
+          '❌ <strong>Lesklé zbytečnosti</strong> tě svedou — pozor!<br><br>' +
+          '<em>Za každý chytrý pokoj <strong>30 ✨</strong>. Celkem až 90 ✨.</em>' +
+        '</div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg4-start">▶ Zařídit pokoj 1</button>' +
+      '</div>';
+    var btn = document.getElementById('mg4-start');
+    if (btn) btn.addEventListener('click', function(){ startRound(); }, { once: true });
+  }
+
+  // ════════ START KOLA ════════
+  function startRound() {
+    if (!active) return;
+    var room = MG4_ROOMS[currentLevel - 1];
+    if (!room) { showSeriesFinish(); return; }
+
+    cart = {};  // Vyresetuj košík pro nové kolo
+
+    var html =
+      '<div class="mg4-header">' +
+        '<div class="mg4-progress">Kolo ' + currentLevel + ' ze ' + TOTAL_LEVELS + '</div>' +
+        '<div class="mg4-room-name">' +
+          '<span class="mg4-room-icon">' + room.icon + '</span>' +
+          '<span>' + room.title + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg4-intro-text">' + room.intro + '</div>' +
+      '<div class="mg4-warning" id="mg4-warning">Jsi nad rozpočtem — ubeř něco!</div>' +
+      '<div class="mg4-budget" id="mg4-budget">' +
+        '<span class="mg4-budget-label">💰 Rozpočet</span>' +
+        '<span class="mg4-budget-value">' +
+          '<span class="mg4-budget-spent" id="mg4-spent">0</span>' +
+          ' / ' + room.budget + ' mincí' +
+        '</span>' +
+      '</div>' +
+      '<div class="mg4-grid" id="mg4-grid">';
+
+    for (var i = 0; i < room.items.length; i++) {
+      var it = room.items[i];
+      html +=
+        '<div class="mg4-item" data-id="' + it.id + '">' +
+          '<div class="mg4-item-icon">' + it.icon + '</div>' +
+          '<div class="mg4-item-name">' + it.name + '</div>' +
+          '<div class="mg4-item-price">💰 ' + it.price + '</div>' +
+        '</div>';
+    }
+    html +=
+      '</div>' +
+      '<div class="mg4-finish-wrap">' +
+        '<button class="mg4-finish-btn" id="mg4-finish" disabled>✓ Dokončit pokoj</button>' +
+      '</div>';
+
+    board.innerHTML = html;
+
+    // Bind handlerů na položky
+    var items = board.querySelectorAll('.mg4-item');
+    for (var j = 0; j < items.length; j++) {
+      (function(el){
+        el.addEventListener('click', function(){
+          toggleItem(el.getAttribute('data-id'), el);
+        });
+      })(items[j]);
+    }
+
+    // Bind na Dokončit
+    var fb = document.getElementById('mg4-finish');
+    if (fb) fb.addEventListener('click', function(){
+      if (fb.disabled) return;
+      finishRound();
+    });
+
+    updateBudgetUI();
+  }
+
+  // ════════ TOGGLE POLOŽKY ════════
+  function toggleItem(itemId, itemEl) {
+    if (!active) return;
+    if (cart[itemId]) {
+      delete cart[itemId];
+      itemEl.classList.remove('is-selected');
+    } else {
+      cart[itemId] = true;
+      itemEl.classList.add('is-selected');
+    }
+    updateBudgetUI();
+  }
+
+  // ════════ UPDATE ROZPOČTU + DOKONČIT TLAČÍTKA ════════
+  function updateBudgetUI() {
+    var room = MG4_ROOMS[currentLevel - 1];
+    if (!room) return;
+
+    var spent = 0;
+    var anySelected = false;
+    for (var i = 0; i < room.items.length; i++) {
+      if (cart[room.items[i].id]) {
+        spent += room.items[i].price;
+        anySelected = true;
+      }
+    }
+
+    var spentEl = document.getElementById('mg4-spent');
+    var budgetEl = document.getElementById('mg4-budget');
+    var warnEl = document.getElementById('mg4-warning');
+    var finishBtn = document.getElementById('mg4-finish');
+
+    if (spentEl) spentEl.textContent = spent;
+
+    var over = spent > room.budget;
+    if (budgetEl) {
+      if (over) budgetEl.classList.add('is-over');
+      else      budgetEl.classList.remove('is-over');
+    }
+    if (warnEl) {
+      if (over) warnEl.classList.add('show');
+      else      warnEl.classList.remove('show');
+    }
+    if (finishBtn) {
+      // Disabled když nad rozpočet NEBO prázdný košík
+      finishBtn.disabled = over || !anySelected;
+    }
+  }
+
+  // ════════ VYHODNOCENÍ KOLA ════════
+  function scoreRound(room) {
+    var totalCost = 0;
+    var hasMustAll = true;
+    var hasAnyNice = false;
+    var hasAnyLuxury = false;
+
+    for (var i = 0; i < room.items.length; i++) {
+      var it = room.items[i];
+      var inCart = !!cart[it.id];
+      if (inCart) totalCost += it.price;
+      if (it.cat === 'must' && !inCart) hasMustAll = false;
+      if (it.cat === 'nice' && inCart) hasAnyNice = true;
+      if (it.cat === 'luxury' && inCart) hasAnyLuxury = true;
+    }
+
+    var withinBudget = totalCost <= room.budget;
+    var score = 0;
+    if (hasMustAll)   score += 15;
+    if (withinBudget) score += 5;
+    if (!hasAnyLuxury) score += 5;
+    if (hasAnyNice)   score += 5;
+
+    return {
+      score: score,
+      totalCost: totalCost,
+      remaining: room.budget - totalCost,
+      hasMustAll: hasMustAll,
+      withinBudget: withinBudget,
+      hasAnyLuxury: hasAnyLuxury,
+      hasAnyNice: hasAnyNice
+    };
+  }
+
+  // ════════ DOKONČENÍ KOLA — UKAŽ VÝSLEDEK ════════
+  function finishRound() {
+    if (!active) return;
+    var room = MG4_ROOMS[currentLevel - 1];
+    var result = scoreRound(room);
+    levelScores[currentLevel - 1] = result.score;
+
+    var iconText, titleText;
+    if (result.score === 30) {
+      iconText = '🏆'; titleText = 'Skvělý pokoj!';
+    } else if (result.score >= 20) {
+      iconText = '⭐'; titleText = 'Dobře zařízeno';
+    } else if (result.score >= 10) {
+      iconText = '✨'; titleText = 'Něco chybí...';
+    } else {
+      iconText = '🌱'; titleText = 'Zkus to znovu';
+    }
+
+    // Sestavení kritérií
+    var crits = [
+      { ok: result.hasMustAll,   text: 'Všechny nutné věci zakoupené',  pts: 15 },
+      { ok: result.withinBudget, text: 'Vešel/a ses do rozpočtu',       pts: 5  },
+      { ok: !result.hasAnyLuxury,text: 'Žádné lesklé zbytečnosti',      pts: 5  },
+      { ok: result.hasAnyNice,   text: 'Aspoň jedna útulná věc',        pts: 5  }
+    ];
+
+    var critsHtml = '';
+    for (var i = 0; i < crits.length; i++) {
+      var c = crits[i];
+      critsHtml +=
+        '<div class="mg4-criterion ' + (c.ok ? 'is-ok' : 'is-fail') + '">' +
+          '<span class="mg4-criterion-icon">' + (c.ok ? '✓' : '✗') + '</span>' +
+          '<span class="mg4-criterion-text">' + c.text + '</span>' +
+          '<span class="mg4-criterion-pts">+' + c.pts + ' ✨</span>' +
+        '</div>';
+    }
+
+    var isLast = (currentLevel >= TOTAL_LEVELS);
+    var nextLabel = isLast ? '✨ Vidět výsledek' : ('Dál na pokoj ' + (currentLevel + 1) + ' →');
+
+    board.innerHTML =
+      '<div class="mg4-header">' +
+        '<div class="mg4-progress">Kolo ' + currentLevel + ' ze ' + TOTAL_LEVELS + ' — výsledek</div>' +
+      '</div>' +
+      '<div class="mg4-result">' +
+        '<div class="mg4-result-icon">' + iconText + '</div>' +
+        '<div class="mg4-result-title">' + titleText + '</div>' +
+        '<div class="mg4-result-score">' + result.score + ' / 30 ✨</div>' +
+        '<div class="mg4-criteria">' + critsHtml + '</div>' +
+      '</div>' +
+      '<div class="mg4-next-wrap">' +
+        '<button class="mg4-next-btn" id="mg4-next">' + nextLabel + '</button>' +
+      '</div>';
+
+    var nb = document.getElementById('mg4-next');
+    if (nb) nb.addEventListener('click', function(){
+      if (isLast) showSeriesFinish();
+      else { currentLevel++; startRound(); }
+    }, { once: true });
+  }
+
+  // ════════ FINIŠ SÉRIE ════════
+  function showSeriesFinish() {
+    if (!active) return;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+    var result = (typeof finishMinigame === 'function')
+      ? finishMinigame(idx, seriesScore)
+      : { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+
+    var iconText, titleText, subText;
+    if (seriesScore === 90) {
+      iconText = '🏰';
+      titleText = 'Mistr stavitel!';
+      subText = 'Tři pokoje jsou útulné a tvá truhla zůstala plná. Pamatuj — vlastní hrad není o zlatě, ale o péči.';
+    } else if (seriesScore >= 60) {
+      iconText = '⭐';
+      titleText = 'Hezky postaveno';
+      subText = 'Tvé pokoje žijí. Příště pomysli i na rezervu — útulnost roste pomalu, ne plnou kapsou.';
+    } else if (seriesScore >= 30) {
+      iconText = '✨';
+      titleText = 'Začínáš stavět';
+      subText = 'Ne každá lesklá věc patří do pokoje. Vrať se zítra a zkus to znovu.';
+    } else {
+      iconText = '🌱';
+      titleText = 'Pojďme znovu';
+      subText = 'Tvůj pokoj zatím křičí, místo aby šeptal. Stavitel se nestane mistrem za jeden den.';
+    }
+
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames && state.minigames.plays && state.minigames.plays[idx] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost získal — zítra zase!</div>';
+    }
+
+    board.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">Pokoj 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Pokoj 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Pokoj 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg4-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg4-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg4-replay');
+    var bb = document.getElementById('mg4-back');
+    if (rb) rb.addEventListener('click', function(){
+      currentLevel = 1;
+      levelScores = [0, 0, 0];
+      seriesScore = 0;
+      cart = {};
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkádova ceremonie u perfektního skóre (90)
+    if (seriesScore === 90) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = (result.isNewBest && state.minigames.plays[idx] === 1)
+        ? '🏰 Mistr stavitel, ' + name + '! Tři pokoje šeptají útulnost a tvá truhla zůstala plná. Vlastní hrad nestaví zlato, ale péče. Jsi pravý strážce svého domova.'
+        : '✨ Stále stavíš s rozvahou, ' + name + '! Tvé pokoje by záviděl i sám král Babylonu.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [
+            { label: 'Děkuji, Arkáde', response: 'Kdo pečuje o svůj domov, pečuje o sebe. Pamatuj si to.' }
+          ]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ CLEANUP ════════
+  window._minigame_cleanup = function() {
+    active = false;
+    cart = {};
+    if (board && board.parentNode) {
+      try { board.parentNode.removeChild(board); } catch(_){}
+    }
+  };
+
+  // Start
+  showIntro();
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 4
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
