@@ -2959,6 +2959,307 @@ svg.jar{width:52px;height:72px;}
   100%{box-shadow:0 0 0 rgba(245,166,35,0);}
 }
 .interest-pulse{animation:interestPulse 1.2s ease;}
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 3: PORADNA U KOVÁŘE (UI styles)
+   3 narativní scénáře — 4 volby, kovářův komentář, finále.
+   max_wisdom: 90 (3 × 30)
+═══════════════════════════════════════════════════════ */
+
+/* Hlavní kontejner */
+.mg3-board{
+  max-width:420px;
+  width:100%;
+  margin:0 auto;
+  padding:1rem 0.75rem 2rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.9rem;
+}
+
+/* Ukazatel kola (např. "Kolo 2 ze 3") */
+.mg3-progress{
+  font-family:'Cinzel',serif;
+  font-size:0.78rem;
+  color:var(--sand);
+  opacity:0.55;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  text-align:center;
+}
+
+/* Skóre v průběhu hry */
+.mg3-scorebar{
+  font-family:'Cinzel',serif;
+  font-size:0.85rem;
+  color:var(--gold);
+  text-align:center;
+  letter-spacing:0.06em;
+  opacity:0.85;
+}
+
+/* ═══ SCÉNICKÁ KARTA (postava + text scénáře) ═══ */
+.mg3-scene{
+  width:100%;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.42);
+  border-radius:14px;
+  padding:1.4rem 1.1rem 1.2rem;
+  text-align:center;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,166,35,0.18);
+  animation:mg3SceneIn 0.4s ease-out;
+  position:relative;
+}
+@keyframes mg3SceneIn{
+  from { opacity:0; transform:translateY(14px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* Kruhový rámeček s emoji postavy */
+.mg3-scene-portrait{
+  width:64px;
+  height:64px;
+  margin:0 auto 0.5rem;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(245,166,35,0.25), rgba(58,36,16,0.6));
+  border:2px solid rgba(245,166,35,0.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2.2rem;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4), inset 0 0 12px rgba(245,166,35,0.15);
+}
+
+.mg3-scene-name{
+  font-family:'Cinzel',serif;
+  font-size:0.92rem;
+  color:var(--lgold);
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  margin-bottom:0.6rem;
+  opacity:0.9;
+}
+
+.mg3-scene-text{
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  color:var(--sand);
+  line-height:1.55;
+  letter-spacing:0.01em;
+}
+.mg3-scene-text em{
+  color:rgba(255,233,163,0.85);
+  font-style:italic;
+}
+
+/* Otázka pod scénou */
+.mg3-prompt{
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  color:var(--gold);
+  text-align:center;
+  letter-spacing:0.08em;
+  margin-top:0.2rem;
+}
+
+/* ═══ VOLBY (4 tlačítka pod sebou) ═══ */
+.mg3-choices{
+  display:flex;
+  flex-direction:column;
+  gap:0.55rem;
+  width:100%;
+}
+
+.mg3-choice-btn{
+  background:linear-gradient(135deg, rgba(42,31,21,0.85), rgba(20,14,8,0.9));
+  border:1.5px solid rgba(245,166,35,0.35);
+  border-radius:10px;
+  padding:0.75rem 0.9rem;
+  color:var(--sand);
+  font-family:'Cinzel',serif;
+  font-size:0.86rem;
+  line-height:1.4;
+  letter-spacing:0.02em;
+  text-align:left;
+  cursor:pointer;
+  transition:transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s, opacity 0.3s;
+  user-select:none;
+  -webkit-user-select:none;
+  display:flex;
+  align-items:center;
+  gap:0.6rem;
+  width:100%;
+}
+.mg3-choice-btn:hover:not(:disabled){
+  border-color:rgba(245,166,35,0.7);
+  box-shadow:0 4px 14px rgba(245,166,35,0.18);
+  transform:translateY(-1px);
+}
+.mg3-choice-btn:active:not(:disabled){ transform:scale(0.98); }
+.mg3-choice-btn:disabled{ cursor:default; }
+
+/* Vybraná volba — zlatý glow */
+.mg3-choice-btn.is-selected{
+  border-color:var(--gold);
+  background:linear-gradient(135deg, rgba(245,166,35,0.22), rgba(160,80,20,0.32));
+  box-shadow:0 0 18px rgba(245,166,35,0.45), inset 0 0 8px rgba(255,215,0,0.2);
+  color:var(--lgold);
+}
+
+/* Ostatní volby ztlumené */
+.mg3-choice-btn.is-faded{
+  opacity:0.32;
+  filter:grayscale(0.4);
+}
+
+/* Emoji vlevo v tlačítku */
+.mg3-choice-emoji{
+  font-size:1.3rem;
+  flex-shrink:0;
+  width:1.6rem;
+  text-align:center;
+}
+
+/* Hlavní text volby */
+.mg3-choice-label{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:0.15rem;
+}
+
+/* Drobná atribuce ("jak radí Matěj") — jen v kole 3 */
+.mg3-choice-attr{
+  font-size:0.7rem;
+  color:rgba(245,166,35,0.6);
+  font-style:italic;
+  letter-spacing:0.04em;
+}
+
+/* ═══ FEEDBACK (výsledek + kovářova bublina) ═══ */
+.mg3-feedback{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+  animation:mg3FeedIn 0.4s ease-out;
+}
+@keyframes mg3FeedIn{
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* Krátký výsledek (ikonka + věta) */
+.mg3-outcome{
+  background:rgba(20,14,8,0.7);
+  border-left:3px solid var(--gold);
+  border-radius:8px;
+  padding:0.7rem 0.9rem;
+  display:flex;
+  gap:0.6rem;
+  align-items:flex-start;
+}
+.mg3-outcome-icon{
+  font-size:1.3rem;
+  flex-shrink:0;
+  line-height:1.2;
+}
+.mg3-outcome-text{
+  flex:1;
+  font-size:0.85rem;
+  color:var(--sand);
+  line-height:1.5;
+}
+
+/* Kovářova bublina */
+.mg3-kovar{
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:1.5px solid rgba(245,166,35,0.45);
+  border-radius:12px;
+  padding:0.9rem 0.95rem;
+  display:flex;
+  gap:0.7rem;
+  align-items:flex-start;
+  box-shadow:0 4px 16px rgba(0,0,0,0.4);
+  position:relative;
+}
+.mg3-kovar::before{
+  content:'';
+  position:absolute;
+  top:-7px;
+  left:24px;
+  width:12px;
+  height:12px;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border-left:1.5px solid rgba(245,166,35,0.45);
+  border-top:1.5px solid rgba(245,166,35,0.45);
+  transform:rotate(45deg);
+}
+.mg3-kovar-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(245,166,35,0.4), rgba(120,60,20,0.6));
+  border:2px solid var(--gold);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.4rem;
+  flex-shrink:0;
+  box-shadow:0 0 10px rgba(245,166,35,0.35);
+}
+.mg3-kovar-body{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:0.2rem;
+}
+.mg3-kovar-name{
+  font-family:'Cinzel',serif;
+  font-size:0.72rem;
+  color:var(--lgold);
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:0.85;
+}
+.mg3-kovar-text{
+  font-size:0.86rem;
+  color:var(--sand);
+  line-height:1.5;
+  font-style:italic;
+}
+
+/* ═══ TLAČÍTKO "DALŠÍ KOLO" ═══ */
+.mg3-next-wrap{
+  width:100%;
+  text-align:center;
+  min-height:50px;
+  margin-top:0.3rem;
+}
+.mg3-next-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:24px;
+  padding:0.7rem 1.6rem;
+  font-family:'Cinzel',serif;
+  font-size:0.92rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(245,166,35,0.35);
+  transition:transform 0.15s, box-shadow 0.2s;
+  animation:mg3NextIn 0.4s ease-out;
+}
+@keyframes mg3NextIn{
+  from { opacity:0; transform:translateY(8px) scale(0.92); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.mg3-next-btn:hover{
+  box-shadow:0 6px 18px rgba(245,166,35,0.5);
+  transform:translateY(-1px);
+}
+.mg3-next-btn:active{ transform:scale(0.97); }
 </style>
 </head>
 <body>
@@ -3904,7 +4205,7 @@ var MINIGAMES = [
   { id: 0, title: "Desátek",            icon: "🪙", short: "3 kola — chytni jednu z deseti", max_wisdom: 90, implemented: true  },
   { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty — 3 kola",      max_wisdom: 90, implemented: true  },
   { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "3 kola — kouzlo úročení",  max_wisdom: 90, implemented: true  },
-  { id: 3, title: "Matějova nabídka",   icon: "🎭", short: "Pravda nebo podvod?",        max_wisdom: 30, implemented: false },
+  { id: 3, title: "Poradna u kováře",   icon: "🎭", short: "3 scénáře — pravda nebo podvod?", max_wisdom: 90, implemented: true  },
   { id: 4, title: "Stavitel",           icon: "🏗️", short: "Zařiď pokoj v rozpočtu",    max_wisdom: 30, implemented: false },
   { id: 5, title: "Zadní vrátka",       icon: "🛡️", short: "Použij rezervu moudře",     max_wisdom: 30, implemented: false },
   { id: 6, title: "Bazar",              icon: "🛒", short: "Hospodař s Moudrostí",       max_wisdom: 30, implemented: false }
@@ -10742,6 +11043,413 @@ window.renderMinigame_2 = function(idx) {
 };
 /* ═══════════════════════════════════════════════════════
    KONEC HRY 2
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 3: PORADNA U KOVÁŘE — datový model
+   3 narativní scénáře po 4 volbách. Skóre 0–30 za volbu.
+   level: 1 (Matějova mapa) | 2 (Tajemný cizinec) | 3 (Babiččin dárek)
+   VAR kvůli hoisting — konzistentní s SEALS, MG1_CARDS apod.
+═══════════════════════════════════════════════════════ */
+var MG3_SCENARIOS = [
+  // ──────────── KOLO 1: MATĚJOVA MAPA ────────────
+  {
+    level: 1,
+    portrait: '🧒',
+    name: 'Matěj',
+    scene: 'Ráno k tobě přiběhne kamarád Matěj, celý zadýchaný. <em>„Kluk u řeky prodává mapu ke stromu, na kterém rostou bonbony! Stačí mi pět mincí a koupím ji pro nás všechny!"</em>',
+    prompt: 'Co uděláš?',
+    choices: [
+      {
+        emoji: '💰',
+        label: '„Tady máš pět mincí, jdi koupit."',
+        score: 5,
+        outcomeIcon: '💸',
+        outcomeText: 'Mince utekly s Matějem. Druhý den se vrátí jen s počmáraným papírem — žádný strom, žádné bonbony.',
+        kovarText: 'Mince utekly jako voda děravým sítem. Matěj naletěl podvodníkovi — a tys naletěl Matějovi.'
+      },
+      {
+        emoji: '🛡️',
+        label: '„Ne. Žádné mince ti nedám."',
+        score: 20,
+        outcomeIcon: '🛡️',
+        outcomeText: 'Mince zůstaly v truhle. Matěj odešel zklamaný — ale ty ses nikoho nezeptal.',
+        kovarText: 'Chytře. Ale moudrost druhého může změnit tvé rozhodnutí v zlato — neboj se zeptat.'
+      },
+      {
+        emoji: '🔨',
+        label: '„Počkej, zeptám se kováře."',
+        score: 30,
+        outcomeIcon: '✨',
+        outcomeText: 'Kovář ti hned potvrdí, že je to podvod. Mince v bezpečí — a navíc znáš pravidlo navždy.',
+        kovarText: 'Tak je to správně. Kdo nezvedne pluh, neví, jak hluboko brát. Matěj o penězích neví nic.'
+      },
+      {
+        emoji: '🤔',
+        label: '„Matěji, popiš tu mapu — kde přesně je ten strom?"',
+        score: 10,
+        outcomeIcon: '🤔',
+        outcomeText: 'Matěj se zakoktá, neumí odpovědět. Poznáš podvod — ale skoro jsi mu uvěřil.',
+        kovarText: 'Skoro... Že se ptáš, je dobré. Ale Matěj sám neví — jeho hlavou neprošla ani jedna pravdivá mince.'
+      }
+    ]
+  },
+
+  // ──────────── KOLO 2: TAJEMNÝ CIZINEC ────────────
+  {
+    level: 2,
+    portrait: '🎩',
+    name: 'Cizinec na jarmarku',
+    scene: 'Na jarmarku tě zastaví muž v zlatém klobouku. <em>„Mám pro tebe tajemství,"</em> šeptá. <em>„Dej mi deset mincí a já ti za jediný den vrátím dvacet. Znám stará kouzla."</em>',
+    prompt: 'Co odpovíš?',
+    choices: [
+      {
+        emoji: '💰',
+        label: '„Deset za jeden den? Souhlasím!"',
+        score: 5,
+        outcomeIcon: '💸',
+        outcomeText: 'Cizinec zmizel v davu. Mince pryč, žádné kouzlo se nekonalo.',
+        kovarText: 'Žádné kouzlo nepromění deset v dvacet za den. Peníze rostou prací, časem a moudrostí — ne kouzly.'
+      },
+      {
+        emoji: '🚶',
+        label: '„Ne, díky." — a odejdeš.',
+        score: 15,
+        outcomeIcon: '🛡️',
+        outcomeText: 'Mince zůstaly. Ale podvodník půjde k jinému dítěti — neodhalil jsi ho.',
+        kovarText: 'Lepší než ztráta. Ale kdyby ses zeptal, kdo je, mohl bys ho odhalit i pro ostatní.'
+      },
+      {
+        emoji: '🎲',
+        label: '„Zkusím to s jednou mincí — uvidíme."',
+        score: 10,
+        outcomeIcon: '💸',
+        outcomeText: 'Jedna mince pryč. Lekce levnější, ale stejně placená.',
+        kovarText: 'Lepší než deset. Ale pravidlo zní: kdo slibuje zázrak za den, lže o všem. Ani jedna mince netest nestojí.'
+      },
+      {
+        emoji: '🔍',
+        label: '„Kdo jsi? Kde tě najdu zítra?"',
+        score: 30,
+        outcomeIcon: '✨',
+        outcomeText: 'Cizinec zakoktá, ucouvne, zmizí v davu. Odhalil jsi podvod sám.',
+        kovarText: 'Tak je to správně! Skutečný kupec vždy řekne, kdo je a kde ho najít. Podvodník tě potřebuje rychle a tajně.'
+      }
+    ]
+  },
+
+  // ──────────── KOLO 3: BABIČČIN DÁREK ────────────
+  {
+    level: 3,
+    portrait: '🎁',
+    name: 'Babiččin dárek',
+    scene: 'Babička ti dala k narozeninám padesát mincí. V tržišti potkáš čtyři lidi a každý ti radí jinak. <em>Komu se svěříš?</em>',
+    prompt: 'Co opravdu uděláš?',
+    choices: [
+      {
+        emoji: '🧒',
+        label: '„Utratím za svítící meč!"',
+        attribution: 'jak radí Matěj',
+        score: 5,
+        outcomeIcon: '💸',
+        outcomeText: 'Meč se zlomí za týden. Padesát mincí v ohni — a ty zůstaneš s prázdnou kapsou.',
+        kovarText: 'Matěj utrácí to, co má. Ale neví, co je hodnota.'
+      },
+      {
+        emoji: '👴',
+        label: '„Půjčím Václavovi — vyhraje v kostkách dvojnásob."',
+        attribution: 'jak radí tulák',
+        score: 5,
+        outcomeIcon: '💸',
+        outcomeText: 'Václav prohraje, omluví se a zmizí. Padesát mincí pryč.',
+        kovarText: 'Hazard nikdy nevrátí. Tuláka o radu prosit nesmíš.'
+      },
+      {
+        emoji: '👵',
+        label: '„Schovám si je pod polštář."',
+        attribution: 'jak radí babička',
+        score: 15,
+        outcomeIcon: '🛏️',
+        outcomeText: 'Po roce pořád padesát. Ani víc, ani míň — mince spaly.',
+        kovarText: 'Babička tě má ráda. Ale mince pod polštářem jsou jako semena na poličce — nikdy nevyrostou.'
+      },
+      {
+        emoji: '🔨',
+        label: '„Pět mincí do truhly NAVŽDY. O zbytku rozhodnu zítra."',
+        attribution: 'jak radí kovář',
+        score: 30,
+        outcomeIcon: '✨',
+        outcomeText: 'Pět mincí v truhle. Druhý den koupíš pastelky a knížku, na kterou ses dlouho těšil — a pár mincí ještě zbylo.',
+        kovarText: 'Tak je to správně. Dělíš a přemýšlíš — to je cesta moudrých.'
+      }
+    ]
+  }
+];
+/* ═══════════════════════════════════════════════════════
+   KONEC DAT HRY 3
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 3: PORADNA U KOVÁŘE — herní logika
+   DOM-based, narativní, 3 scénáře, kovářova bublina.
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_3 = function(idx) {
+  // Cleanup případného předchozího běhu
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ STATE SÉRIE ════════
+  var TOTAL_LEVELS = 3;
+  var currentLevel = 1;          // 1, 2, 3
+  var levelScores = [0, 0, 0];
+  var seriesScore = 0;
+  var active = true;
+  var nextTimer = null;          // setTimeout pro odhalení "Další kolo"
+
+  // ════════ BOARD DOM ════════
+  var board = document.createElement('div');
+  board.className = 'mg3-board';
+  wrap.appendChild(board);
+
+  // ════════ HELPER: BEZPEČNÉ PŘIDÁNÍ HTML ════════
+  function setHTML(el, html){ if (el) el.innerHTML = html; }
+
+  // ════════ INTRO KARTA ════════
+  function showIntro() {
+    if (!active) return;
+    board.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">🔨</div>' +
+        '<div class="mg0-card-title">Poradna u kováře</div>' +
+        '<div class="mg0-card-text">Tahle hra má <strong>3 scénáře</strong>. ' +
+          'V každém někdo přijde s nabídkou nebo radou.<br><br>' +
+          '🤔 Vyber, co bys udělal/a.<br>' +
+          '🔨 Kovář ti potom poví, jak to dopadlo.<br><br>' +
+          '<em>Za moudré volby získáš až <strong>30 ✨</strong> v každém kole. ' +
+          'Celkem se dá získat 90 ✨.</em></div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg3-start">▶ Začít kolo 1</button>' +
+      '</div>';
+    var btn = document.getElementById('mg3-start');
+    if (btn) btn.addEventListener('click', function(){ startRound(); }, { once: true });
+  }
+
+  // ════════ START KOLA ════════
+  function startRound() {
+    if (!active) return;
+    var scenario = MG3_SCENARIOS[currentLevel - 1];
+    if (!scenario) { showFinish(); return; }
+
+    // Sestavení karty + voleb
+    var html =
+      '<div class="mg3-progress">Kolo ' + currentLevel + ' ze ' + TOTAL_LEVELS + '</div>' +
+      '<div class="mg3-scene">' +
+        '<div class="mg3-scene-portrait">' + scenario.portrait + '</div>' +
+        '<div class="mg3-scene-name">' + scenario.name + '</div>' +
+        '<div class="mg3-scene-text">' + scenario.scene + '</div>' +
+      '</div>' +
+      '<div class="mg3-prompt">' + scenario.prompt + '</div>' +
+      '<div class="mg3-choices" id="mg3-choices">';
+
+    for (var i = 0; i < scenario.choices.length; i++) {
+      var c = scenario.choices[i];
+      var attrHtml = c.attribution
+        ? '<span class="mg3-choice-attr">(' + c.attribution + ')</span>'
+        : '';
+      html +=
+        '<button class="mg3-choice-btn" data-choice="' + i + '">' +
+          '<span class="mg3-choice-emoji">' + c.emoji + '</span>' +
+          '<span class="mg3-choice-label">' +
+            '<span>' + c.label + '</span>' +
+            attrHtml +
+          '</span>' +
+        '</button>';
+    }
+    html += '</div>';
+
+    // Skóre v průběhu (zobrazí se až od kola 2)
+    if (currentLevel > 1) {
+      var soFar = levelScores[0] + levelScores[1];
+      html += '<div class="mg3-scorebar">Doposud: ' + soFar + ' / ' + ((currentLevel - 1) * 30) + ' ✨</div>';
+    }
+
+    board.innerHTML = html;
+
+    // Bind handlerů na volby
+    var btns = board.querySelectorAll('.mg3-choice-btn');
+    for (var j = 0; j < btns.length; j++) {
+      (function(btn){
+        btn.addEventListener('click', function(){
+          var ci = parseInt(btn.getAttribute('data-choice'), 10);
+          handleChoice(ci);
+        }, { once: true });
+      })(btns[j]);
+    }
+  }
+
+  // ════════ ZPRACOVÁNÍ VOLBY ════════
+  function handleChoice(choiceIdx) {
+    if (!active) return;
+    var scenario = MG3_SCENARIOS[currentLevel - 1];
+    var choice = scenario.choices[choiceIdx];
+    if (!choice) return;
+
+    // Zaznamenej skóre
+    levelScores[currentLevel - 1] = choice.score;
+
+    // Vizualizace: zvolené tlačítko zlatě, ostatní fade & disabled
+    var btns = board.querySelectorAll('.mg3-choice-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+      var bi = parseInt(btns[i].getAttribute('data-choice'), 10);
+      if (bi === choiceIdx) {
+        btns[i].classList.add('is-selected');
+      } else {
+        btns[i].classList.add('is-faded');
+      }
+    }
+
+    // Vlož feedback panel (výsledek + kovářova bublina)
+    var feedback = document.createElement('div');
+    feedback.className = 'mg3-feedback';
+    feedback.innerHTML =
+      '<div class="mg3-outcome">' +
+        '<div class="mg3-outcome-icon">' + choice.outcomeIcon + '</div>' +
+        '<div class="mg3-outcome-text">' + choice.outcomeText + '</div>' +
+      '</div>' +
+      '<div class="mg3-kovar">' +
+        '<div class="mg3-kovar-avatar">🔨</div>' +
+        '<div class="mg3-kovar-body">' +
+          '<div class="mg3-kovar-name">Kovář</div>' +
+          '<div class="mg3-kovar-text">„' + choice.kovarText + '"</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg3-next-wrap" id="mg3-next-wrap"></div>';
+    board.appendChild(feedback);
+
+    // Po 1.4s nechej objevit tlačítko "Další" / "Vidět výsledek"
+    if (nextTimer) { clearTimeout(nextTimer); }
+    nextTimer = setTimeout(function(){
+      if (!active) return;
+      var nextWrap = document.getElementById('mg3-next-wrap');
+      if (!nextWrap) return;
+
+      var isLast = (currentLevel >= TOTAL_LEVELS);
+      var btnLabel = isLast ? '✨ Vidět výsledek' : ('Další kolo ' + (currentLevel + 1) + ' →');
+
+      nextWrap.innerHTML =
+        '<button class="mg3-next-btn" id="mg3-next-btn">' + btnLabel + '</button>';
+
+      var nb = document.getElementById('mg3-next-btn');
+      if (nb) nb.addEventListener('click', function(){
+        if (isLast) {
+          showFinish();
+        } else {
+          currentLevel++;
+          startRound();
+        }
+      }, { once: true });
+    }, 1400);
+  }
+
+  // ════════ FINIŠ KARTA ════════
+  function showFinish() {
+    if (!active) return;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+    var result = (typeof finishMinigame === 'function')
+      ? finishMinigame(idx, seriesScore)
+      : { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+
+    var iconText, titleText, subText;
+    if (seriesScore === 90) {
+      iconText = '🏆';
+      titleText = 'Strážce pravdy!';
+      subText = 'Tři lháře jsi nepřemohl, kovář tě nazve svým žákem. Kdo umí rozeznat moudrého od pošetilého, je sám moudrý.';
+    } else if (seriesScore >= 60) {
+      iconText = '⭐';
+      titleText = 'Skvěle!';
+      subText = 'Slyšel jsi hlasy moudrosti. Příště se zeptej dřív, než dáš mince z ruky.';
+    } else if (seriesScore >= 30) {
+      iconText = '✨';
+      titleText = 'Začínáš poznávat lháře';
+      subText = 'I dospělí se v tom učí celý život. Vrať se zítra — Matěj přijde s další nabídkou.';
+    } else {
+      iconText = '🌱';
+      titleText = 'Pojď se zeptat';
+      subText = 'Peníze odešly tentokrát. Ale ten, kdo platí za poznání, se učí nejlépe. Zkus znovu — kovář čeká.';
+    }
+
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames && state.minigames.plays && state.minigames.plays[idx] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost získal — zítra zase!</div>';
+    }
+
+    board.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">Kolo 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Kolo 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg3-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg3-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg3-replay');
+    var bb = document.getElementById('mg3-back');
+    if (rb) rb.addEventListener('click', function(){
+      currentLevel = 1;
+      levelScores = [0, 0, 0];
+      seriesScore = 0;
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkádova ceremonie u perfektního skóre (90)
+    if (seriesScore === 90) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = (result.isNewBest && state.minigames.plays[idx] === 1)
+        ? '🎉 Strážce pravdy, ' + name + '! Tři lháři tě nepřemohli a kovář tě nazve svým žákem. Kdo umí rozeznat moudrého od pošetilého, je sám moudrý. Tvůj poklad je v bezpečí.'
+        : '✨ Stále to umíš, ' + name + '! Lháři kolem tebe nemají šanci.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [
+            { label: 'Děkuji, Arkáde', response: 'Moudrý se ptá, pošetilý slibuje. Pamatuj si to.' }
+          ]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ CLEANUP ════════
+  window._minigame_cleanup = function() {
+    active = false;
+    if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+    if (board && board.parentNode) {
+      try { board.parentNode.removeChild(board); } catch(_){}
+    }
+  };
+
+  // Start
+  showIntro();
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 3
 ═══════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════

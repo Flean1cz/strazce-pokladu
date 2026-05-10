@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.20.0'; // ← KROK 14.19: Skip intro video tapem na overlay
+const VERSION = 'v2.21.0'; // ← KROK 14.20: HRA 3 Poradna u kováře (4. tajemství)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
