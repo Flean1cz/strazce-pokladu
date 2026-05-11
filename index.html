@@ -3609,6 +3609,529 @@ svg.jar{width:52px;height:72px;}
   transform:translateY(-1px);
 }
 .mg4-next-btn:active{ transform:scale(0.97); }
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 5: ZADNÍ VRÁTKA (UI styles)
+   3 měsíce × 30 ✨ — dvě truhly, kalendář situací.
+   max_wisdom: 90 (3 × 30)
+═══════════════════════════════════════════════════════ */
+
+/* Hlavní kontejner */
+.mg5-board{
+  max-width:420px;
+  width:100%;
+  margin:0 auto;
+  padding:0.8rem 0.6rem 2rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.7rem;
+}
+
+/* ═══ HLAVIČKA ═══ */
+.mg5-header{
+  width:100%;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+}
+.mg5-progress{
+  font-family:'Cinzel',serif;
+  font-size:0.72rem;
+  color:var(--sand);
+  opacity:0.55;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+}
+.mg5-month-name{
+  font-family:'Cinzel',serif;
+  font-size:1.1rem;
+  color:var(--lgold);
+  letter-spacing:0.06em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+}
+.mg5-month-icon{ font-size:1.4rem; }
+
+/* ═══ DVĚ TRUHLY ═══ */
+.mg5-chests{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.6rem;
+}
+
+.mg5-chest{
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.42);
+  border-radius:12px;
+  padding:0.7rem 0.5rem 0.6rem;
+  text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(245,166,35,0.18);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.2rem;
+  transition:border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+  position:relative;
+}
+.mg5-chest-icon{
+  font-size:1.8rem;
+  line-height:1;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+.mg5-chest-name{
+  font-family:'Cinzel',serif;
+  font-size:0.72rem;
+  color:var(--sand);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  opacity:0.8;
+}
+.mg5-chest-value{
+  font-family:'Cinzel',serif;
+  font-size:1.3rem;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:0.04em;
+  transition:color 0.3s;
+}
+.mg5-chest-unit{
+  font-size:0.65rem;
+  color:rgba(245,230,195,0.5);
+  letter-spacing:0.06em;
+}
+
+/* Animace ubytí mincí */
+.mg5-chest.is-pulse{
+  animation:mg5ChestPulse 0.5s ease-out;
+}
+@keyframes mg5ChestPulse{
+  0%   { transform:scale(1); }
+  40%  { transform:scale(1.05); border-color:var(--gold); box-shadow:0 0 18px rgba(245,166,35,0.5); }
+  100% { transform:scale(1); }
+}
+
+/* Rezerva vyčerpaná = červeně + kapka krve */
+.mg5-chest.is-empty{
+  border-color:rgba(229,57,53,0.6);
+  box-shadow:0 0 16px rgba(229,57,53,0.25);
+}
+.mg5-chest.is-empty .mg5-chest-value{
+  color:#ff7060;
+}
+.mg5-chest.is-empty .mg5-chest-icon{
+  opacity:0.35;
+  filter:grayscale(0.5);
+}
+
+/* ═══ SITUACE (karta uprostřed) ═══ */
+.mg5-situation{
+  width:100%;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.42);
+  border-radius:14px;
+  padding:1.2rem 1rem 1.1rem;
+  text-align:center;
+  box-shadow:0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,166,35,0.18);
+  animation:mg5SitIn 0.4s ease-out;
+  position:relative;
+}
+@keyframes mg5SitIn{
+  from { opacity:0; transform:translateY(14px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.mg5-sit-progress{
+  font-family:'Cinzel',serif;
+  font-size:0.72rem;
+  color:var(--sand);
+  opacity:0.5;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  margin-bottom:0.5rem;
+}
+.mg5-sit-icon{
+  font-size:2.4rem;
+  margin-bottom:0.4rem;
+  line-height:1;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.mg5-sit-text{
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  color:var(--sand);
+  line-height:1.5;
+  letter-spacing:0.01em;
+  margin-bottom:0.7rem;
+}
+.mg5-sit-text em{ color:rgba(255,233,163,0.85); font-style:italic; }
+.mg5-sit-price{
+  display:inline-block;
+  padding:0.3rem 0.8rem;
+  background:rgba(20,14,8,0.6);
+  border:1px solid rgba(245,166,35,0.35);
+  border-radius:18px;
+  font-family:'Cinzel',serif;
+  font-size:0.85rem;
+  color:var(--gold);
+  font-weight:700;
+  letter-spacing:0.04em;
+}
+
+/* ═══ DOPLŇOVAČ REZERVY (jen kolo 3) ═══ */
+.mg5-refill{
+  width:100%;
+  background:rgba(20,14,8,0.5);
+  border:1px solid rgba(245,166,35,0.25);
+  border-radius:10px;
+  padding:0.55rem 0.7rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.4rem;
+}
+.mg5-refill-label{
+  font-size:0.78rem;
+  color:var(--lgold);
+  letter-spacing:0.04em;
+  text-align:center;
+}
+.mg5-refill-row{
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+.mg5-refill-slider{
+  flex:1;
+  -webkit-appearance:none;
+  appearance:none;
+  height:8px;
+  background:rgba(245,166,35,0.2);
+  border-radius:4px;
+  outline:none;
+}
+.mg5-refill-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:22px;
+  height:22px;
+  background:var(--gold);
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid #2a1a08;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+.mg5-refill-slider::-moz-range-thumb{
+  width:22px;
+  height:22px;
+  background:var(--gold);
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid #2a1a08;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+.mg5-refill-amount{
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  color:var(--gold);
+  font-weight:700;
+  min-width:2.5rem;
+  text-align:right;
+}
+.mg5-refill-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:8px;
+  padding:0.4rem 0.8rem;
+  font-family:'Cinzel',serif;
+  font-size:0.78rem;
+  font-weight:700;
+  letter-spacing:0.04em;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:transform 0.15s, opacity 0.2s;
+}
+.mg5-refill-btn:active:not(:disabled){ transform:scale(0.96); }
+.mg5-refill-btn:disabled{ opacity:0.4; cursor:default; }
+
+/* ═══ VOLBY (3 tlačítka) ═══ */
+.mg5-choices{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+}
+.mg5-choice-btn{
+  background:linear-gradient(135deg, rgba(42,31,21,0.85), rgba(20,14,8,0.9));
+  border:1.5px solid rgba(245,166,35,0.4);
+  border-radius:10px;
+  padding:0.8rem 0.9rem;
+  color:var(--sand);
+  font-family:'Cinzel',serif;
+  font-size:0.9rem;
+  letter-spacing:0.03em;
+  text-align:left;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  display:flex;
+  align-items:center;
+  gap:0.7rem;
+  transition:transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s, opacity 0.3s;
+}
+.mg5-choice-btn:hover:not(:disabled){
+  border-color:rgba(245,166,35,0.7);
+  box-shadow:0 4px 14px rgba(245,166,35,0.18);
+  transform:translateY(-1px);
+}
+.mg5-choice-btn:active:not(:disabled){ transform:scale(0.98); }
+.mg5-choice-btn:disabled{
+  opacity:0.35;
+  cursor:not-allowed;
+  filter:grayscale(0.5);
+}
+.mg5-choice-emoji{
+  font-size:1.4rem;
+  flex-shrink:0;
+  width:1.8rem;
+  text-align:center;
+}
+.mg5-choice-label{
+  flex:1;
+  font-weight:600;
+}
+
+/* Vybrané — zlatý glow */
+.mg5-choice-btn.is-selected{
+  border-color:var(--gold);
+  background:linear-gradient(135deg, rgba(245,166,35,0.22), rgba(160,80,20,0.3));
+  box-shadow:0 0 16px rgba(245,166,35,0.4);
+  color:var(--lgold);
+}
+.mg5-choice-btn.is-faded{
+  opacity:0.32;
+  filter:grayscale(0.4);
+}
+
+/* Tlačítko zablokované z důvodu prázdné rezervy */
+.mg5-choice-btn.is-blocked{
+  border-color:rgba(229,57,53,0.5);
+  background:linear-gradient(135deg, rgba(60,20,15,0.7), rgba(30,10,8,0.85));
+}
+.mg5-choice-btn.is-blocked .mg5-choice-label{
+  color:#ff7060;
+}
+
+/* ═══ FEEDBACK PANEL ═══ */
+.mg5-feedback{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:0.5rem;
+  animation:mg5FeedIn 0.4s ease-out;
+}
+@keyframes mg5FeedIn{
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.mg5-fb-result{
+  display:flex;
+  align-items:center;
+  gap:0.6rem;
+  padding:0.7rem 0.9rem;
+  border-radius:10px;
+  font-size:0.88rem;
+  line-height:1.4;
+}
+.mg5-fb-result.is-ok{
+  background:linear-gradient(135deg, rgba(76,140,80,0.2), rgba(46,100,52,0.3));
+  border-left:3px solid #8fdc8f;
+  color:#c3e8c3;
+}
+.mg5-fb-result.is-bad{
+  background:linear-gradient(135deg, rgba(200,60,50,0.18), rgba(120,30,25,0.28));
+  border-left:3px solid #ff7060;
+  color:#ffc4bb;
+}
+.mg5-fb-icon{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.95rem;
+  font-weight:900;
+  flex-shrink:0;
+}
+.mg5-fb-result.is-ok .mg5-fb-icon{
+  background:rgba(76,140,80,0.5);
+  color:#fff;
+  border:1px solid rgba(143,220,143,0.7);
+}
+.mg5-fb-result.is-bad .mg5-fb-icon{
+  background:rgba(200,60,50,0.5);
+  color:#fff;
+  border:1px solid rgba(255,112,96,0.7);
+}
+.mg5-fb-text{ flex:1; }
+
+/* Dramatický panel "rezerva prázdná" */
+.mg5-empty-warning{
+  background:linear-gradient(135deg, rgba(80,30,25,0.85), rgba(40,15,12,0.92));
+  border:2px solid rgba(229,57,53,0.6);
+  border-radius:12px;
+  padding:0.9rem 1rem;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.4rem;
+  animation:mg5EmptyIn 0.5s ease-out;
+  box-shadow:0 4px 18px rgba(229,57,53,0.3);
+}
+@keyframes mg5EmptyIn{
+  0%   { opacity:0; transform:scale(0.92); }
+  60%  { transform:scale(1.02); }
+  100% { opacity:1; transform:scale(1); }
+}
+.mg5-empty-icon{
+  font-size:1.8rem;
+  filter:grayscale(0.4);
+  opacity:0.7;
+}
+.mg5-empty-title{
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  color:#ff8a7c;
+  letter-spacing:0.06em;
+  font-weight:700;
+}
+.mg5-empty-text{
+  font-size:0.82rem;
+  color:rgba(255,200,193,0.85);
+  font-style:italic;
+  line-height:1.4;
+}
+
+/* ═══ TLAČÍTKO „DALŠÍ" pod feedback ═══ */
+.mg5-next-wrap{
+  width:100%;
+  text-align:center;
+  min-height:50px;
+  margin-top:0.3rem;
+}
+.mg5-next-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:24px;
+  padding:0.7rem 1.6rem;
+  font-family:'Cinzel',serif;
+  font-size:0.92rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(245,166,35,0.35);
+  transition:transform 0.15s, box-shadow 0.2s;
+  animation:mg5NextIn 0.4s ease-out;
+}
+@keyframes mg5NextIn{
+  from { opacity:0; transform:translateY(8px) scale(0.92); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.mg5-next-btn:hover{
+  box-shadow:0 6px 18px rgba(245,166,35,0.5);
+  transform:translateY(-1px);
+}
+.mg5-next-btn:active{ transform:scale(0.97); }
+
+/* ═══ VÝSLEDEK KOLA (breakdown) ═══ */
+.mg5-result{
+  width:100%;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.45);
+  border-radius:14px;
+  padding:1.2rem 1rem;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,166,35,0.18);
+  animation:mg5ResultIn 0.4s ease-out;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+}
+@keyframes mg5ResultIn{
+  from { opacity:0; transform:translateY(14px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.mg5-result-icon{ font-size:2.6rem; line-height:1; }
+.mg5-result-title{
+  font-family:'Cinzel',serif;
+  font-size:1.2rem;
+  color:var(--lgold);
+  letter-spacing:0.04em;
+}
+.mg5-result-score{
+  font-family:'Cinzel',serif;
+  font-size:1.6rem;
+  color:var(--gold);
+  font-weight:700;
+  letter-spacing:0.05em;
+  text-shadow:0 2px 8px rgba(245,166,35,0.4);
+}
+.mg5-result-breakdown{
+  display:flex;
+  flex-direction:column;
+  gap:0.35rem;
+  text-align:left;
+  margin-top:0.3rem;
+}
+.mg5-result-row{
+  display:flex;
+  align-items:center;
+  gap:0.55rem;
+  padding:0.4rem 0.6rem;
+  background:rgba(20,14,8,0.5);
+  border-radius:8px;
+  font-size:0.82rem;
+  color:var(--sand);
+  line-height:1.3;
+}
+.mg5-result-row-icon{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.78rem;
+  font-weight:900;
+  flex-shrink:0;
+}
+.mg5-result-row.is-ok .mg5-result-row-icon{
+  background:rgba(76,140,80,0.4);
+  color:#8fdc8f;
+  border:1px solid rgba(76,140,80,0.7);
+}
+.mg5-result-row.is-fail .mg5-result-row-icon{
+  background:rgba(200,60,50,0.3);
+  color:#f08070;
+  border:1px solid rgba(200,60,50,0.6);
+}
+.mg5-result-row-text{ flex:1; }
+.mg5-result-row-pts{
+  font-family:'Cinzel',serif;
+  font-size:0.78rem;
+  color:var(--gold);
+  font-weight:700;
+  white-space:nowrap;
+}
+.mg5-result-row.is-fail .mg5-result-row-pts{
+  color:rgba(245,230,195,0.4);
+  text-decoration:line-through;
+}
 </style>
 </head>
 <body>
@@ -4556,7 +5079,7 @@ var MINIGAMES = [
   { id: 2, title: "Rostoucí hromada",   icon: "📈", short: "3 kola — kouzlo úročení",  max_wisdom: 90, implemented: true  },
   { id: 3, title: "Poradna u kováře",   icon: "🎭", short: "3 scénáře — pravda nebo podvod?", max_wisdom: 90, implemented: true  },
   { id: 4, title: "Stavitel",           icon: "🏗️", short: "3 pokoje — vlastní hrad",      max_wisdom: 90, implemented: true  },
-  { id: 5, title: "Zadní vrátka",       icon: "🛡️", short: "Použij rezervu moudře",     max_wisdom: 30, implemented: false },
+  { id: 5, title: "Zadní vrátka",       icon: "🗝️", short: "3 měsíce — rezerva tě zachrání", max_wisdom: 90, implemented: true  },
   { id: 6, title: "Bazar",              icon: "🛒", short: "Hospodař s Moudrostí",       max_wisdom: 30, implemented: false }
 ];
 
@@ -12219,6 +12742,603 @@ window.renderMinigame_4 = function(idx) {
 };
 /* ═══════════════════════════════════════════════════════
    KONEC HRY 4
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 5: ZADNÍ VRÁTKA — datový model
+   3 měsíce, dvě truhly, kalendář 5 situací každý.
+   correct: 'truhla' | 'rezerva' | 'neutracet'
+   VAR kvůli hoisting — konzistentní s ostatními hrami.
+═══════════════════════════════════════════════════════ */
+var MG5_MONTHS = [
+  // ──────────── KOLO 1: KLIDNÝ MĚSÍC ────────────
+  {
+    level: 1,
+    title: 'Klidný měsíc',
+    icon: '🌤️',
+    startTruhla: 100,
+    startRezerva: 30,
+    allowRefill: false,
+    situations: [
+      {
+        icon:'🎂',
+        text:'Maminka má narozeniny. Chceš jí koupit kytku.',
+        price:10, correct:'truhla',
+        okText:'Plánovaný výdaj — patří do hlavní truhly.',
+        badText:'Narozeniny jsi věděl předem — to není nečekané.'
+      },
+      {
+        icon:'🚲',
+        text:'Spadl ti řetěz z kola. Tatínek řekl, že to opravíš ty.',
+        price:8, correct:'rezerva',
+        okText:'Nečekaná oprava — přesně proto je rezerva.',
+        badText:'Oprava kola se nedá naplánovat — patří do rezervy.'
+      },
+      {
+        icon:'🍬',
+        text:'V krámě prodavač nabízí slevu na bonbony, které jsi nechtěl.',
+        price:5, correct:'neutracet',
+        okText:'Sleva na věc, kterou nechceš, je zbytečnost.',
+        badText:'Sleva tě svedla — bonbony jsi nepotřeboval.'
+      },
+      {
+        icon:'📚',
+        text:'Vrátil jsi knihu z knihovny pozdě — pokuta.',
+        price:5, correct:'rezerva',
+        okText:'Pokuta tě překvapila — to je věc pro rezervu.',
+        badText:'Pokutu jsi nečekal — patří do rezervy, ne do plánu.'
+      },
+      {
+        icon:'🎫',
+        text:'Třída jde na výlet do hradu. Tvoje účast.',
+        price:15, correct:'truhla',
+        okText:'Výlet je plánovaný — z hlavní truhly.',
+        badText:'Výlet jsi věděl předem — rezervu šetři na bouřky.'
+      }
+    ]
+  },
+  // ──────────── KOLO 2: BOUŘKOVÝ MĚSÍC ────────────
+  {
+    level: 2,
+    title: 'Bouřkový měsíc',
+    icon: '⛈️',
+    startTruhla: 100,
+    startRezerva: 46,
+    allowRefill: false,
+    intro: 'Tenhle měsíc se stalo víc nečekaných věcí, než jsi čekal...',
+    situations: [
+      {
+        icon:'🌧️',
+        text:'Bouřka. Roztrhly se ti boty cestou ze školy.',
+        price:15, correct:'rezerva',
+        okText:'Nečekané — přesně proto máš zadní vrátka.',
+        badText:'Roztrhané boty nepočkají — patří do rezervy.'
+      },
+      {
+        icon:'🎁',
+        text:'Sestra má narozeniny — chceš jí dárek.',
+        price:12, correct:'truhla',
+        okText:'Narozeniny jsi věděl předem — z truhly.',
+        badText:'Narozeniny nejsou nečekané — šetři rezervu.'
+      },
+      {
+        icon:'📺',
+        text:'Reklama: nová hra na konzoli za polovic!',
+        price:20, correct:'neutracet',
+        okText:'Reklamy svádějí. Tvá moudrost je silnější.',
+        badText:'Reklama ti našeptala — ale tos vlastně nepotřeboval.'
+      },
+      {
+        icon:'🪟',
+        text:'Doma prosakuje okno. Maminka tě prosí o příspěvek na sklenáře.',
+        price:18, correct:'rezerva',
+        okText:'Bouřka nepočítá — rezerva slouží přesně k tomu.',
+        badText:'Prosakující okno počkat nemůže — to je věc pro rezervu.'
+      },
+      {
+        icon:'🔑',
+        text:'Ztratil jsi klíče. Musíš zaplatit nový.',
+        price:12, correct:'rezerva',
+        okText:'Ztrátu nikdo neplánuje — rezerva pomohla.',
+        badText:'Klíče se ztrácejí nečekaně — to je pro rezervu.'
+      }
+    ]
+  },
+  // ──────────── KOLO 3: NOVÝ MĚSÍC (s doplňováním) ────────────
+  {
+    level: 3,
+    title: 'Nový měsíc',
+    icon: '💪',
+    startTruhla: 100,
+    startRezerva: 20,
+    allowRefill: true,
+    intro: 'Poučil ses. Tentokrát můžeš mezi situacemi doplňovat rezervu z hlavní truhly.',
+    situations: [
+      {
+        icon:'📒',
+        text:'Potřebuješ nový sešit do školy.',
+        price:6, correct:'truhla',
+        okText:'Plánovaný školní výdaj — z truhly.',
+        badText:'Sešit si plánuješ — ne rezerva.'
+      },
+      {
+        icon:'🦷',
+        text:'Roste ti zub a tatínek říká, že potřebuješ kapky s vitamínem D.',
+        price:10, correct:'rezerva',
+        okText:'Nečekaný léčebný výdaj — přesně do rezervy.',
+        badText:'Bolestivý zub si neplánoval — to je pro rezervu.'
+      },
+      {
+        icon:'🎮',
+        text:'Kamarád prodává starou hru za polovic. Měl bys ji koupit?',
+        price:25, correct:'neutracet',
+        okText:'Sleva tě nesvede — vlastně ji nepotřebuješ.',
+        badText:'Bratranec ti vnutil cizí potřebu — moudrý jí odolá.'
+      },
+      {
+        icon:'🛞',
+        text:'Praskla pneumatika na kole. Bez kola nemůžeš do školy.',
+        price:15, correct:'rezerva',
+        okText:'Nečekané — a nezbytné. Rezerva odvedla svou práci.',
+        badText:'Pneumatika se nezeptá — patří do rezervy.'
+      },
+      {
+        icon:'🎨',
+        text:'Před Vánoci je výprodej pastelek. Tatínek si přeje nový set.',
+        price:8, correct:'truhla',
+        okText:'Dárek je plánovaný — z hlavní truhly.',
+        badText:'Vánoce nejsou náhlé — rezervu šetři na bouřky.'
+      }
+    ]
+  }
+];
+/* ═══════════════════════════════════════════════════════
+   KONEC DAT HRY 5
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 5: ZADNÍ VRÁTKA — herní logika
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_5 = function(idx) {
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ STATE SÉRIE ════════
+  var TOTAL_LEVELS = 3;
+  var currentLevel = 1;
+  var levelScores = [0, 0, 0];
+  var seriesScore = 0;
+  var active = true;
+
+  // Stav aktuálního kola
+  var truhla = 0;
+  var rezerva = 0;
+  var sitIdx = 0;       // index aktuální situace (0..4)
+  var correctCount = 0; // počet správných voleb v kole
+  var refillAmount = 0; // dočasná hodnota slideru
+
+  var board = document.createElement('div');
+  board.className = 'mg5-board';
+  wrap.appendChild(board);
+
+  // ════════ INTRO KARTA ════════
+  function showIntro() {
+    if (!active) return;
+    board.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">🗝️</div>' +
+        '<div class="mg0-card-title">Zadní vrátka</div>' +
+        '<div class="mg0-card-text">' +
+          'Tři měsíce života. Každý den se něco děje a ty rozhoduješ:<br><br>' +
+          '🏛️ <strong>Hlavní truhla</strong> — pro plánované výdaje<br>' +
+          '🗝️ <strong>Zadní vrátka</strong> — rezerva na nečekané<br>' +
+          '❌ <strong>Neutrácet</strong> — některé věci nejsou pro tebe<br><br>' +
+          '<em>Pozor — pokud rezerva dojde, musíš sáhnout do hlavní truhly!</em>' +
+        '</div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg5-start">▶ Začít první měsíc</button>' +
+      '</div>';
+    var btn = document.getElementById('mg5-start');
+    if (btn) btn.addEventListener('click', function(){ startRound(); }, { once: true });
+  }
+
+  // ════════ START KOLA ════════
+  function startRound() {
+    if (!active) return;
+    var month = MG5_MONTHS[currentLevel - 1];
+    if (!month) { showSeriesFinish(); return; }
+
+    truhla = month.startTruhla;
+    rezerva = month.startRezerva;
+    sitIdx = 0;
+    correctCount = 0;
+    refillAmount = 0;
+
+    // Pokud má kolo intro text, ukaž ho jako mezikartu
+    if (month.intro) {
+      board.innerHTML =
+        '<div class="mg0-card">' +
+          '<div class="mg0-card-icon">' + month.icon + '</div>' +
+          '<div class="mg0-card-title">' + month.title + '</div>' +
+          '<div class="mg0-card-text"><em>' + month.intro + '</em></div>' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg5-month-go">▶ Začít měsíc ' + currentLevel + '</button>' +
+        '</div>';
+      var b = document.getElementById('mg5-month-go');
+      if (b) b.addEventListener('click', function(){ renderSituation(); }, { once: true });
+    } else {
+      renderSituation();
+    }
+  }
+
+  // ════════ VYKRESLENÍ AKTUÁLNÍ SITUACE ════════
+  function renderSituation() {
+    if (!active) return;
+    var month = MG5_MONTHS[currentLevel - 1];
+    var sit = month.situations[sitIdx];
+    if (!sit) { showRoundResult(); return; }
+
+    var rezervaBlocked = (rezerva < sit.price);
+
+    var html =
+      '<div class="mg5-header">' +
+        '<div class="mg5-progress">Měsíc ' + currentLevel + ' ze ' + TOTAL_LEVELS + '</div>' +
+        '<div class="mg5-month-name">' +
+          '<span class="mg5-month-icon">' + month.icon + '</span>' +
+          '<span>' + month.title + '</span>' +
+        '</div>' +
+      '</div>' +
+      buildChestsHTML() +
+      '<div class="mg5-situation">' +
+        '<div class="mg5-sit-progress">Situace ' + (sitIdx + 1) + ' z ' + month.situations.length + '</div>' +
+        '<div class="mg5-sit-icon">' + sit.icon + '</div>' +
+        '<div class="mg5-sit-text">' + sit.text + '</div>' +
+        '<div class="mg5-sit-price">💰 ' + sit.price + ' mincí</div>' +
+      '</div>';
+
+    // Refill widget (jen kolo 3)
+    if (month.allowRefill) {
+      var maxRefill = Math.min(truhla, 50);
+      html +=
+        '<div class="mg5-refill">' +
+          '<div class="mg5-refill-label">💰 Doplnit rezervu z truhly</div>' +
+          '<div class="mg5-refill-row">' +
+            '<input type="range" min="0" max="' + maxRefill + '" value="0" class="mg5-refill-slider" id="mg5-slider">' +
+            '<span class="mg5-refill-amount" id="mg5-slider-val">0</span>' +
+            '<button class="mg5-refill-btn" id="mg5-refill-btn" disabled>Přesun</button>' +
+          '</div>' +
+        '</div>';
+    }
+
+    var truhlaCannot = (truhla < sit.price);
+    html +=
+      '<div class="mg5-choices">' +
+        '<button class="mg5-choice-btn" data-choice="truhla" ' + (truhlaCannot ? 'disabled' : '') + '>' +
+          '<span class="mg5-choice-emoji">🏛️</span>' +
+          '<span class="mg5-choice-label">Truhla</span>' +
+        '</button>' +
+        '<button class="mg5-choice-btn ' + (rezervaBlocked ? 'is-blocked' : '') + '" data-choice="rezerva" ' + (rezervaBlocked ? 'disabled' : '') + '>' +
+          '<span class="mg5-choice-emoji">🗝️</span>' +
+          '<span class="mg5-choice-label">' + (rezervaBlocked ? 'Rezerva (prázdná)' : 'Rezerva') + '</span>' +
+        '</button>' +
+        '<button class="mg5-choice-btn" data-choice="neutracet">' +
+          '<span class="mg5-choice-emoji">❌</span>' +
+          '<span class="mg5-choice-label">Neutrácet</span>' +
+        '</button>' +
+      '</div>';
+
+    board.innerHTML = html;
+
+    // Dramatický panel "rezerva prázdná" jen pokud:
+    // - rezerva < cena
+    // - správná volba JE rezerva
+    // (tj. dítě by chtělo platit z rezervy, ale nemůže)
+    if (rezervaBlocked && sit.correct === 'rezerva') {
+      var warn = document.createElement('div');
+      warn.className = 'mg5-empty-warning';
+      warn.innerHTML =
+        '<div class="mg5-empty-icon">🗝️</div>' +
+        '<div class="mg5-empty-title">Zadní vrátka jsou prázdná</div>' +
+        '<div class="mg5-empty-text">Rezerva ti došla. Musíš sáhnout do hlavní truhly — a tvůj poklad nemůže pracovat tak jak by mohl.</div>';
+      var chestsEl = board.querySelector('.mg5-chests');
+      if (chestsEl && chestsEl.nextSibling) {
+        board.insertBefore(warn, chestsEl.nextSibling);
+      }
+    }
+
+    // Bind voleb
+    var btns = board.querySelectorAll('.mg5-choice-btn');
+    for (var i = 0; i < btns.length; i++) {
+      (function(btn){
+        btn.addEventListener('click', function(){
+          if (btn.disabled) return;
+          handleChoice(btn.getAttribute('data-choice'));
+        }, { once: true });
+      })(btns[i]);
+    }
+
+    // Bind refill widgetu
+    if (month.allowRefill) {
+      var slider = document.getElementById('mg5-slider');
+      var sval   = document.getElementById('mg5-slider-val');
+      var rbtn   = document.getElementById('mg5-refill-btn');
+      if (slider && sval && rbtn) {
+        slider.addEventListener('input', function(){
+          refillAmount = parseInt(slider.value, 10) || 0;
+          sval.textContent = refillAmount;
+          rbtn.disabled = (refillAmount <= 0);
+        });
+        rbtn.addEventListener('click', function(){
+          if (refillAmount <= 0) return;
+          doRefill(refillAmount);
+        });
+      }
+    }
+  }
+
+  // ════════ POMOCNÉ HTML — TRUHLY ════════
+  function buildChestsHTML() {
+    var emptyClass = (rezerva === 0) ? ' is-empty' : '';
+    return '' +
+      '<div class="mg5-chests">' +
+        '<div class="mg5-chest" id="mg5-chest-truhla">' +
+          '<div class="mg5-chest-icon">🏛️</div>' +
+          '<div class="mg5-chest-name">Truhla</div>' +
+          '<div class="mg5-chest-value">' + truhla + '</div>' +
+          '<div class="mg5-chest-unit">mincí</div>' +
+        '</div>' +
+        '<div class="mg5-chest' + emptyClass + '" id="mg5-chest-rezerva">' +
+          '<div class="mg5-chest-icon">🗝️</div>' +
+          '<div class="mg5-chest-name">Rezerva</div>' +
+          '<div class="mg5-chest-value">' + rezerva + '</div>' +
+          '<div class="mg5-chest-unit">mincí</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ════════ DOPLNĚNÍ REZERVY ════════
+  function doRefill(amount) {
+    if (!active) return;
+    if (amount <= 0 || amount > truhla) return;
+    truhla -= amount;
+    rezerva += amount;
+    // Animace pulsu obou truhel + překreslení
+    var truhlaEl = document.getElementById('mg5-chest-truhla');
+    var rezervaEl = document.getElementById('mg5-chest-rezerva');
+    if (truhlaEl) {
+      var tv = truhlaEl.querySelector('.mg5-chest-value');
+      if (tv) tv.textContent = truhla;
+      truhlaEl.classList.add('is-pulse');
+      setTimeout(function(){ if (truhlaEl) truhlaEl.classList.remove('is-pulse'); }, 500);
+    }
+    if (rezervaEl) {
+      var rv = rezervaEl.querySelector('.mg5-chest-value');
+      if (rv) rv.textContent = rezerva;
+      if (rezerva > 0) rezervaEl.classList.remove('is-empty');
+      rezervaEl.classList.add('is-pulse');
+      setTimeout(function(){ if (rezervaEl) rezervaEl.classList.remove('is-pulse'); }, 500);
+    }
+    // Po doplnění překresli celou situaci (aby se odblokovala rezerva)
+    setTimeout(function(){ if (active) renderSituation(); }, 550);
+  }
+
+  // ════════ ZPRACOVÁNÍ VOLBY ════════
+  function handleChoice(choice) {
+    if (!active) return;
+    var month = MG5_MONTHS[currentLevel - 1];
+    var sit = month.situations[sitIdx];
+    if (!sit) return;
+
+    var isCorrect = (choice === sit.correct);
+    if (isCorrect) correctCount++;
+
+    // Odečti z truhly/rezervy
+    if (choice === 'truhla')  truhla  = Math.max(0, truhla  - sit.price);
+    if (choice === 'rezerva') rezerva = Math.max(0, rezerva - sit.price);
+    // 'neutracet' → nic se neodečte
+
+    // Animace zvolené volby + faded ostatní
+    var btns = board.querySelectorAll('.mg5-choice-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+      if (btns[i].getAttribute('data-choice') === choice) {
+        btns[i].classList.add('is-selected');
+      } else {
+        btns[i].classList.add('is-faded');
+      }
+    }
+
+    // Animace truhel
+    if (choice === 'truhla' || choice === 'rezerva') {
+      var el = document.getElementById(choice === 'truhla' ? 'mg5-chest-truhla' : 'mg5-chest-rezerva');
+      if (el) {
+        var v = el.querySelector('.mg5-chest-value');
+        if (v) v.textContent = (choice === 'truhla' ? truhla : rezerva);
+        if (choice === 'rezerva' && rezerva === 0) el.classList.add('is-empty');
+        el.classList.add('is-pulse');
+        setTimeout(function(){ if (el) el.classList.remove('is-pulse'); }, 500);
+      }
+    }
+
+    // Feedback panel
+    var fb = document.createElement('div');
+    fb.className = 'mg5-feedback';
+    fb.innerHTML =
+      '<div class="mg5-fb-result ' + (isCorrect ? 'is-ok' : 'is-bad') + '">' +
+        '<div class="mg5-fb-icon">' + (isCorrect ? '✓' : '✗') + '</div>' +
+        '<div class="mg5-fb-text">' + (isCorrect ? sit.okText : sit.badText) + '</div>' +
+      '</div>' +
+      '<div class="mg5-next-wrap" id="mg5-next-wrap"></div>';
+    board.appendChild(fb);
+
+    setTimeout(function(){
+      if (!active) return;
+      var nw = document.getElementById('mg5-next-wrap');
+      if (!nw) return;
+      var isLastSit = (sitIdx + 1 >= month.situations.length);
+      var label = isLastSit ? '✨ Konec měsíce' : 'Další situace →';
+      nw.innerHTML = '<button class="mg5-next-btn" id="mg5-next-btn">' + label + '</button>';
+      var nb = document.getElementById('mg5-next-btn');
+      if (nb) nb.addEventListener('click', function(){
+        sitIdx++;
+        if (sitIdx >= month.situations.length) showRoundResult();
+        else renderSituation();
+      }, { once: true });
+    }, 900);
+  }
+
+  // ════════ VÝSLEDEK KOLA ════════
+  function showRoundResult() {
+    if (!active) return;
+    var month = MG5_MONTHS[currentLevel - 1];
+
+    // Skóre: 5 ✨ za každou správnou + 5 ✨ bonus za neprázdnou rezervu
+    var basePts = correctCount * 5;
+    var reserveBonus = (rezerva > 0) ? 5 : 0;
+    var score = basePts + reserveBonus;
+    levelScores[currentLevel - 1] = score;
+
+    var iconText, titleText;
+    if (score === 30) {
+      iconText = '🏆'; titleText = 'Perfektní měsíc!';
+    } else if (score >= 20) {
+      iconText = '⭐'; titleText = 'Dobrý měsíc';
+    } else if (score >= 10) {
+      iconText = '✨'; titleText = 'Učíš se';
+    } else {
+      iconText = '🌱'; titleText = 'Zkus to znovu';
+    }
+
+    var isLast = (currentLevel >= TOTAL_LEVELS);
+    var nextLabel = isLast ? '✨ Vidět výsledek' : ('Dál na měsíc ' + (currentLevel + 1) + ' →');
+
+    var html =
+      '<div class="mg5-header">' +
+        '<div class="mg5-progress">Měsíc ' + currentLevel + ' — výsledek</div>' +
+      '</div>' +
+      buildChestsHTML() +
+      '<div class="mg5-result">' +
+        '<div class="mg5-result-icon">' + iconText + '</div>' +
+        '<div class="mg5-result-title">' + titleText + '</div>' +
+        '<div class="mg5-result-score">' + score + ' / 30 ✨</div>' +
+        '<div class="mg5-result-breakdown">' +
+          '<div class="mg5-result-row ' + (correctCount === 5 ? 'is-ok' : (correctCount > 0 ? 'is-ok' : 'is-fail')) + '">' +
+            '<span class="mg5-result-row-icon">' + (correctCount > 0 ? '✓' : '✗') + '</span>' +
+            '<span class="mg5-result-row-text">Správně rozhodnuto: ' + correctCount + ' z 5</span>' +
+            '<span class="mg5-result-row-pts">+' + basePts + ' ✨</span>' +
+          '</div>' +
+          '<div class="mg5-result-row ' + (reserveBonus > 0 ? 'is-ok' : 'is-fail') + '">' +
+            '<span class="mg5-result-row-icon">' + (reserveBonus > 0 ? '✓' : '✗') + '</span>' +
+            '<span class="mg5-result-row-text">Rezerva neprázdná na konci</span>' +
+            '<span class="mg5-result-row-pts">+5 ✨</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg5-next-wrap">' +
+        '<button class="mg5-next-btn" id="mg5-next-round">' + nextLabel + '</button>' +
+      '</div>';
+
+    board.innerHTML = html;
+
+    var nb = document.getElementById('mg5-next-round');
+    if (nb) nb.addEventListener('click', function(){
+      if (isLast) showSeriesFinish();
+      else { currentLevel++; startRound(); }
+    }, { once: true });
+  }
+
+  // ════════ FINIŠ SÉRIE ════════
+  function showSeriesFinish() {
+    if (!active) return;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+    var result = (typeof finishMinigame === 'function')
+      ? finishMinigame(idx, seriesScore)
+      : { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+
+    var iconText, titleText, subText;
+    if (seriesScore === 90) {
+      iconText = '🗝️';
+      titleText = 'Strážce klidných nocí!';
+      subText = 'Tři měsíce a tvá rezerva tě nikdy nezklamala. Kdo má zadní vrátka, spí v noci jako král.';
+    } else if (seriesScore >= 60) {
+      iconText = '⭐';
+      titleText = 'Dobrý hospodář';
+      subText = 'Naučil ses oddělit nečekané od plánovaného. Příště pomysli i na dostatečně velkou rezervu.';
+    } else if (seriesScore >= 30) {
+      iconText = '✨';
+      titleText = 'Začínáš chápat';
+      subText = 'Rezerva je jako deštník — užitečná, jen když ji máš včas. Zkus znovu.';
+    } else {
+      iconText = '🌱';
+      titleText = 'Pojďme znovu';
+      subText = 'Bez rezervy je každá bouřka pohromou. Vrať se zítra — tvá truhla čeká.';
+    }
+
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames && state.minigames.plays && state.minigames.plays[idx] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost získal — zítra zase!</div>';
+    }
+
+    board.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">Měsíc 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Měsíc 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Měsíc 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg5-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg5-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg5-replay');
+    var bb = document.getElementById('mg5-back');
+    if (rb) rb.addEventListener('click', function(){
+      currentLevel = 1; levelScores = [0, 0, 0]; seriesScore = 0;
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkád JEN u perfektu 90 a JEN při prvním dosažení (NEW BEST + 1. hraní dne)
+    if (seriesScore === 90 && result.isNewBest && state.minigames.plays[idx] === 1) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = '🗝️ Strážce klidných nocí, ' + name + '! Tři měsíce a tvá rezerva tě nikdy nezklamala. Kdo má zadní vrátka, spí v noci jako král. Pamatuj — bouřka vždy přijde, jen nevíš kdy.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [
+            { label: 'Děkuji, Arkáde', response: 'Rezerva je tvá tichá moudrost. Pamatuj si to.' }
+          ]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ CLEANUP ════════
+  window._minigame_cleanup = function() {
+    active = false;
+    if (board && board.parentNode) {
+      try { board.parentNode.removeChild(board); } catch(_){}
+    }
+  };
+
+  // Start
+  showIntro();
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 5
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
