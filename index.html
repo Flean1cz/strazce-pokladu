@@ -4132,6 +4132,396 @@ svg.jar{width:52px;height:72px;}
   color:rgba(245,230,195,0.4);
   text-decoration:line-through;
 }
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 6: BAZAR (UI styles)
+   3 tržnice × 30 ✨ — dvě měny (mince + Moudrost), tap-to-buy.
+   max_wisdom: 90 (3 × 30)
+═══════════════════════════════════════════════════════ */
+
+/* Hlavní kontejner */
+.mg6-board{
+  max-width:420px;
+  width:100%;
+  margin:0 auto;
+  padding:0.8rem 0.6rem 2rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.7rem;
+}
+
+/* ═══ HLAVIČKA ═══ */
+.mg6-header{
+  width:100%;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.3rem;
+}
+.mg6-progress{
+  font-family:'Cinzel',serif;
+  font-size:0.72rem;
+  color:var(--sand);
+  opacity:0.55;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+}
+.mg6-market-name{
+  font-family:'Cinzel',serif;
+  font-size:1.1rem;
+  color:var(--lgold);
+  letter-spacing:0.06em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+}
+.mg6-market-icon{ font-size:1.4rem; }
+
+/* Krátký intro text k tržnici */
+.mg6-intro-text{
+  width:100%;
+  font-size:0.85rem;
+  color:rgba(245,230,195,0.78);
+  text-align:center;
+  font-style:italic;
+  line-height:1.4;
+  padding:0 0.4rem;
+}
+
+/* ═══ DVĚ MĚNY ═══ */
+.mg6-wallets{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.6rem;
+}
+.mg6-wallet{
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.42);
+  border-radius:12px;
+  padding:0.65rem 0.5rem;
+  text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(245,166,35,0.18);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.15rem;
+  transition:transform 0.2s, box-shadow 0.25s, border-color 0.25s;
+}
+.mg6-wallet-icon{ font-size:1.6rem; line-height:1; }
+.mg6-wallet-name{
+  font-family:'Cinzel',serif;
+  font-size:0.68rem;
+  color:var(--sand);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  opacity:0.8;
+}
+.mg6-wallet-value{
+  font-family:'Cinzel',serif;
+  font-size:1.3rem;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:0.04em;
+  transition:color 0.3s;
+}
+/* Měna Moudrost má lehce odlišný akcent */
+.mg6-wallet.is-wisdom .mg6-wallet-value{ color:#9fd4ff; }
+.mg6-wallet.is-wisdom{ border-color:rgba(120,180,235,0.4); }
+
+/* Puls při změně */
+.mg6-wallet.is-pulse{ animation:mg6WalletPulse 0.5s ease-out; }
+@keyframes mg6WalletPulse{
+  0%   { transform:scale(1); }
+  40%  { transform:scale(1.06); box-shadow:0 0 18px rgba(245,166,35,0.5); }
+  100% { transform:scale(1); }
+}
+.mg6-wallet.is-wisdom.is-pulse{ animation:mg6WisdomPulse 0.5s ease-out; }
+@keyframes mg6WisdomPulse{
+  0%   { transform:scale(1); }
+  40%  { transform:scale(1.06); box-shadow:0 0 18px rgba(120,180,235,0.55); }
+  100% { transform:scale(1); }
+}
+
+/* ═══ MŘÍŽKA PŘEDMĚTŮ ═══ */
+.mg6-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.55rem;
+}
+
+.mg6-item{
+  background:linear-gradient(135deg, rgba(42,31,21,0.85), rgba(20,14,8,0.9));
+  border:1.5px solid rgba(245,166,35,0.3);
+  border-radius:12px;
+  padding:0.7rem 0.5rem 0.55rem;
+  text-align:center;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  position:relative;
+  transition:transform 0.15s, box-shadow 0.2s, border-color 0.2s, background 0.2s, opacity 0.25s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:0.2rem;
+  min-height:128px;
+}
+.mg6-item:hover:not(.is-disabled){
+  border-color:rgba(245,166,35,0.55);
+  box-shadow:0 4px 12px rgba(245,166,35,0.15);
+}
+.mg6-item:active:not(.is-disabled){ transform:scale(0.96); }
+
+.mg6-item-icon{
+  font-size:1.9rem;
+  line-height:1.1;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+.mg6-item-name{
+  font-family:'Cinzel',serif;
+  font-size:0.78rem;
+  color:var(--sand);
+  line-height:1.2;
+  letter-spacing:0.01em;
+}
+
+/* Cena + výnos */
+.mg6-item-cost{
+  font-family:'Cinzel',serif;
+  font-size:0.82rem;
+  font-weight:700;
+  margin-top:0.15rem;
+}
+.mg6-item-gain{
+  font-family:'Cinzel',serif;
+  font-size:0.74rem;
+  opacity:0.95;
+}
+
+/* Typové barvy — levý barevný proužek */
+.mg6-item::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:4px;
+  border-radius:12px 0 0 12px;
+}
+.mg6-item.type-spotreba::before   { background:rgba(160,160,160,0.6); }
+.mg6-item.type-poetilost::before  { background:rgba(229,57,53,0.7); }
+.mg6-item.type-vzdelani::before   { background:rgba(120,180,235,0.75); }
+.mg6-item.type-mistrovstvi::before{ background:var(--gold); }
+
+/* Cena barevně podle měny */
+.mg6-cost-mince  { color:var(--gold); }
+.mg6-cost-wisdom { color:#9fd4ff; }
+.mg6-gain-mince  { color:#8fdc8f; }
+.mg6-gain-wisdom { color:#9fd4ff; }
+
+/* Vybraný předmět — počet kusů v košíku */
+.mg6-item.is-selected{
+  border-color:var(--gold);
+  background:linear-gradient(135deg, rgba(245,166,35,0.2), rgba(160,80,20,0.28));
+  box-shadow:0 0 16px rgba(245,166,35,0.35);
+}
+.mg6-item-badge{
+  position:absolute;
+  top:4px;
+  right:5px;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  background:var(--gold);
+  color:#2a1a08;
+  border-radius:10px;
+  font-size:0.78rem;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  animation:mg6BadgeIn 0.25s ease-out;
+}
+@keyframes mg6BadgeIn{
+  from{ transform:scale(0); }
+  to{ transform:scale(1); }
+}
+
+/* Nedostupný předmět (málo měny) */
+.mg6-item.is-disabled{
+  opacity:0.4;
+  cursor:not-allowed;
+  filter:grayscale(0.55);
+}
+
+/* ═══ HOTOVO TLAČÍTKO ═══ */
+.mg6-finish-wrap{
+  width:100%;
+  text-align:center;
+  margin-top:0.5rem;
+}
+.mg6-finish-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:24px;
+  padding:0.75rem 1.8rem;
+  font-family:'Cinzel',serif;
+  font-size:0.95rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(245,166,35,0.35);
+  transition:transform 0.15s, box-shadow 0.2s;
+}
+.mg6-finish-btn:hover{
+  box-shadow:0 6px 18px rgba(245,166,35,0.5);
+  transform:translateY(-1px);
+}
+.mg6-finish-btn:active{ transform:scale(0.97); }
+
+/* Tip pod tlačítkem (jen v 1. kole) */
+.mg6-hint{
+  width:100%;
+  text-align:center;
+  font-size:0.74rem;
+  color:rgba(159,212,255,0.75);
+  font-style:italic;
+  line-height:1.4;
+  margin-top:0.2rem;
+}
+
+/* ═══ VÝSLEDEK KOLA ═══ */
+.mg6-result{
+  width:100%;
+  background:linear-gradient(135deg, rgba(58,36,16,0.92), rgba(28,18,8,0.94));
+  border:2px solid rgba(245,166,35,0.45);
+  border-radius:14px;
+  padding:1.2rem 1rem;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(245,166,35,0.18);
+  animation:mg6ResultIn 0.4s ease-out;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+}
+@keyframes mg6ResultIn{
+  from { opacity:0; transform:translateY(14px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.mg6-result-icon{ font-size:2.6rem; line-height:1; }
+.mg6-result-title{
+  font-family:'Cinzel',serif;
+  font-size:1.2rem;
+  color:var(--lgold);
+  letter-spacing:0.04em;
+}
+.mg6-result-score{
+  font-family:'Cinzel',serif;
+  font-size:1.6rem;
+  color:var(--gold);
+  font-weight:700;
+  letter-spacing:0.05em;
+  text-shadow:0 2px 8px rgba(245,166,35,0.4);
+}
+
+/* Mince přehled (start → konec) */
+.mg6-result-coins{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.5rem;
+  font-family:'Cinzel',serif;
+  font-size:0.92rem;
+  color:var(--sand);
+}
+.mg6-result-coins strong{ color:var(--gold); }
+.mg6-result-coins .mg6-arrow{ opacity:0.6; }
+.mg6-result-coins .is-up{ color:#8fdc8f; }
+.mg6-result-coins .is-down{ color:#ff7060; }
+
+/* Breakdown kritérií */
+.mg6-criteria{
+  display:flex;
+  flex-direction:column;
+  gap:0.35rem;
+  text-align:left;
+  margin-top:0.3rem;
+}
+.mg6-criterion{
+  display:flex;
+  align-items:center;
+  gap:0.55rem;
+  padding:0.4rem 0.6rem;
+  background:rgba(20,14,8,0.5);
+  border-radius:8px;
+  font-size:0.8rem;
+  color:var(--sand);
+  line-height:1.3;
+}
+.mg6-criterion-icon{
+  width:21px;
+  height:21px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.76rem;
+  font-weight:900;
+  flex-shrink:0;
+}
+.mg6-criterion.is-ok .mg6-criterion-icon{
+  background:rgba(76,140,80,0.4);
+  color:#8fdc8f;
+  border:1px solid rgba(76,140,80,0.7);
+}
+.mg6-criterion.is-fail .mg6-criterion-icon{
+  background:rgba(200,60,50,0.3);
+  color:#f08070;
+  border:1px solid rgba(200,60,50,0.6);
+}
+.mg6-criterion-text{ flex:1; }
+.mg6-criterion-pts{
+  font-family:'Cinzel',serif;
+  font-size:0.76rem;
+  color:var(--gold);
+  font-weight:700;
+  white-space:nowrap;
+}
+.mg6-criterion.is-fail .mg6-criterion-pts{
+  color:rgba(245,230,195,0.4);
+  text-decoration:line-through;
+}
+
+/* Tlačítko Další pod výsledkem */
+.mg6-next-wrap{
+  width:100%;
+  text-align:center;
+  margin-top:0.5rem;
+}
+.mg6-next-btn{
+  background:linear-gradient(180deg, var(--gold), #C88A14);
+  color:#2a1a08;
+  border:none;
+  border-radius:24px;
+  padding:0.7rem 1.6rem;
+  font-family:'Cinzel',serif;
+  font-size:0.92rem;
+  font-weight:700;
+  letter-spacing:0.06em;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(245,166,35,0.35);
+  transition:transform 0.15s, box-shadow 0.2s;
+}
+.mg6-next-btn:hover{
+  box-shadow:0 6px 18px rgba(245,166,35,0.5);
+  transform:translateY(-1px);
+}
+.mg6-next-btn:active{ transform:scale(0.97); }
 </style>
 </head>
 <body>
@@ -5080,7 +5470,7 @@ var MINIGAMES = [
   { id: 3, title: "Poradna u kováře",   icon: "🎭", short: "3 scénáře — pravda nebo podvod?", max_wisdom: 90, implemented: true  },
   { id: 4, title: "Stavitel",           icon: "🏗️", short: "3 pokoje — vlastní hrad",      max_wisdom: 90, implemented: true  },
   { id: 5, title: "Zadní vrátka",       icon: "🗝️", short: "3 měsíce — rezerva tě zachrání", max_wisdom: 90, implemented: true  },
-  { id: 6, title: "Bazar",              icon: "🛒", short: "Hospodař s Moudrostí",       max_wisdom: 30, implemented: false }
+  { id: 6, title: "Bazar",              icon: "🛒", short: "3 tržnice — moudrost dělá zlato", max_wisdom: 90, implemented: true  }
 ];
 
 const PYRAMID = [
@@ -13339,6 +13729,549 @@ window.renderMinigame_5 = function(idx) {
 };
 /* ═══════════════════════════════════════════════════════
    KONEC HRY 5
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 6: BAZAR — datový model
+   3 tržnice, dvě měny (mince + Moudrost), tap-to-buy.
+   type: 'spotreba' | 'poetilost' | 'vzdelani' | 'mistrovstvi'
+   costCur / gainCur: 'mince' | 'wisdom'
+   VAR kvůli hoisting — konzistentní s ostatními hrami.
+═══════════════════════════════════════════════════════ */
+var MG6_MARKETS = [
+  // ──────────── KOLO 1: TRŽNICE UČEDNÍKA ────────────
+  {
+    level: 1,
+    title: 'Tržnice učedníka',
+    icon: '🛒',
+    intro: 'Začínáš jako učedník. Máš 50 mincí. Co si dnes pořídíš?',
+    startMince: 50,
+    startWisdom: 0,
+    showHint: true,
+    items: [
+      { id:'m1_vata',   icon:'🍬', name:'Cukrová vata',   type:'spotreba',
+        costCur:'mince', costAmt:5,  gainCur:null, gainAmt:0 },
+      { id:'m1_balon',  icon:'🎈', name:'Barevný balón',  type:'spotreba',
+        costCur:'mince', costAmt:8,  gainCur:null, gainAmt:0 },
+      { id:'m1_pocty',  icon:'📖', name:'Lekce počítání', type:'vzdelani',
+        costCur:'mince', costAmt:15, gainCur:'wisdom', gainAmt:1 },
+      { id:'m1_teser',  icon:'🪚', name:'Kurz tesařství', type:'vzdelani',
+        costCur:'mince', costAmt:25, gainCur:'wisdom', gainAmt:2 },
+      { id:'m1_budka',  icon:'🏗️', name:'Vyrobit ptačí budku', type:'mistrovstvi',
+        costCur:'wisdom', costAmt:1, gainCur:'mince', gainAmt:25 },
+      { id:'m1_police', icon:'🛠️', name:'Vyrobit polici', type:'mistrovstvi',
+        costCur:'wisdom', costAmt:2, gainCur:'mince', gainAmt:50 },
+      { id:'m1_amulet', icon:'💎', name:'Pozlacený amulet', type:'poetilost',
+        costCur:'mince', costAmt:40, gainCur:null, gainAmt:0 }
+    ]
+  },
+  // ──────────── KOLO 2: TRŽNICE TOVARYŠE ────────────
+  {
+    level: 2,
+    title: 'Tržnice tovaryše',
+    icon: '⚒️',
+    intro: 'Tvá pověst roste. Nabídka se rozšiřuje, ale i pokušení...',
+    startMince: 60,
+    startWisdom: 0,
+    showHint: false,
+    items: [
+      { id:'m2_lizatko', icon:'🍭', name:'Lízátko',     type:'spotreba',
+        costCur:'mince', costAmt:4,  gainCur:null, gainAmt:0 },
+      { id:'m2_maslicka',icon:'🎁', name:'Mašlička',    type:'spotreba',
+        costCur:'mince', costAmt:6,  gainCur:null, gainAmt:0 },
+      { id:'m2_bylinky', icon:'🌿', name:'Kniha o bylinkách', type:'vzdelani',
+        costCur:'mince', costAmt:20, gainCur:'wisdom', gainAmt:2 },
+      { id:'m2_cteni',   icon:'📜', name:'Lekce čtení', type:'vzdelani',
+        costCur:'mince', costAmt:30, gainCur:'wisdom', gainAmt:3 },
+      { id:'m2_sirup',   icon:'🌱', name:'Vyrobit léčivý sirup', type:'mistrovstvi',
+        costCur:'wisdom', costAmt:2, gainCur:'mince', gainAmt:40 },
+      { id:'m2_smlouva', icon:'✒️', name:'Sepsat smlouvu', type:'mistrovstvi',
+        costCur:'wisdom', costAmt:3, gainCur:'mince', gainAmt:70 },
+      { id:'m2_koruna',  icon:'👑', name:'Pozlacená koruna', type:'poetilost',
+        costCur:'mince', costAmt:50, gainCur:null, gainAmt:0 },
+      { id:'m2_sazka',   icon:'🎰', name:'Sázka v kostkách', type:'poetilost',
+        costCur:'mince', costAmt:25, gainCur:null, gainAmt:0 }
+    ]
+  },
+  // ──────────── KOLO 3: MISTROVSKÁ TRŽNICE ────────────
+  {
+    level: 3,
+    title: 'Mistrovská tržnice',
+    icon: '👑',
+    intro: 'Jsi mistr. Velké zakázky čekají — ale i velká lákadla.',
+    startMince: 80,
+    startWisdom: 0,
+    showHint: false,
+    items: [
+      { id:'m3_dort',   icon:'🍰', name:'Kus dortu',     type:'spotreba',
+        costCur:'mince', costAmt:8,  gainCur:null, gainAmt:0 },
+      { id:'m3_spiz',   icon:'🍡', name:'Sladký špíz',   type:'spotreba',
+        costCur:'mince', costAmt:12, gainCur:null, gainAmt:0 },
+      { id:'m3_karto',  icon:'🗺️', name:'Studium kartografie', type:'vzdelani',
+        costCur:'mince', costAmt:35, gainCur:'wisdom', gainAmt:3 },
+      { id:'m3_alch',   icon:'⚗️', name:'Mistrovská alchymie', type:'vzdelani',
+        costCur:'mince', costAmt:60, gainCur:'wisdom', gainAmt:5 },
+      { id:'m3_mapa',   icon:'🗺️', name:'Nakreslit mapu pokladu', type:'mistrovstvi',
+        costCur:'wisdom', costAmt:3, gainCur:'mince', gainAmt:70 },
+      { id:'m3_elixir', icon:'🧪', name:'Vyrobit elixír', type:'mistrovstvi',
+        costCur:'wisdom', costAmt:5, gainCur:'mince', gainAmt:130 },
+      { id:'m3_prsten', icon:'💍', name:'Drahý prsten',  type:'poetilost',
+        costCur:'mince', costAmt:70, gainCur:null, gainAmt:0 },
+      { id:'m3_hazard', icon:'🎲', name:'Hazard v krčmě', type:'poetilost',
+        costCur:'mince', costAmt:40, gainCur:null, gainAmt:0 }
+    ]
+  }
+];
+/* ═══════════════════════════════════════════════════════
+   KONEC DAT HRY 6
+═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   KROK 14 – HRA 6: BAZAR — herní logika
+   Dvě měny, tap-to-buy, kompound vzdělání → mistrovství.
+═══════════════════════════════════════════════════════ */
+window.renderMinigame_6 = function(idx) {
+  if (typeof window._minigame_cleanup === 'function') {
+    try { window._minigame_cleanup(); } catch(e){}
+  }
+
+  var wrap = document.getElementById('minigame-canvas-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ════════ STATE SÉRIE ════════
+  var TOTAL_LEVELS = 3;
+  var currentLevel = 1;
+  var levelScores = [0, 0, 0];
+  var seriesScore = 0;
+  var active = true;
+
+  // Stav aktuálního kola
+  var mince = 0;
+  var wisdom = 0;
+  var cart = {};  // { itemId: count }
+
+  var board = document.createElement('div');
+  board.className = 'mg6-board';
+  wrap.appendChild(board);
+
+  // ════════ INTRO KARTA ════════
+  function showIntro() {
+    if (!active) return;
+    board.innerHTML =
+      '<div class="mg0-card">' +
+        '<div class="mg0-card-icon">🛒</div>' +
+        '<div class="mg0-card-title">Bazar</div>' +
+        '<div class="mg0-card-text">' +
+          'Tři tržnice a dvě měny:<br><br>' +
+          '🪙 <strong>Mince</strong> — utrácíš a získáváš zpět<br>' +
+          '✨ <strong>Moudrost</strong> — kupuješ ji vzděláním<br><br>' +
+          'Kouzlo zní: <em>kup 📚 Vzdělání → získáš ✨ Moudrost → kup 🏆 Mistrovství → vrátí ti víc 🪙 mincí, než jsi dal.</em><br><br>' +
+          'Lesklé ❌ pošetilosti ti nic nevrátí!' +
+        '</div>' +
+        '<button class="mg0-btn mg0-btn-primary" id="mg6-start">▶ Vstoupit na tržnici</button>' +
+      '</div>';
+    var btn = document.getElementById('mg6-start');
+    if (btn) btn.addEventListener('click', function(){ startRound(); }, { once: true });
+  }
+
+  // ════════ START KOLA ════════
+  function startRound() {
+    if (!active) return;
+    var market = MG6_MARKETS[currentLevel - 1];
+    if (!market) { showSeriesFinish(); return; }
+
+    mince = market.startMince;
+    wisdom = market.startWisdom;
+    cart = {};
+
+    renderMarket();
+  }
+
+  // ════════ VYKRESLENÍ TRŽNICE ════════
+  function renderMarket() {
+    if (!active) return;
+    var market = MG6_MARKETS[currentLevel - 1];
+
+    var html =
+      '<div class="mg6-header">' +
+        '<div class="mg6-progress">Kolo ' + currentLevel + ' ze ' + TOTAL_LEVELS + '</div>' +
+        '<div class="mg6-market-name">' +
+          '<span class="mg6-market-icon">' + market.icon + '</span>' +
+          '<span>' + market.title + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mg6-intro-text">' + market.intro + '</div>' +
+      buildWalletsHTML() +
+      '<div class="mg6-grid" id="mg6-grid">';
+
+    for (var i = 0; i < market.items.length; i++) {
+      html += buildItemHTML(market.items[i]);
+    }
+    html += '</div>';
+
+    html +=
+      '<div class="mg6-finish-wrap">' +
+        '<button class="mg6-finish-btn" id="mg6-finish">✓ Hotovo s kolem</button>' +
+      '</div>';
+
+    if (market.showHint) {
+      html += '<div class="mg6-hint">💡 Tip: Nejdřív kup Vzdělání, pak za získanou Moudrost kup Mistrovství.</div>';
+    }
+
+    board.innerHTML = html;
+
+    // Bind položek
+    var items = board.querySelectorAll('.mg6-item');
+    for (var j = 0; j < items.length; j++) {
+      (function(el){
+        el.addEventListener('click', function(){
+          if (el.classList.contains('is-disabled')) return;
+          buyItem(el.getAttribute('data-id'));
+        });
+      })(items[j]);
+    }
+
+    // Bind Hotovo
+    var fb = document.getElementById('mg6-finish');
+    if (fb) fb.addEventListener('click', function(){ finishRound(); });
+  }
+
+  // ════════ HTML PENĚŽENEK ════════
+  function buildWalletsHTML() {
+    return '' +
+      '<div class="mg6-wallets">' +
+        '<div class="mg6-wallet" id="mg6-wallet-mince">' +
+          '<div class="mg6-wallet-icon">🪙</div>' +
+          '<div class="mg6-wallet-name">Mince</div>' +
+          '<div class="mg6-wallet-value">' + mince + '</div>' +
+        '</div>' +
+        '<div class="mg6-wallet is-wisdom" id="mg6-wallet-wisdom">' +
+          '<div class="mg6-wallet-icon">✨</div>' +
+          '<div class="mg6-wallet-name">Moudrost</div>' +
+          '<div class="mg6-wallet-value">' + wisdom + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ════════ HTML JEDNÉ POLOŽKY ════════
+  function buildItemHTML(item) {
+    var count = cart[item.id] || 0;
+    var canAfford = canBuy(item);
+
+    // Cena
+    var costClass = (item.costCur === 'mince') ? 'mg6-cost-mince' : 'mg6-cost-wisdom';
+    var costIcon = (item.costCur === 'mince') ? '🪙' : '✨';
+    var costHtml = '<div class="mg6-item-cost ' + costClass + '">−' + costIcon + ' ' + item.costAmt + '</div>';
+
+    // Výnos
+    var gainHtml = '';
+    if (item.gainCur) {
+      var gainClass = (item.gainCur === 'mince') ? 'mg6-gain-mince' : 'mg6-gain-wisdom';
+      var gainIcon = (item.gainCur === 'mince') ? '🪙' : '✨';
+      gainHtml = '<div class="mg6-item-gain ' + gainClass + '">+' + gainIcon + ' ' + item.gainAmt + '</div>';
+    } else {
+      gainHtml = '<div class="mg6-item-gain" style="opacity:0.4;">—</div>';
+    }
+
+    var classes = 'mg6-item type-' + item.type;
+    if (count > 0) classes += ' is-selected';
+    if (!canAfford && count === 0) classes += ' is-disabled';
+    // I při count>0 ale nedostatku → zůstává klikatelné jen pokud má smysl;
+    // pokud nemůže koupit další, ale už má v košíku, necháme klikatelné (klik přidá další jen když může)
+
+    var badge = (count > 0) ? '<div class="mg6-item-badge">' + count + '×</div>' : '';
+
+    return '' +
+      '<div class="' + classes + '" data-id="' + item.id + '">' +
+        badge +
+        '<div class="mg6-item-icon">' + item.icon + '</div>' +
+        '<div class="mg6-item-name">' + item.name + '</div>' +
+        costHtml +
+        gainHtml +
+      '</div>';
+  }
+
+  // ════════ MŮŽE KOUPIT? ════════
+  function canBuy(item) {
+    if (item.costCur === 'mince')  return mince >= item.costAmt;
+    if (item.costCur === 'wisdom') return wisdom >= item.costAmt;
+    return false;
+  }
+
+  // ════════ NÁKUP POLOŽKY ════════
+  function buyItem(itemId) {
+    if (!active) return;
+    var market = MG6_MARKETS[currentLevel - 1];
+    var item = null;
+    for (var i = 0; i < market.items.length; i++) {
+      if (market.items[i].id === itemId) { item = market.items[i]; break; }
+    }
+    if (!item) return;
+    if (!canBuy(item)) return;
+
+    // Odečti cenu
+    if (item.costCur === 'mince')  mince  -= item.costAmt;
+    if (item.costCur === 'wisdom') wisdom -= item.costAmt;
+    // Přičti výnos
+    if (item.gainCur === 'mince')  mince  += item.gainAmt;
+    if (item.gainCur === 'wisdom') wisdom += item.gainAmt;
+
+    // Zapiš do košíku
+    cart[itemId] = (cart[itemId] || 0) + 1;
+
+    // Animace peněženek
+    pulseWallet('mince');
+    if (item.costCur === 'wisdom' || item.gainCur === 'wisdom') pulseWallet('wisdom');
+
+    // Překresli celou tržnici (aktualizace dostupnosti všech položek)
+    refreshMarketValues();
+  }
+
+  // ════════ PULS PENĚŽENKY ════════
+  function pulseWallet(which) {
+    var el = document.getElementById(which === 'mince' ? 'mg6-wallet-mince' : 'mg6-wallet-wisdom');
+    if (!el) return;
+    el.classList.add('is-pulse');
+    setTimeout(function(){ if (el) el.classList.remove('is-pulse'); }, 500);
+  }
+
+  // ════════ AKTUALIZACE HODNOT BEZ ZTRÁTY ANIMACÍ ════════
+  function refreshMarketValues() {
+    // Update čísel peněženek
+    var mEl = document.querySelector('#mg6-wallet-mince .mg6-wallet-value');
+    var wEl = document.querySelector('#mg6-wallet-wisdom .mg6-wallet-value');
+    if (mEl) mEl.textContent = mince;
+    if (wEl) wEl.textContent = wisdom;
+
+    // Update každé položky (badge + disabled stav)
+    var market = MG6_MARKETS[currentLevel - 1];
+    for (var i = 0; i < market.items.length; i++) {
+      var item = market.items[i];
+      var el = board.querySelector('.mg6-item[data-id="' + item.id + '"]');
+      if (!el) continue;
+      var count = cart[item.id] || 0;
+      var canAfford = canBuy(item);
+
+      // Badge
+      var badge = el.querySelector('.mg6-item-badge');
+      if (count > 0) {
+        if (badge) {
+          badge.textContent = count + '×';
+        } else {
+          var nb = document.createElement('div');
+          nb.className = 'mg6-item-badge';
+          nb.textContent = count + '×';
+          el.insertBefore(nb, el.firstChild);
+        }
+        el.classList.add('is-selected');
+      } else {
+        if (badge) badge.remove();
+        el.classList.remove('is-selected');
+      }
+
+      // Disabled stav
+      if (!canAfford) el.classList.add('is-disabled');
+      else el.classList.remove('is-disabled');
+    }
+  }
+
+  // ════════ VYHODNOCENÍ KOLA ════════
+  function scoreRound(market) {
+    var boughtVzdelani = false;
+    var boughtMistrovstvi = false;
+    var boughtPoetilost = false;
+
+    for (var i = 0; i < market.items.length; i++) {
+      var item = market.items[i];
+      var count = cart[item.id] || 0;
+      if (count > 0) {
+        if (item.type === 'vzdelani')    boughtVzdelani = true;
+        if (item.type === 'mistrovstvi') boughtMistrovstvi = true;
+        if (item.type === 'poetilost')   boughtPoetilost = true;
+      }
+    }
+
+    var keptCoins = (mince >= market.startMince);
+
+    var score = 0;
+    if (boughtVzdelani)    score += 10;
+    if (boughtMistrovstvi) score += 10;
+    if (!boughtPoetilost)  score += 5;
+    if (keptCoins)         score += 5;
+
+    return {
+      score: score,
+      boughtVzdelani: boughtVzdelani,
+      boughtMistrovstvi: boughtMistrovstvi,
+      boughtPoetilost: boughtPoetilost,
+      keptCoins: keptCoins,
+      startMince: market.startMince,
+      endMince: mince
+    };
+  }
+
+  // ════════ DOKONČENÍ KOLA ════════
+  function finishRound() {
+    if (!active) return;
+    var market = MG6_MARKETS[currentLevel - 1];
+    var r = scoreRound(market);
+    levelScores[currentLevel - 1] = r.score;
+
+    var iconText, titleText;
+    if (r.score === 30) {
+      iconText = '🏆'; titleText = 'Mistrovský obchod!';
+    } else if (r.score >= 20) {
+      iconText = '⭐'; titleText = 'Dobrý obchod';
+    } else if (r.score >= 10) {
+      iconText = '✨'; titleText = 'Učíš se obchodovat';
+    } else {
+      iconText = '🌱'; titleText = 'Zkus to znovu';
+    }
+
+    // Mince přehled (start → konec)
+    var diffClass = '';
+    if (r.endMince > r.startMince) diffClass = 'is-up';
+    else if (r.endMince < r.startMince) diffClass = 'is-down';
+
+    var crits = [
+      { ok: r.boughtVzdelani,    text: 'Koupil/a jsi Vzdělání',          pts: 10 },
+      { ok: r.boughtMistrovstvi, text: 'Koupil/a jsi Mistrovství',       pts: 10 },
+      { ok: !r.boughtPoetilost,  text: 'Žádná lesklá pošetilost',        pts: 5  },
+      { ok: r.keptCoins,         text: 'Neztratil/a jsi mince',          pts: 5  }
+    ];
+
+    var critsHtml = '';
+    for (var i = 0; i < crits.length; i++) {
+      var c = crits[i];
+      critsHtml +=
+        '<div class="mg6-criterion ' + (c.ok ? 'is-ok' : 'is-fail') + '">' +
+          '<span class="mg6-criterion-icon">' + (c.ok ? '✓' : '✗') + '</span>' +
+          '<span class="mg6-criterion-text">' + c.text + '</span>' +
+          '<span class="mg6-criterion-pts">+' + c.pts + ' ✨</span>' +
+        '</div>';
+    }
+
+    var isLast = (currentLevel >= TOTAL_LEVELS);
+    var nextLabel = isLast ? '✨ Vidět výsledek' : ('Dál na tržnici ' + (currentLevel + 1) + ' →');
+
+    board.innerHTML =
+      '<div class="mg6-header">' +
+        '<div class="mg6-progress">Kolo ' + currentLevel + ' — výsledek</div>' +
+      '</div>' +
+      '<div class="mg6-result">' +
+        '<div class="mg6-result-icon">' + iconText + '</div>' +
+        '<div class="mg6-result-title">' + titleText + '</div>' +
+        '<div class="mg6-result-score">' + r.score + ' / 30 ✨</div>' +
+        '<div class="mg6-result-coins">' +
+          '<span>🪙 ' + r.startMince + '</span>' +
+          '<span class="mg6-arrow">→</span>' +
+          '<span class="' + diffClass + '"><strong>🪙 ' + r.endMince + '</strong></span>' +
+        '</div>' +
+        '<div class="mg6-criteria">' + critsHtml + '</div>' +
+      '</div>' +
+      '<div class="mg6-next-wrap">' +
+        '<button class="mg6-next-btn" id="mg6-next">' + nextLabel + '</button>' +
+      '</div>';
+
+    var nb = document.getElementById('mg6-next');
+    if (nb) nb.addEventListener('click', function(){
+      if (isLast) showSeriesFinish();
+      else { currentLevel++; startRound(); }
+    }, { once: true });
+  }
+
+  // ════════ FINIŠ SÉRIE ════════
+  function showSeriesFinish() {
+    if (!active) return;
+    seriesScore = levelScores[0] + levelScores[1] + levelScores[2];
+    var result = (typeof finishMinigame === 'function')
+      ? finishMinigame(idx, seriesScore)
+      : { wisdomGiven: 0, isNewBest: false, previousBest: 0 };
+
+    var iconText, titleText, subText;
+    if (seriesScore === 90) {
+      iconText = '👑';
+      titleText = 'Mistr Babylonu!';
+      subText = 'Naučil ses sedmé a nejmocnější tajemství: peníze přicházejí a odcházejí, ale moudrost zůstává navždy.';
+    } else if (seriesScore >= 60) {
+      iconText = '⭐';
+      titleText = 'Zručný obchodník';
+      subText = 'Chápeš sílu vzdělání. Příště nech Moudrost vždy proměnit v mistrovství — tam se rodí bohatství.';
+    } else if (seriesScore >= 30) {
+      iconText = '✨';
+      titleText = 'Začínající kupec';
+      subText = 'Učení je most k mincím. Zkus celý kruh: Vzdělání → Moudrost → Mistrovství → mince zpět.';
+    } else {
+      iconText = '🌱';
+      titleText = 'Pojďme znovu';
+      subText = 'Lesklé pošetilosti tě svedly z cesty. Tvá hlava je tvůj největší poklad — investuj do ní.';
+    }
+
+    var wisdomLine = '';
+    if (result.wisdomGiven > 0) {
+      wisdomLine = '<div class="mg0-card-wisdom">+' + result.wisdomGiven + ' Moudrosti ✨</div>';
+    } else if (state.minigames && state.minigames.plays && state.minigames.plays[idx] > 1) {
+      wisdomLine = '<div class="mg0-card-wisdom-note">Dnes už jsi Moudrost získal — zítra zase!</div>';
+    }
+
+    board.innerHTML =
+      '<div class="mg0-card mg0-card-end">' +
+        '<div class="mg0-card-icon">' + iconText + '</div>' +
+        '<div class="mg0-card-title">' + titleText + '</div>' +
+        '<div class="mg0-score">' + seriesScore + ' / 90 ✨</div>' +
+        '<div class="mg0-twotrack">' +
+          '<div class="mg0-track">Tržnice 1<br><strong>' + levelScores[0] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Tržnice 2<br><strong>' + levelScores[1] + ' / 30</strong></div>' +
+          '<div class="mg0-track">Tržnice 3<br><strong>' + levelScores[2] + ' / 30</strong></div>' +
+        '</div>' +
+        '<div class="mg0-card-text">' + subText + '</div>' +
+        wisdomLine +
+        '<div class="mg0-buttons">' +
+          '<button class="mg0-btn mg0-btn-primary" id="mg6-replay">🔄 Hrát znovu</button>' +
+          '<button class="mg0-btn mg0-btn-ghost" id="mg6-back">‹ Zpět</button>' +
+        '</div>' +
+      '</div>';
+
+    var rb = document.getElementById('mg6-replay');
+    var bb = document.getElementById('mg6-back');
+    if (rb) rb.addEventListener('click', function(){
+      currentLevel = 1; levelScores = [0, 0, 0]; seriesScore = 0;
+      mince = 0; wisdom = 0; cart = {};
+      showIntro();
+    }, { once: true });
+    if (bb) bb.addEventListener('click', function(){
+      if (typeof showScreen === 'function') showScreen('tajemstvi');
+    }, { once: true });
+
+    // Arkád JEN u perfektu 90 a JEN při prvním dosažení
+    if (seriesScore === 90 && result.isNewBest && state.minigames.plays[idx] === 1) {
+      var name = (state.user && state.user.name) ? state.user.name : 'milý poutníku';
+      var arkadText = '👑 Mistr Babylonu, ' + name + '! Tvá hlava je tvůj největší poklad. Naučil ses sedmé a nejmocnější tajemství: peníze přicházejí a odcházejí, ale moudrost zůstává navždy. Strom hojnosti šumí v tvou poctu — všech sedm tajemství je teď v tvých rukou.';
+      setTimeout(function(){
+        if (typeof openArkadModal === 'function') {
+          openArkadModal(arkadText, [
+            { label: 'Děkuji, Arkáde', response: 'Sedm tajemství jsi naplnil. Teď jsi strážcem ty sám.' }
+          ]);
+        }
+      }, 1200);
+    }
+  }
+
+  // ════════ CLEANUP ════════
+  window._minigame_cleanup = function() {
+    active = false;
+    cart = {};
+    if (board && board.parentNode) {
+      try { board.parentNode.removeChild(board); } catch(_){}
+    }
+  };
+
+  // Start
+  showIntro();
+};
+/* ═══════════════════════════════════════════════════════
+   KONEC HRY 6
 ═══════════════════════════════════════════════════════ */
 </script>
 </body>
