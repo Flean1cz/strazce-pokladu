@@ -1,4 +1,5 @@
 {
+  "id": "/strazce-pokladu/",
   "name": "Babylonská pokladnice",
   "short_name": "Pokladnice",
   "description": "Finanční vzdělávání pro děti — pravidlo 80/10/10 v duchu starého Babylonu",
@@ -9,6 +10,7 @@
   "background_color": "#0d0700",
   "theme_color": "#F5A623",
   "lang": "cs",
+  "dir": "ltr",
   "categories": ["education", "kids", "finance"],
   "icons": [
     {
