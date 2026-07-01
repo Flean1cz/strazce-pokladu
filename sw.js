@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.24.0'; // ← KROK 14.23: HRA 6 Bazar (7. tajemství) — KOMPLETNÍ SADA 7/7
+const VERSION = 'v2.25.0'; // ← KROK 14.24: Oprava HTML div balance (#screen-pokladnice, #screen-admin)
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
