@@ -5547,8 +5547,12 @@ var ICONS = {
   mountains: '<path d="M10 48 L26 22 L36 38 L42 28 L54 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 29 L26 22 L30 29 L26 32 Z" fill="currentColor" opacity=".5"/><path d="M38 33 L42 28 L46 35" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".6" stroke-linejoin="round"/>',
   drop:      '<path d="M32 14 C32 14 44 30 44 40 C44 48 38 52 32 52 C26 52 20 48 20 40 C20 30 32 14 32 14 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M28 42 C28 46 31 48 34 47" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".7" stroke-linecap="round"/>',
   sparkle:   '<path d="M32 12 L35 27 L32 30 L29 27 Z M32 52 L29 37 L32 34 L35 37 Z M12 32 L27 29 L30 32 L27 35 Z M52 32 L37 35 L34 32 L37 29 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="32" cy="32" r="3" fill="currentColor"/><path d="M20 20 L23 23 M44 20 L41 23 M20 44 L23 41 M44 44 L41 41" stroke="currentColor" stroke-width="1.4" opacity=".6" stroke-linecap="round"/>',
-  castle:    '<path d="M16 48 L16 28 L20 28 L20 22 L26 22 L26 28 L30 28 L30 20 L34 20 L34 28 L38 28 L38 22 L44 22 L44 28 L48 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M28 48 L28 38 L36 38 L36 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
+  castle:    '<path d="M16 48 L16 28 L20 28 L20 22 L26 22 L26 28 L30 28 L30 20 L34 20 L34 28 L38 28 L38 22 L44 22 L44 28 L48 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M28 48 L28 38 L36 38 L36 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  shield:    '<path d="M32 12 C38 16 44 17 50 17 C50 34 44 46 32 52 C20 46 14 34 14 17 C20 17 26 16 32 12 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 20 C36 23 40 24 44 24 C44 35 40 43 32 47 L32 20 Z" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".6" stroke-linejoin="round"/><path d="M32 12 L32 52" stroke="currentColor" stroke-width="1" opacity=".4"/>'
 };
+
+/* Tajemství (STORIES.seal): index 0–6 */
+var STORY_ICON = ['amphora','shield','tree','lion','castle','key','crown'];
 
 /**
  * Vrátí kompletní <svg> string pro danou ikonu.
@@ -6202,7 +6206,7 @@ function renderSecrets() {
   grid.innerHTML = STORIES.map((s,i) => {
     const unlocked = state.progression.unlocked_secrets.includes(i);
     return `<div class="secret-card ${unlocked?'unlocked':''}" id="secret-card-${i}">
-      <span class="secret-seal">${s.seal}</span>
+      <span class="secret-seal"><span class="bab-icon">${ikona(STORY_ICON[i], {size:38})}</span></span>
       <div class="secret-num">Tajemství ${i+1}</div>
       <div class="secret-name">${s.title}</div>
       ${unlocked ? `<div class="secret-text">„${s.secret}"</div>` : ''}
@@ -6582,7 +6586,7 @@ function openSecretModal(idx) {
   const unlocked = state.progression.unlocked_secrets.includes(idx);
   if (!unlocked) { toast('🔒 Přečti příběh č.'+(idx+1)+' pro odemčení!'); return; }
 
-  document.getElementById('smo-ico').textContent   = s.seal;
+  document.getElementById('smo-ico').innerHTML     = '<span class="bab-icon">' + ikona(STORY_ICON[idx], {size:44}) + '</span>';
   document.getElementById('smo-num').textContent   = 'TAJEMSTVÍ ' + ROMAN_NUMS[idx];
   document.getElementById('smo-title').textContent = s.title;
   document.getElementById('smo-body').textContent  = data.body;

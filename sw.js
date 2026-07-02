@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.27.0'; // ← Ikony ZAPOJENY: minihry, pečetě, sbírky, hodnost, pilíře — SVG rytina místo emoji
+const VERSION = 'v2.28.0'; // ← Ikony tajemství: STORY_ICON + shield, karta i modal SVG
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
