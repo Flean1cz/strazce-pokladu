@@ -4678,7 +4678,7 @@ svg.jar{width:52px;height:72px;}
   </div>
 
   <div class="pillar-card pokladnice" id="nav-pokladnice">
-    <div class="pillar-icon">🏺</div>
+    <div class="pillar-icon"><span class="bab-icon"><svg viewBox="0 0 64 64" width="44" height="44" fill="none" aria-hidden="true" style="display:block"><path d="M24 16 L40 16 M26 16 C26 22 20 22 20 30 C20 42 26 48 32 48 C38 48 44 42 44 30 C44 22 38 22 38 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 28 C16 26 16 32 20 32 M44 28 C48 26 48 32 44 32" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M24 36 L40 36" stroke="currentColor" stroke-width="1.4" opacity=".7"/></svg></span></div>
     <div class="pillar-content">
       <div class="pillar-name">Babylonská pokladnice</div>
       <div class="pillar-desc">Správa tří nádob · Zlatý strom · Wishlist snů</div>
@@ -4688,7 +4688,7 @@ svg.jar{width:52px;height:72px;}
   </div>
 
   <div class="pillar-card pribehy" id="nav-pribehy">
-    <div class="pillar-icon">📜</div>
+    <div class="pillar-icon"><span class="bab-icon"><svg viewBox="0 0 64 64" width="44" height="44" fill="none" aria-hidden="true" style="display:block"><path d="M20 20 C16 20 16 26 20 26 L44 26 C48 26 48 20 44 20 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 26 L20 42 C16 42 16 48 20 48 L44 48 C48 48 48 42 44 42 L44 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M26 33 L40 33 M26 38 L37 38" stroke="currentColor" stroke-width="1.4" opacity=".7" stroke-linecap="round"/></svg></span></div>
     <div class="pillar-content">
       <div class="pillar-name">Příběhy</div>
       <div class="pillar-desc">7 mudroslovných příběhů ze starého Babylonu</div>
@@ -4698,7 +4698,7 @@ svg.jar{width:52px;height:72px;}
   </div>
 
   <div class="pillar-card tajemstvi" id="nav-tajemstvi">
-    <div class="pillar-icon">🌟</div>
+    <div class="pillar-icon"><span class="bab-icon"><svg viewBox="0 0 64 64" width="44" height="44" fill="none" aria-hidden="true" style="display:block"><path d="M32 12 L37 26 L52 26 L40 35 L44 49 L32 40 L20 49 L24 35 L12 26 L27 26 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></span></div>
     <div class="pillar-content">
       <div class="pillar-name">7 tajemství zlata</div>
       <div class="pillar-desc">Síň slávy · Odemknutá moudrost Babylonu</div>
@@ -4708,7 +4708,7 @@ svg.jar{width:52px;height:72px;}
   </div>
 
   <div class="pillar-card seals-pillar" id="nav-seals">
-    <div class="pillar-icon">🏆</div>
+    <div class="pillar-icon"><span class="bab-icon"><svg viewBox="0 0 64 64" width="44" height="44" fill="none" aria-hidden="true" style="display:block"><path d="M14 42 L18 22 L26 32 L32 18 L38 32 L46 22 L50 42 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 42 L50 42 L48 48 L16 48 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="18" r="2.5" fill="currentColor"/><circle cx="18" cy="22" r="2" fill="currentColor"/><circle cx="46" cy="22" r="2" fill="currentColor"/></svg></span></div>
     <div class="pillar-content">
       <div class="pillar-name">Síň pečetí</div>
       <div class="pillar-desc">Drobné úspěchy · Tvá sbírka odznaků</div>
@@ -4718,7 +4718,7 @@ svg.jar{width:52px;height:72px;}
   </div>
 
   <div class="pillar-card vitrine-pillar" id="nav-vitrine">
-    <div class="pillar-icon">📜</div>
+    <div class="pillar-icon"><span class="bab-icon"><svg viewBox="0 0 64 64" width="44" height="44" fill="none" aria-hidden="true" style="display:block"><path d="M20 20 C16 20 16 26 20 26 L44 26 C48 26 48 20 44 20 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 26 L20 42 C16 42 16 48 20 48 L44 48 C48 48 48 42 44 42 L44 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M26 33 L40 33 M26 38 L37 38" stroke="currentColor" stroke-width="1.4" opacity=".7" stroke-linecap="round"/></svg></span></div>
     <div class="pillar-content">
       <div class="pillar-name">Vitrína sbírek</div>
       <div class="pillar-desc">Mince · Byliny · Zvířátka · Knihy</div>
@@ -6237,7 +6237,7 @@ function renderMinigameSection(idx) {
   return `<div class="minigame-section">
     <div class="minigame-divider"></div>
     <div class="minigame-label">🎮 Mistrovská hra</div>
-    <div class="minigame-name">${game.icon} ${game.title}</div>
+    <div class="minigame-name"><span class="minigame-icon-svg">${ikona(MG_ICON[idx])}</span> ${game.title}</div>
     <div class="minigame-short">${game.short}</div>
     <div class="minigame-cta">
       <button class="minigame-play-btn" onclick="startMinigame(${idx})">▶ Hrát</button>
@@ -6277,7 +6277,7 @@ function startMinigame(idx) {
   showScreen('minigame');
 
   var titleEl = document.getElementById('minigame-title');
-  if (titleEl) titleEl.textContent = game.icon + ' ' + game.title;
+  if (titleEl) titleEl.innerHTML = '<span class="bab-icon" style="display:inline-flex;vertical-align:-4px;margin-right:6px;">' + ikona(MG_ICON[idx], {size:22}) + '</span>' + game.title;
 
   // Volá konkrétní render funkci dané hry — bude přidána v dalších krocích
   var renderFn = window['renderMinigame_' + idx];
@@ -7884,7 +7884,7 @@ function renderRank() {
   const icoEl  = document.getElementById('rank-ico');
   if (badge && nameEl && icoEl) {
     nameEl.textContent = rank.name;
-    icoEl.textContent  = rank.ico;
+    icoEl.innerHTML    = ikona(RANK_ICON[rankIdx], {size:18});
     badge.className = 'rank-badge r-' + rankIdx;
   }
 
@@ -8335,7 +8335,7 @@ function renderSealsScreen(animateNew) {
 
       card.innerHTML =
         lockHtml +
-        '<div class="seal-ico">' + seal.ico + '</div>' +
+        '<div class="seal-ico">' + ikonaFor(SEAL_ICON, seal.id, seal.ico) + '</div>' +
         '<div class="seal-name">' + seal.name + '</div>' +
         descHtml +
         dateHtml;
@@ -9395,7 +9395,7 @@ function renderVitrineScreen(animateNew) {
       card.className = 'art-card ' + (isUn ? 'unlocked' : 'locked') + (justGot ? ' just-got' : '');
       card.setAttribute('data-art', it.id);
       card.setAttribute('title', isUn ? it.name : 'Ještě nezískáno');
-      card.innerHTML = '<span class="art-ico">' + it.ico + '</span>';
+      card.innerHTML = '<span class="art-ico">' + ikonaFor(COLL_ICON, it.id, it.ico) + '</span>';
       card.addEventListener('click', () => openArtifactDetail(it.id));
       grid.appendChild(card);
     });

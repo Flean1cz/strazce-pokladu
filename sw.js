@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.26.0'; // ← Ikony: vložen babylon-icons blok (ICONS/ikona/ikonaFor) — příprava na náhradu emoji
+const VERSION = 'v2.27.0'; // ← Ikony ZAPOJENY: minihry, pečetě, sbírky, hodnost, pilíře — SVG rytina místo emoji
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',
