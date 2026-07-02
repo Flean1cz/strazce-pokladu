@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.25.0'; // ← KROK 14.24: Oprava HTML div balance (#screen-pokladnice, #screen-admin)
+const VERSION = 'v2.26.0'; // ← Ikony: vložen babylon-icons blok (ICONS/ikona/ikonaFor) — příprava na náhradu emoji
 const CACHE = `strazce-${VERSION}`;
 const ASSETS = [
   './', './index.html', './manifest.json',

@@ -4522,6 +4522,20 @@ svg.jar{width:52px;height:72px;}
   transform:translateY(-1px);
 }
 .mg6-next-btn:active{ transform:scale(0.97); }
+
+/* ═══ BABYLONSKÉ IKONY — CSS (viz babylon-icons.js) ═══ */
+.bab-icon{ color:#E0B84E; display:inline-flex; align-items:center; justify-content:center; }
+.bab-icon svg{ display:block; }
+.minigame-icon-svg{ color:#E0B84E; width:34px; height:34px; flex-shrink:0; }
+.minigame-icon-svg svg{ filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+.seal-ico .bab-icon{ color:#E0B84E; }
+.seal-card.locked .seal-ico{ color:#7a6a45; filter:grayscale(.6) opacity(.45); }
+.art-ico .bab-icon{ color:#E0B84E; }
+.art-card.locked .art-ico{ display:none; }
+.rank-ico .bab-icon{ color:#FFD700; }
+.rank-ico svg{ filter:drop-shadow(0 0 4px rgba(255,215,0,.6)); }
+.pillar-icon .bab-icon{ color:#E0B84E; width:44px; height:44px; }
+.bab-icon.relief svg{ filter:drop-shadow(0 1px 0 rgba(255,240,200,.25)) drop-shadow(0 -1px 2px rgba(0,0,0,.4)); }
 </style>
 </head>
 <body>
@@ -5463,6 +5477,140 @@ const STORIES = [
 // implemented: false → karta zobrazí "Brzy přijde mistrovská hra"
 // max_wisdom: maximální Moudrost dosažitelná za perfektní výkon
 // ═══════════════════════════════════════════════════════
+
+/* ═══════════════════════════════════════════════════════════════
+   BABYLONSKÉ IKONY — inline SVG sada (styl: rytina)
+   Vloží se do index.html jako <script> blok (single-file).
+   40 ikon · zlatá #E0B84E · viewBox 64×64 · tah 2.2px
+   ───────────────────────────────────────────────────────────────
+   Použití:
+     ikona('coin')            → vrátí SVG string
+     ikona('coin', {size:28}) → SVG s danou velikostí
+   Mapování id → ikona je v ICON_MAP níže.
+═══════════════════════════════════════════════════════════════ */
+
+var ICONS = {
+  /* ── sdílené (13) ── */
+  coin:      '<circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="32" cy="32" r="18" fill="none" stroke="currentColor" stroke-width="1" opacity=".6"/><path d="M24 26 L32 19 L40 26 M32 19 L32 44 M24 41 L40 41" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  herb:      '<path d="M32 50 L32 26" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M32 34 C24 32 20 24 21 18 C28 18 33 24 32 34Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 30 C40 28 44 20 43 14 C36 14 31 20 32 30Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M27 50 L37 50" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  book:      '<path d="M16 18 C22 15 28 15 32 18 C36 15 42 15 48 18 L48 46 C42 43 36 43 32 46 C28 43 22 43 16 46 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 18 L32 46" stroke="currentColor" stroke-width="2"/><path d="M21 25 L28 24 M21 31 L28 30 M36 24 L43 25 M36 30 L43 31" stroke="currentColor" stroke-width="1.2" opacity=".7" stroke-linecap="round"/>',
+  scroll:    '<path d="M20 20 C16 20 16 26 20 26 L44 26 C48 26 48 20 44 20 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 26 L20 42 C16 42 16 48 20 48 L44 48 C48 48 48 42 44 42 L44 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M26 33 L40 33 M26 38 L37 38" stroke="currentColor" stroke-width="1.4" opacity=".7" stroke-linecap="round"/>',
+  temple:    '<path d="M14 26 L32 15 L50 26 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M18 26 L18 44 M27 26 L27 44 M37 26 L37 44 M46 26 L46 44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 44 L51 44 M11 48 L53 48" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  owl:       '<path d="M20 22 C20 14 28 12 32 12 C36 12 44 14 44 22 L44 36 C44 46 38 50 32 50 C26 50 20 46 20 36 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="26" cy="26" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="38" cy="26" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="26" cy="26" r="1.5" fill="currentColor"/><circle cx="38" cy="26" r="1.5" fill="currentColor"/><path d="M32 31 L29 34 L35 34 Z" fill="currentColor"/><path d="M20 18 L24 13 M44 18 L40 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  scales:    '<path d="M32 14 L32 48" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 22 L48 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="32" cy="14" r="2.5" fill="currentColor"/><path d="M16 22 L11 33 L21 33 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M48 22 L43 33 L53 33 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M24 48 L40 48" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  amphora:   '<path d="M24 16 L40 16 M26 16 C26 22 20 22 20 30 C20 42 26 48 32 48 C38 48 44 42 44 30 C44 22 38 22 38 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 28 C16 26 16 32 20 32 M44 28 C48 26 48 32 44 32" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M24 36 L40 36" stroke="currentColor" stroke-width="1.4" opacity=".7"/>',
+  book_open: '<path d="M32 20 C26 16 18 16 14 18 L14 44 C18 42 26 42 32 46 C38 42 46 42 50 44 L50 18 C46 16 38 16 32 20 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 20 L32 46" stroke="currentColor" stroke-width="2"/><path d="M19 25 L27 24 M19 31 L27 30 M37 24 L45 25 M37 30 L45 31" stroke="currentColor" stroke-width="1.2" opacity=".7" stroke-linecap="round"/>',
+  star:      '<path d="M32 12 L37 26 L52 26 L40 35 L44 49 L32 40 L20 49 L24 35 L12 26 L27 26 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>',
+  purse:     '<path d="M26 20 L38 20 L34 26 L30 26 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M30 26 C18 30 16 50 32 50 C48 50 46 30 34 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M27 23 L37 23" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="32" cy="40" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M29 40 L35 40 M32 37 L32 43" stroke="currentColor" stroke-width="1"/>',
+  leaf:      '<path d="M20 44 C20 28 32 16 46 16 C46 32 36 46 20 44 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M24 40 C30 32 38 24 44 20" stroke="currentColor" stroke-width="1.6" opacity=".8" stroke-linecap="round"/><path d="M30 36 L33 38 M36 30 L39 32" stroke="currentColor" stroke-width="1.2" opacity=".6" stroke-linecap="round"/>',
+  books:     '<path d="M16 40 L44 40 L44 46 L16 46 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M19 32 L47 32 L47 40 L19 40 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M17 24 L45 24 L45 32 L17 32 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 28 L24 28 M22 36 L24 36 M40 44 L42 44" stroke="currentColor" stroke-width="1.2" opacity=".7" stroke-linecap="round"/>',
+
+  /* ── minihry (5 nových) ── */
+  growpile:  '<path d="M14 50 L50 50" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M18 50 L18 40 M28 50 L28 32 M38 50 L38 24 M48 50 L48 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M14 28 L24 22 L34 24 L50 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" opacity=".85"/><path d="M44 12 L50 12 L50 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  mask:      '<path d="M18 18 C18 16 46 16 46 18 C48 32 42 48 32 48 C22 48 16 32 18 18 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M24 28 C26 25 30 25 31 28 M33 28 C34 25 38 25 40 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M25 38 C28 42 36 42 39 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  builder:   '<path d="M16 30 L32 18 L48 30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 30 L20 48 L44 48 L44 30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 39 L44 39 M32 30 L32 48" stroke="currentColor" stroke-width="1.4" opacity=".7"/><path d="M38 14 L46 14 L46 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  key:       '<circle cx="24" cy="24" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="24" cy="24" r="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M30 30 L46 46 M46 46 L42 50 M46 46 L50 42 M40 40 L36 44" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bazaar:    '<path d="M14 26 L50 26 L46 48 L18 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 26 L18 16 L46 16 L52 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 16 L20 26 M32 16 L32 26 M42 16 L44 26" stroke="currentColor" stroke-width="1.4" opacity=".7"/><path d="M26 48 L26 38 L38 38 L38 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+
+  /* ── hodnosti (5 nových) ── */
+  compass:   '<circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width=".8" opacity=".5" stroke-dasharray="2 3"/><path d="M32 18 L37 32 L32 46 L27 32 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 18 L34 27 L32 32 L30 27 Z" fill="currentColor"/><circle cx="32" cy="32" r="2" fill="currentColor"/>',
+  sapling:   '<path d="M32 50 L32 30" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M32 36 C24 36 20 30 20 24 C28 24 32 30 32 36Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 32 C40 32 44 26 44 20 C36 20 32 26 32 32Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M22 50 C22 46 42 46 42 50" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  crown:     '<path d="M14 42 L18 22 L26 32 L32 18 L38 32 L46 22 L50 42 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 42 L50 42 L48 48 L16 48 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="18" r="2.5" fill="currentColor"/><circle cx="18" cy="22" r="2" fill="currentColor"/><circle cx="46" cy="22" r="2" fill="currentColor"/>',
+  bigbush:   '<path d="M32 52 L32 34" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M32 40 C22 38 18 30 20 22 M32 34 C42 32 46 24 44 16 M32 44 C26 44 22 40 22 34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="22" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="44" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="22" cy="34" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+
+  /* ── zvířátka (4) ── */
+  squirrel:  '<path d="M26 48 C18 48 18 38 24 36 C20 30 24 20 32 20 C38 20 42 26 40 32 C46 30 50 38 46 44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M46 44 C52 40 52 24 44 18 C46 26 44 32 40 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="30" cy="28" r="1.6" fill="currentColor"/><path d="M32 20 L30 15 M36 21 L39 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M24 48 L30 48" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  bird:      '<path d="M20 32 C20 24 28 22 32 24 C36 20 44 20 46 26 C50 26 50 30 46 32 C48 40 40 46 32 44 C24 46 18 40 20 32 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M46 26 L52 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="42" cy="28" r="1.5" fill="currentColor"/><path d="M26 34 C30 38 36 38 40 34" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".7"/>',
+  cat:       '<path d="M20 24 L18 14 L26 20 C30 18 34 18 38 20 L46 14 L44 24 C50 30 48 46 32 46 C16 46 14 30 20 24 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="27" cy="30" r="1.6" fill="currentColor"/><circle cx="37" cy="30" r="1.6" fill="currentColor"/><path d="M32 34 L30 37 L34 37 Z" fill="currentColor"/><path d="M24 38 L18 36 M24 40 L18 41 M40 38 L46 36 M40 40 L46 41" stroke="currentColor" stroke-width="1.2" opacity=".7" stroke-linecap="round"/>',
+  lion:      '<circle cx="32" cy="32" r="14" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M32 18 L30 12 M32 18 L34 12 M18 32 L12 30 M18 32 L12 34 M46 32 L52 30 M46 32 L52 34 M22 22 L17 18 M42 22 L47 18 M22 42 L17 47 M42 42 L47 47 M32 46 L30 52 M32 46 L34 52" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="27" cy="30" r="1.5" fill="currentColor"/><circle cx="37" cy="30" r="1.5" fill="currentColor"/><path d="M28 37 C30 39 34 39 36 37" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+
+  /* ── byliny extra (4) ── */
+  saffron:   '<path d="M32 50 L32 32" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M32 32 C28 24 24 22 22 18 C28 18 31 24 32 32 M32 32 C36 24 40 22 42 18 C36 18 33 24 32 32 M32 30 L32 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 44 C29 41 35 41 37 44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+  myrrh:     '<path d="M24 46 L40 46 L38 54 L26 54 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 46 L32 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M32 36 C26 34 22 28 24 22 M32 30 C38 28 42 22 40 16 M32 40 C28 40 24 36 24 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  lotus:     '<path d="M32 46 C32 38 26 30 32 22 C38 30 32 38 32 46Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 46 C26 42 16 40 16 30 C24 30 32 38 32 46Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M32 46 C38 42 48 40 48 30 C40 30 32 38 32 46Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 48 L44 48" stroke="currentColor" stroke-width="1.6" opacity=".7" stroke-linecap="round"/>',
+  herbs:     '<path d="M24 48 L24 34 M32 48 L32 28 M40 48 L40 34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 36 C20 34 18 30 20 26 C24 27 25 32 24 36Z M32 30 C28 28 26 22 28 18 C32 20 33 26 32 30Z M40 36 C44 34 46 30 44 26 C40 27 39 32 40 36Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M20 48 L44 48" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+
+  /* ── mince kultur (3) ── */
+  coin_rome: '<circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M26 22 L26 40 L24 42 L28 42 L26 40 M26 22 L23 25 M26 22 L29 25" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M38 22 L38 40 L36 42 L40 42 L38 40 M38 22 L35 25 M38 22 L41 25" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  coin_china:'<circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="25" y="25" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"/><path d="M32 9 L32 16 M32 48 L32 55 M9 32 L16 32 M48 32 L55 32" stroke="currentColor" stroke-width="1.2" opacity=".6" stroke-linecap="round"/>',
+  coin_egypt:'<path d="M26 20 L38 20 L34 26 L30 26 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M30 26 C18 30 16 50 32 50 C48 50 46 30 34 26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="32" cy="40" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M29 40 L35 40 M32 37 L32 43" stroke="currentColor" stroke-width="1.2"/>',
+
+  /* ── knihy extra (2) ── */
+  book_red:  '<path d="M18 16 L42 16 L42 48 L18 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M18 16 C14 16 14 48 18 48" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="30" cy="32" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M30 29 L30 35 M27 32 L33 32" stroke="currentColor" stroke-width="1.2"/>',
+  book_seven:'<path d="M18 16 L42 16 L42 48 L18 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M18 16 C14 16 14 48 18 48" fill="none" stroke="currentColor" stroke-width="2"/><path d="M24 30 L37 30 M24 35 L37 35 M24 40 L33 40" stroke="currentColor" stroke-width="1.3" opacity=".75" stroke-linecap="round"/><text x="31" y="26" font-size="7" fill="currentColor" text-anchor="middle" font-family="serif">VII</text>',
+
+  /* ── speciální pečetě (7) ── */
+  calendar:  '<rect x="14" y="18" width="36" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M14 26 L50 26" stroke="currentColor" stroke-width="2"/><path d="M22 14 L22 22 M42 14 L42 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 32 L24 32 M30 32 L34 32 M40 32 L44 32 M20 40 L24 40 M30 40 L34 40" stroke="currentColor" stroke-width="1.6" opacity=".75" stroke-linecap="round"/>',
+  moon:      '<path d="M40 14 C28 16 20 26 22 38 C24 48 34 52 44 48 C34 48 28 40 30 30 C32 22 36 17 40 14 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M46 22 L48 18 L50 22 L54 24 L50 26 L48 30 L46 26 L42 24 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+  tree:      '<path d="M32 52 L32 36" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M32 40 L24 34 M32 44 L40 38" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="32" cy="24" r="13" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="22" cy="30" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="42" cy="30" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M26 52 L38 52" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  wheat:     '<path d="M32 52 L32 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M32 24 L26 18 M32 24 L38 18 M32 30 L25 25 M32 30 L39 25 M32 36 L26 31 M32 36 L38 31 M32 42 L27 38 M32 42 L37 38" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M32 20 L29 15 M32 20 L35 15 M32 20 L32 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  mountains: '<path d="M10 48 L26 22 L36 38 L42 28 L54 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 29 L26 22 L30 29 L26 32 Z" fill="currentColor" opacity=".5"/><path d="M38 33 L42 28 L46 35" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".6" stroke-linejoin="round"/>',
+  drop:      '<path d="M32 14 C32 14 44 30 44 40 C44 48 38 52 32 52 C26 52 20 48 20 40 C20 30 32 14 32 14 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M28 42 C28 46 31 48 34 47" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".7" stroke-linecap="round"/>',
+  sparkle:   '<path d="M32 12 L35 27 L32 30 L29 27 Z M32 52 L29 37 L32 34 L35 37 Z M12 32 L27 29 L30 32 L27 35 Z M52 32 L37 35 L34 32 L37 29 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="32" cy="32" r="3" fill="currentColor"/><path d="M20 20 L23 23 M44 20 L41 23 M20 44 L23 41 M44 44 L41 41" stroke="currentColor" stroke-width="1.4" opacity=".6" stroke-linecap="round"/>',
+  castle:    '<path d="M16 48 L16 28 L20 28 L20 22 L26 22 L26 28 L30 28 L30 20 L34 20 L34 28 L38 28 L38 22 L44 22 L44 28 L48 48 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M28 48 L28 38 L36 38 L36 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
+};
+
+/**
+ * Vrátí kompletní <svg> string pro danou ikonu.
+ * @param {string} id  – klíč v ICONS
+ * @param {object} opt – {size:number, cls:string}
+ */
+function ikona(id, opt) {
+  opt = opt || {};
+  var body = ICONS[id];
+  if (!body) return ''; // neznámá ikona → prázdno (fallback řeší volající)
+  var size = opt.size || 32;
+  var cls  = opt.cls ? ' class="' + opt.cls + '"' : '';
+  return '<svg' + cls + ' viewBox="0 0 64 64" width="' + size + '" height="' + size +
+         '" fill="none" aria-hidden="true" style="display:block">' + body + '</svg>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAPOVÁNÍ id → ikona
+   Klíče odpovídají id v MINIGAMES / SEALS / COLLECTIONS / RANKS.
+═══════════════════════════════════════════════════════════════ */
+
+/* Minihry: index 0–6 */
+var MG_ICON = ['coin','scales','growpile','mask','builder','key','bazaar'];
+
+/* Hodnosti: index 0–9 */
+var RANK_ICON = ['compass','book','scroll','scales','sapling','bigbush','temple','amphora','owl','crown'];
+
+/* Pečetě: id → ikona */
+var SEAL_ICON = {
+  name_in_clay:'scroll', first_coin:'coin', first_stroke:'herb', first_reader:'book_open',
+  scribe_apprentice:'book', first_seal:'star', dream_maker:'castle', planner:'temple',
+  reserve_guardian:'amphora', first_interest:'purse',
+  week_babylon:'calendar', moon_diligence:'moon', century_tree:'tree', faithful_gardener:'wheat',
+  mountain_patience:'mountains', tree_whisperer:'leaf', coin_stream:'drop',
+  seasoned_reader:'books', wisdom_500:'sparkle', wisdom_2500:'star'
+};
+
+/* Sbírky: id artefaktu → ikona (+ skupiny) */
+var COLL_ICON = {
+  /* mince */ coin_bab:'coin', coin_egy:'coin_egypt', coin_gre:'temple', coin_rom:'coin_rome', coin_chi:'coin_china',
+  /* byliny */ herb_mint:'herb', herb_saffron:'saffron', herb_myrrh:'myrrh', herb_laurel:'leaf', herb_lotus:'lotus',
+  /* zvířata */ animal_squirrel:'squirrel', animal_bird:'bird', animal_cat:'cat', animal_owl:'owl', animal_dragon:'lion',
+  /* knihy */ book_desetina:'book_open', book_prani:'scroll', book_uroky:'book_red', book_sedm:'book_seven', book_master:'book'
+};
+var COLL_GROUP_ICON = { coins:'coin', herbs:'herbs', animals:'owl', books:'books' };
+
+/* Navigační pilíře na nádvoří (id pilíře → ikona) */
+var PILLAR_ICON = {
+  'nav-pokladnice':'amphora', 'nav-pribehy':'scroll', 'nav-tajemstvi':'star',
+  'nav-seals':'crown', 'nav-vitrine':'scroll'
+};
+
+/** Vrátí SVG ikonu podle mapy, nebo fallback (emoji) když chybí. */
+function ikonaFor(map, id, fallbackEmoji) {
+  var key = map[id];
+  if (key && ICONS[key]) {
+    return '<span class="bab-icon">' + ikona(key) + '</span>';
+  }
+  return fallbackEmoji || '';
+}
+
+
 var MINIGAMES = [
   { id: 0, title: "Desátek",            icon: "🪙", short: "3 kola — chytni jednu z deseti", max_wisdom: 90, implemented: true  },
   { id: 1, title: "Potřeba × přání",    icon: "⚖️", short: "Roztřiď karty — 3 kola",      max_wisdom: 90, implemented: true  },
