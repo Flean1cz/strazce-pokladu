@@ -5728,15 +5728,50 @@ let state = DEFAULT_STATE();
 let adminUnlocked = false;
 let currentStoryIdx = null;
 let currentScreen = 'setup';
+let currentUserId = null;
 
 // Drive
 let tokenClient = null, accessToken = null, driveFileId = null;
 let clientId = null, syncTimer = null;
 
+/* ═══ KROK 15 – Multi-user profily (Fáze 1: datový model) ═══ */
+function generateUserId() {
+  return 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function userStorageKey(id) {
+  return 'babylon_v3_user_' + id;
+}
+
+function ensureActiveProfile() {
+  let profiles = [];
+  try { profiles = JSON.parse(localStorage.getItem('babylon_v3_profiles')) || []; } catch(e) { profiles = []; }
+
+  if (!Array.isArray(profiles) || profiles.length === 0) {
+    const profile = { id: generateUserId(), jmeno: '', vytvoreno: new Date().toISOString() };
+
+    // Migrace existujících dat ze starého jednotného klíče (pokud existuje)
+    const legacyRaw = localStorage.getItem('babylon_v3');
+    if (legacyRaw) {
+      try {
+        const legacy = JSON.parse(legacyRaw);
+        if (legacy?.state?.user?.name) profile.jmeno = legacy.state.user.name;
+        localStorage.setItem(userStorageKey(profile.id), legacyRaw);
+      } catch(e) {}
+    }
+
+    profiles = [profile];
+    try { localStorage.setItem('babylon_v3_profiles', JSON.stringify(profiles)); } catch(e) {}
+  }
+
+  currentUserId = profiles[0].id;
+}
+
 /* ═══ PERSISTENCE ═══ */
 function loadLocal() {
+  ensureActiveProfile();
   try {
-    const raw = localStorage.getItem('babylon_v3');
+    const raw = localStorage.getItem(userStorageKey(currentUserId));
     if (raw) {
       const p = JSON.parse(raw);
       state = Object.assign(DEFAULT_STATE(), p.state || {});
@@ -5840,7 +5875,7 @@ function loadLocal() {
   } catch(e) { console.error(e); }
 }
 function saveLocal() {
-  try { localStorage.setItem('babylon_v3', JSON.stringify({state, driveFileId})); } catch(e) {}
+  try { localStorage.setItem(userStorageKey(currentUserId), JSON.stringify({state, driveFileId})); } catch(e) {}
   // KROK 13 – push report dat na backend (jen pokud je e-mail nastaven)
   if (typeof _pushReportToBackend === 'function') {
     _pushReportToBackend();

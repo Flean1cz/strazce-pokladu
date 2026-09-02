@@ -51,11 +51,22 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
   definován v `DEFAULT_STATE()` (ř. 5652–5726): `user, balances{living_80,dreams_10,
   forever_10}, settings, progression, wishlist, history, wisdom*, streak, rank,
   seals, tree, custom, challenges, collections, report, minigames`.
-- **Persistence**: `localStorage['babylon_v3']` (čtení ř. 5739, zápis ř. 5843 přes
-  `scheduleSave()`→`saveLocal()`) + volitelný Google Drive sync (`saveToDriveNow()`,
-  `DRIVE_FILENAME`, GSI OAuth).
+- **Persistence (multi-user, od Fáze 1)**: `state` se ukládá per-profil pod
+  `localStorage['babylon_v3_user_' + currentUserId]` (čtení v `loadLocal()`,
+  zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`) + volitelný
+  Google Drive sync (`saveToDriveNow()`, `DRIVE_FILENAME`, GSI OAuth).
+  Seznam profilů `[{ id, jmeno, vytvoreno }]` je zvlášť v
+  `localStorage['babylon_v3_profiles']`, spravuje ho `ensureActiveProfile()`
+  (volaná na začátku `loadLocal()`). V této fázi existuje vždy přesně jeden
+  profil — appka zatím nemá UI pro víc účtů. Starý jednotný klíč
+  `localStorage['babylon_v3']` zůstává na disku jako netknutá legacy záloha
+  (appka ho po jednorázové migraci existujících dat už nečte ani nezapisuje).
+- **`currentUserId`** (ř. ~5731, `let currentUserId = null;`) — globál stejného
+  stylu jako `currentScreen`; nastavuje ho `ensureActiveProfile()` na id
+  aktivního profilu.
 - **Další globály**: `adminUnlocked`, `currentStoryIdx`, `currentScreen`,
-  `MINIGAMES[]` (ř. 5619), `SEALS[]` (ř. 8036), `PYRAMID[]`, `clientId`.
+  `currentUserId`, `MINIGAMES[]` (ř. 5619), `SEALS[]` (ř. 8036), `PYRAMID[]`,
+  `clientId`.
 - **Hlavní mutační místa**: `doDeposit()` ř. 6353 (rozděluje vklad 80/10/10),
   úrok ř. 7039–7041, `addWisdom()` ř. 7568, `checkAllSeals()` ř. 8261,
   `finishMinigame()` ř. 6297 (zapisuje `state.minigames.*`), reset na
