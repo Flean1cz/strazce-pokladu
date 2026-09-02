@@ -107,12 +107,29 @@ je v appce zabudovaná, ale tiše vypnutá (silent fail, záměrně dle README).
 napojený na appku.** Pokud práce vyžaduje ho zapojit, je potřeba nastavit
 `BACKEND_URL` na skutečně nasazenou URL.
 
-### Zanořené duplikáty backend-cf/backend-cf a backend-node/backend-node
+## Plánované změny
 
-`backend-cf/backend-cf/*` a `backend-node/backend-node/*` jsou bajtově
-identické duplikáty svých rodičovských adresářů — vznikly nechtěným
-dvouúrovňovým uploadem přes GitHub web UI (commit `d0c6ecc` „patch 3.2.0"
-2026-04-24 přidal jen zanořenou verzi; `03446b0` „3.1.1 bug fix" 2026-04-25
-přidal správnou top-level verzi, zanořenou nikdo nesmazal). Jsou to mrtvé
-kopie bez reference — needituj je, edituj vždy top-level `backend-cf/src/index.js`
-resp. `backend-node/server.js`.
+1. **Android tablet, orientace na šířku** — cílová platforma se posouvá z
+   současného portrait/mobile designu na landscape tablet.
+
+2. **Přepínání účtů (děti)** — čistě lokální na zařízení, přes `localStorage`.
+   Žádná cloud synchronizace mezi zařízeními, žádný server účet rodiče. Dnešní
+   model má jediný globální `state` (viz „Globální stav" výše) — přechod na
+   víc účtů znamená víc instancí tohoto stavu vedle sebe + mechanismus, který
+   přepíná, který z nich je „aktivní" a ukládá se pod který klíč v `localStorage`
+   (dnes jediný pevný klíč `babylon_v3`).
+
+3. **Nová domovská obrazovka: týdenní přehled úkolů**
+   - **Šablona úkolů**: rodič nastaví jednou v adminu; každý úkol má seznam dní
+     v týdnu, kdy je normálně aktivní.
+   - **Týdenní výjimky**: rodič může po odemčení pro konkrétní týden vypnout
+     konkrétní úkol na konkrétní den (např. „jít do školy" během prázdnin).
+     Toto se neukládá do šablony, ale zvlášť per týden (šablona zůstává
+     nedotčená, výjimky jsou vedlejší časově vázaná struktura).
+   - Dítě denně zaškrtává splněné úkoly.
+   - Týdenní vyhodnocení počítá ze šablony minus aktivní výjimky pro daný
+     týden; výsledek spouští `doDeposit()` (ř. 6353) pro rozdělení kapesného
+     80/10/10.
+
+4. **Pořadí implementace**: 1) multi-user state model → 2) UI přepínání účtů
+   → 3) týdenní úkoly → 4) Android/landscape. (Viz předchozí diskuze.)
