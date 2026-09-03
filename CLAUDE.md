@@ -51,14 +51,23 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
   definován v `DEFAULT_STATE()` (ř. 5652–5726): `user, balances{living_80,dreams_10,
   forever_10}, settings, progression, wishlist, history, wisdom*, streak, rank,
   seals, tree, custom, challenges, collections, report, minigames`.
-- **Persistence (multi-user, od Fáze 1)**: `state` se ukládá per-profil pod
-  `localStorage['babylon_v3_user_' + currentUserId]` (čtení v `loadLocal()`,
-  zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`) + volitelný
-  Google Drive sync (`saveToDriveNow()`, `DRIVE_FILENAME`, GSI OAuth).
+- **Persistence (multi-user, od Fáze 1; UI přepínání od Fáze 2)**: `state` se
+  ukládá per-profil pod `localStorage['babylon_v3_user_' + currentUserId]`
+  (čtení v `loadLocal()`, zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`)
+  + volitelný Google Drive sync (`saveToDriveNow()`, `DRIVE_FILENAME`, GSI OAuth).
   Seznam profilů `[{ id, jmeno, vytvoreno }]` je zvlášť v
   `localStorage['babylon_v3_profiles']`, spravuje ho `ensureActiveProfile()`
-  (volaná na začátku `loadLocal()`). V této fázi existuje vždy přesně jeden
-  profil — appka zatím nemá UI pro víc účtů. Starý jednotný klíč
+  (volaná na začátku `loadLocal()`) — při bootu vybere profil podle
+  `localStorage['babylon_v3_last_user']`, pokud existuje a odpovídá reálnému
+  profilu, jinak spadne na `profiles[0]`. Uživatel přepíná mezi profily a
+  vytváří nové přes rolovací menu `#profile-menu` (vlevo nahoře, skryté jen
+  na `screen-setup`) — KROK 16 blok funkcí `listProfiles()`, `saveProfiles()`,
+  `syncProfileName()` (volaná ze `saveLocal()`, drží `profile.jmeno` v
+  `babylon_v3_profiles` sesynchronizované se `state.user.name`),
+  `switchToProfile(id)`, `createProfile(jmeno)`, `renderProfileMenu()`,
+  `openProfileMenu()`/`closeProfileMenu()`. `driveFileId` je součástí
+  per-profilového blobu (tedy taky per-profil); `clientId`/OAuth token
+  zůstávají globální/sdílené napříč profily. Starý jednotný klíč
   `localStorage['babylon_v3']` zůstává na disku jako netknutá legacy záloha
   (appka ho po jednorázové migraci existujících dat už nečte ani nezapisuje).
 - **`currentUserId`** (ř. ~5731, `let currentUserId = null;`) — globál stejného

@@ -1918,6 +1918,36 @@ svg.jar{width:52px;height:72px;}
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 }
 #bottom-nav.hidden{display:none;}
+
+/* ═══ KROK 16 – Profile menu (Fáze 2 UI) ═══ */
+#profile-menu{position:fixed;top:calc(60px + env(safe-area-inset-top));left:10px;z-index:95;}
+#profile-menu.hidden{display:none;}
+#profile-menu-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(8,4,0,.75);border:2px solid rgba(245,166,35,.4);
+  color:var(--gold);font-size:17px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.profile-menu-dropdown{
+  position:absolute;top:46px;left:0;min-width:180px;
+  background:linear-gradient(180deg,var(--bg3),var(--bg2));
+  border:2px solid rgba(245,166,35,.35);border-radius:14px;
+  padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.profile-menu-dropdown.hidden{display:none;}
+.profile-menu-item{
+  display:block;width:100%;text-align:left;padding:9px 10px;margin-bottom:4px;
+  background:transparent;border:none;border-radius:9px;
+  color:var(--sand);font-family:'Cinzel',serif;font-size:13px;cursor:pointer;
+}
+.profile-menu-item.active{background:rgba(245,166,35,.18);color:var(--lgold);}
+.profile-menu-add{
+  display:block;width:100%;padding:9px 10px;margin-top:4px;
+  background:rgba(245,166,35,.1);border:1px dashed rgba(245,166,35,.4);border-radius:9px;
+  color:var(--gold);font-family:'Cinzel',serif;font-size:12px;cursor:pointer;
+}
+
 .nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;
   gap:2px;padding:5px;cursor:pointer;
@@ -5281,6 +5311,15 @@ svg.jar{width:52px;height:72px;}
   </button>
 </div>
 
+<!-- ══════════════ PROFILE MENU ══════════════ -->
+<div id="profile-menu" class="hidden">
+  <button id="profile-menu-btn" aria-label="Přepnout profil">👤</button>
+  <div class="profile-menu-dropdown hidden" id="profile-menu-dropdown">
+    <div id="profile-menu-list"></div>
+    <button class="profile-menu-add" id="profile-menu-add-btn">➕ Přidat nového</button>
+  </div>
+</div>
+
 <!-- ══════════════ WISH MODAL ══════════════ -->
 <div class="modal-overlay hidden" id="modal-wish">
   <div class="modal-box">
@@ -5290,6 +5329,18 @@ svg.jar{width:52px;height:72px;}
     <div class="modal-btns">
       <button class="modal-btn cancel" id="wish-cancel-btn">Zrušit</button>
       <button class="modal-btn confirm" id="wish-confirm-btn">Přidat sen ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ NEW PROFILE MODAL ══════════════ -->
+<div class="modal-overlay hidden" id="modal-add-profile">
+  <div class="modal-box">
+    <div class="modal-title">👤 Nový profil</div>
+    <input type="text" class="modal-inp" id="new-profile-name-inp" placeholder="Jméno…" maxlength="20"/>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="new-profile-cancel-btn">Zrušit</button>
+      <button class="modal-btn confirm" id="new-profile-confirm-btn">Vytvořit ✨</button>
     </div>
   </div>
 </div>
@@ -5764,8 +5815,80 @@ function ensureActiveProfile() {
     try { localStorage.setItem('babylon_v3_profiles', JSON.stringify(profiles)); } catch(e) {}
   }
 
-  currentUserId = profiles[0].id;
+  const lastUserId = localStorage.getItem('babylon_v3_last_user');
+  const match = lastUserId && profiles.find(p => p.id === lastUserId);
+  currentUserId = match ? match.id : profiles[0].id;
 }
+
+/* ═══ KROK 16 – Přepínání profilů (Fáze 2: UI) ═══ */
+function listProfiles() {
+  try { return JSON.parse(localStorage.getItem('babylon_v3_profiles')) || []; } catch(e) { return []; }
+}
+
+function saveProfiles(profiles) {
+  try { localStorage.setItem('babylon_v3_profiles', JSON.stringify(profiles)); } catch(e) {}
+}
+
+function syncProfileName() {
+  const profiles = listProfiles();
+  const p = profiles.find(x => x.id === currentUserId);
+  if (p && p.jmeno !== (state.user.name || '')) {
+    p.jmeno = state.user.name || '';
+    saveProfiles(profiles);
+  }
+}
+
+function switchToProfile(id) {
+  closeProfileMenu();
+  if (id === currentUserId) return;
+  try { localStorage.setItem('babylon_v3_last_user', id); } catch(e) {}
+  loadLocal();
+  document.getElementById('name-input').value = state.user.name || '';
+  renderProfileMenu();
+  if (state.user.name) {
+    showScreen('nadvorí');
+    renderAll();
+  } else {
+    showScreen('setup', true);
+  }
+  toast('🏺 Přepnuto na ' + (state.user.name || 'nový profil'));
+}
+
+function createProfile(jmeno) {
+  const profiles = listProfiles();
+  const profile = { id: generateUserId(), jmeno: jmeno, vytvoreno: new Date().toISOString() };
+  profiles.push(profile);
+  saveProfiles(profiles);
+  const seedState = DEFAULT_STATE();
+  seedState.user.name = jmeno;
+  seedState.user.created_at = profile.vytvoreno;
+  try { localStorage.setItem(userStorageKey(profile.id), JSON.stringify({ state: seedState, driveFileId: null })); } catch(e) {}
+  try { localStorage.setItem('babylon_v3_last_user', profile.id); } catch(e) {}
+  currentUserId = profile.id;
+  loadLocal();
+  document.getElementById('name-input').value = state.user.name || '';
+  renderProfileMenu();
+  showScreen('nadvorí');
+  renderAll();
+  toast('✨ Profil „' + jmeno + '" vytvořen!');
+}
+
+function renderProfileMenu() {
+  const list = document.getElementById('profile-menu-list');
+  if (!list) return;
+  const profiles = listProfiles();
+  list.innerHTML = profiles.map(p =>
+    '<button class="profile-menu-item' + (p.id === currentUserId ? ' active' : '') + '" data-pid="' + p.id + '">' +
+      '👤 ' + (p.jmeno || '(bez jména)') +
+    '</button>'
+  ).join('');
+  list.querySelectorAll('.profile-menu-item[data-pid]').forEach(btn => {
+    btn.addEventListener('click', () => switchToProfile(btn.dataset.pid));
+  });
+}
+
+function openProfileMenu() { document.getElementById('profile-menu-dropdown').classList.remove('hidden'); }
+function closeProfileMenu() { document.getElementById('profile-menu-dropdown')?.classList.add('hidden'); }
 
 /* ═══ PERSISTENCE ═══ */
 function loadLocal() {
@@ -5876,6 +5999,7 @@ function loadLocal() {
 }
 function saveLocal() {
   try { localStorage.setItem(userStorageKey(currentUserId), JSON.stringify({state, driveFileId})); } catch(e) {}
+  syncProfileName();
   // KROK 13 – push report dat na backend (jen pokud je e-mail nastaven)
   if (typeof _pushReportToBackend === 'function') {
     _pushReportToBackend();
@@ -6001,6 +6125,9 @@ function showScreen(id, hideNav=false) {
     else
       nav.classList.remove('hidden');
   }
+  const profileMenu = document.getElementById('profile-menu');
+  if (profileMenu) profileMenu.classList.toggle('hidden', id === 'setup');
+  closeProfileMenu();
   // Update nav active state
   document.querySelectorAll('.nav-btn[data-nav]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.nav === id);
@@ -6808,6 +6935,7 @@ function finishSetupWithName() {
 /* ═══ BOOT ═══ */
 loadLocal();
 initStars();
+renderProfileMenu();
 
 // Initialize UI with loaded state
 document.getElementById('name-input').value = state.user.name || '';
@@ -6856,6 +6984,29 @@ document.getElementById('skip-btn').addEventListener('click', ()=>{
   state.user.name=name; saveLocal();
   showScreen('nadvorí'); document.getElementById('bottom-nav').classList.remove('hidden');
   renderAll(); setDriveStatus('offline','Lokální úložiště');
+});
+
+// Profile menu (KROK 16)
+document.getElementById('profile-menu-btn').addEventListener('click', () => {
+  const dd = document.getElementById('profile-menu-dropdown');
+  dd.classList.contains('hidden') ? openProfileMenu() : closeProfileMenu();
+});
+document.getElementById('profile-menu-add-btn').addEventListener('click', () => {
+  closeProfileMenu();
+  document.getElementById('new-profile-name-inp').value = '';
+  document.getElementById('modal-add-profile').classList.remove('hidden');
+});
+document.getElementById('new-profile-cancel-btn').addEventListener('click', () =>
+  document.getElementById('modal-add-profile').classList.add('hidden')
+);
+document.getElementById('new-profile-confirm-btn').addEventListener('click', () => {
+  const name = document.getElementById('new-profile-name-inp').value.trim();
+  if (!name) { toast('⚠️ Zadej jméno profilu!'); return; }
+  document.getElementById('modal-add-profile').classList.add('hidden');
+  createProfile(name);
+});
+document.getElementById('modal-add-profile').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('modal-add-profile').classList.add('hidden');
 });
 
 // Bottom nav
