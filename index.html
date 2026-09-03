@@ -1831,6 +1831,11 @@ svg.jar{width:52px;height:72px;}
   background:linear-gradient(135deg,rgba(245,166,35,.25),rgba(255,215,0,.15));
   color:var(--lgold);opacity:1;border-color:rgba(245,166,35,.5);
 }
+.task-day-btn.excepted{
+  background:rgba(229,57,53,.15);border-color:rgba(229,57,53,.4);
+  color:rgba(229,57,53,.85);opacity:1;
+}
+#task-exc-week-inp::-webkit-calendar-picker-indicator{filter:invert(1);}
 .task-tmpl-empty{text-align:center;font-size:12px;color:var(--sand);opacity:.35;padding:14px 0;}
 .task-tmpl-item{
   background:rgba(0,0,0,.25);border:1px solid rgba(245,166,35,.15);border-radius:10px;
@@ -5272,6 +5277,15 @@ svg.jar{width:52px;height:72px;}
       <div id="task-tmpl-list"></div>
       <button class="admin-btn dep" id="add-task-btn" style="margin-top:10px;">➕ Přidat úkol</button>
     </div>
+
+    <div class="admin-card">
+      <div class="admin-card-title">🚫 Výjimky pro vybraný týden</div>
+      <div class="admin-input-row">
+        <input type="week" class="admin-inp" id="task-exc-week-inp"/>
+      </div>
+      <div id="task-exc-empty" class="task-tmpl-empty" style="display:none">Nejdřív přidej úkoly do šablony výše.</div>
+      <div id="task-exc-list"></div>
+    </div>
   </div>
 
   <!-- ══════════════ KROK 9 – DASHBOARD (druhý tab) ══════════════ -->
@@ -5770,7 +5784,7 @@ const DEFAULT_STATE = () => ({
   settings: { monthly_interest: 1, admin_pin: '1234', weekly_allowance: 0 },
   progression: { unlocked_stories: [], unlocked_secrets: [] },
   wishlist: [],
-  tasks: { template: [] },
+  tasks: { template: [], exceptions: {} },
   history: [],
   last_interest_applied: null,
   // ═══ KROK 1 – Moudrost (body) ═══
@@ -5966,6 +5980,7 @@ function loadLocal() {
       // Deep merge balances
       if (p.state?.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, p.state.balances);
       if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},p.state.settings);
+      if (p.state?.tasks) state.tasks = Object.assign({template:[],exceptions:{}}, p.state.tasks);
       if (p.state?.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, p.state.progression);
       // KROK 1 – Moudrost: zpětná kompatibilita pro stará data
       if (typeof state.wisdom !== 'number') state.wisdom = 0;
@@ -6129,6 +6144,7 @@ async function loadFromDrive() {
       state = Object.assign(DEFAULT_STATE(), data.state);
       if (data.state.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, data.state.balances);
       if (data.state.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},data.state.settings);
+      if (data.state.tasks) state.tasks = Object.assign({template:[],exceptions:{}}, data.state.tasks);
       if (data.state.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, data.state.progression);
       saveLocal(); renderAll();
     }
@@ -6451,6 +6467,7 @@ function removeTaskFromTemplate(idx) {
   if (confirm('Smazat tento úkol ze šablony?')) {
     state.tasks.template.splice(idx,1);
     scheduleSave(); renderTaskTemplate();
+    renderTaskExceptions();
   }
 }
 
@@ -6461,6 +6478,38 @@ function saveWeeklyAllowance() {
   state.settings.weekly_allowance = val;
   scheduleSave();
   toast('💸 Týdenní kapesné uloženo!');
+}
+
+/* ═══ KROK 18 – Týdenní výjimky (Fáze 3b) ═══ */
+function renderTaskExceptions() {
+  const list = document.getElementById('task-exc-list');
+  const empty = document.getElementById('task-exc-empty');
+  const weekInp = document.getElementById('task-exc-week-inp');
+  if (!list || !empty || !weekInp) return;
+  if (!weekInp.value) weekInp.value = _getWeekKey();
+  const weekKey = weekInp.value;
+  const tmpl = state.tasks.template;
+  empty.style.display = tmpl.length ? 'none' : 'block';
+  const excForWeek = (state.tasks.exceptions[weekKey]) || {};
+  list.innerHTML = tmpl.map(t => {
+    const off = excForWeek[t.id] || [];
+    return `<div class="task-tmpl-item">
+      <div class="task-tmpl-name">${t.nazev}</div>
+      <div class="task-days-row" data-task-id="${t.id}">
+        ${t.dny.map(d => `<button class="task-day-btn${off.includes(d)?' excepted':' active'}" data-day="${d}">${TASK_DAY_LABELS[d]}</button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTaskException(weekKey, taskId, day) {
+  if (!state.tasks.exceptions[weekKey]) state.tasks.exceptions[weekKey] = {};
+  const arr = state.tasks.exceptions[weekKey][taskId] || [];
+  const idx = arr.indexOf(day);
+  if (idx === -1) arr.push(day); else arr.splice(idx, 1);
+  state.tasks.exceptions[weekKey][taskId] = arr;
+  scheduleSave();
+  renderTaskExceptions();
 }
 
 function renderStories() {
@@ -6629,6 +6678,7 @@ function renderAdminPanel() {
   const wa = document.getElementById('weekly-allowance-inp');
   if (wa) wa.value = state.settings.weekly_allowance || 0;
   renderTaskTemplate();
+  renderTaskExceptions();
 }
 
 /* ═══ DEPOSIT LOGIC ═══ */
@@ -7280,6 +7330,14 @@ document.getElementById('task-cancel-btn').addEventListener('click', hideAddTask
 document.getElementById('task-confirm-btn').addEventListener('click', addTaskToTemplate);
 document.getElementById('modal-add-task').addEventListener('click', e=>{ if(e.target===e.currentTarget) hideAddTaskModal(); });
 document.getElementById('save-weekly-allowance-btn').addEventListener('click', saveWeeklyAllowance);
+document.getElementById('task-exc-week-inp').addEventListener('change', renderTaskExceptions);
+document.getElementById('task-exc-list').addEventListener('click', e => {
+  const btn = e.target.closest('.task-day-btn');
+  if (!btn) return;
+  const taskId = btn.closest('[data-task-id]')?.dataset.taskId;
+  const weekKey = document.getElementById('task-exc-week-inp').value;
+  if (taskId && weekKey) toggleTaskException(weekKey, taskId, btn.dataset.day);
+});
 
 /* ════════════════════════════════════
    FÁZE 4 – Secret modal listeners
@@ -9808,7 +9866,7 @@ function switchAdminTab(tabId) {
   if (tasks) tasks.style.display = (tabId === 'tasks') ? '' : 'none';
   if (dashboard) dashboard.style.display = (tabId === 'dashboard') ? '' : 'none';
   if (tabId === 'dashboard') renderDashboard();
-  if (tabId === 'tasks') renderTaskTemplate();
+  if (tabId === 'tasks') { renderTaskTemplate(); renderTaskExceptions(); }
 }
 
 /** Pomocné: první den aktuálního týdne jako YYYY-MM-DD. */

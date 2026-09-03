@@ -54,11 +54,17 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
 - **`state.tasks.template`** (od Fáze 3a) — pole `{id, nazev, dny}` (šablona
   týdenních úkolů, `dny` = podmnožina `['po','ut','st','ct','pa','so','ne']`),
   plus `state.settings.weekly_allowance` (Kč, max. týdenní kapesné). Obojí
-  nastavuje rodič v novém 3. tabu adminu (`data-admin-tab="tasks"`,
+  nastavuje rodič v 3. tabu adminu (`data-admin-tab="tasks"`,
   `renderTaskTemplate()`, `addTaskToTemplate()`, `removeTaskFromTemplate()`,
   `saveWeeklyAllowance()` — KROK 17). Plně per-profil, stejně jako `wishlist`.
-  Zatím jen šablona a částka — týdenní výjimky, denní zaškrtávání dítětem a
-  vyhodnocení/výplata jsou další podkroky Fáze 3 (3b–3d, viz „Plánované změny").
+- **`state.tasks.exceptions`** (od Fáze 3b) — `{ [weekKey]: { [taskId]: dny[] } }`,
+  kde `weekKey` je formát `"YYYY-Www"` (shodný s výstupem `_getWeekKey()` i
+  s hodnotou `<input type="week">`) a `dny` jsou dny VYPNUTÉ pro daný úkol
+  v daném týdnu (šablona zůstává nedotčená, výjimka jen odečítá). Editor
+  v adminu (`renderTaskExceptions()`, `toggleTaskException()` — KROK 18)
+  s date-pickerem `#task-exc-week-inp`. Plně per-profil.
+  Zatím jen šablona, kapesné a výjimky — denní zaškrtávání dítětem a
+  vyhodnocení/výplata jsou další podkroky Fáze 3 (3c–3d, viz „Plánované změny").
 - **Persistence (multi-user, od Fáze 1; UI přepínání od Fáze 2)**: `state` se
   ukládá per-profil pod `localStorage['babylon_v3_user_' + currentUserId]`
   (čtení v `loadLocal()`, zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`)
