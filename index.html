@@ -1819,6 +1819,29 @@ svg.jar{width:52px;height:72px;}
 .admin-btn.with{background:rgba(229,57,53,.12);border:1px solid rgba(229,57,53,.35);color:rgba(229,57,53,.85);}
 .admin-btn.interest{background:linear-gradient(135deg,var(--gold),var(--dgold));color:var(--dbrown);margin-bottom:7px;}
 .admin-btn.changepin{background:rgba(255,255,255,.04);border:1px solid rgba(245,166,35,.2);color:rgba(245,166,35,.55);font-size:12px;}
+
+/* ═══ KROK 17 – Šablona týdenních úkolů (Fáze 3a) ═══ */
+.task-days-row{display:flex;gap:4px;margin:10px 0;}
+.task-day-btn{
+  flex:1;padding:7px 0;background:rgba(0,0,0,.35);border:1px solid rgba(245,166,35,.25);
+  border-radius:8px;color:var(--sand);opacity:.65;font-family:'Cinzel',serif;
+  font-size:11px;font-weight:600;cursor:pointer;transition:all .2s ease;
+}
+.task-day-btn.active{
+  background:linear-gradient(135deg,rgba(245,166,35,.25),rgba(255,215,0,.15));
+  color:var(--lgold);opacity:1;border-color:rgba(245,166,35,.5);
+}
+.task-tmpl-empty{text-align:center;font-size:12px;color:var(--sand);opacity:.35;padding:14px 0;}
+.task-tmpl-item{
+  background:rgba(0,0,0,.25);border:1px solid rgba(245,166,35,.15);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px;
+}
+.task-tmpl-name{font-family:'Cinzel',serif;font-size:13px;color:var(--sand);margin-bottom:6px;}
+.task-tmpl-days{font-size:10px;color:var(--gold);opacity:.7;margin-bottom:8px;}
+.task-tmpl-del{
+  background:rgba(229,57,53,.12);border:1px solid rgba(229,57,53,.35);color:rgba(229,57,53,.85);
+  border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;
+}
 .admin-logout{
   display:block;margin:8px auto;
   background:transparent;border:1px solid rgba(245,166,35,.18);
@@ -5115,6 +5138,7 @@ svg.jar{width:52px;height:72px;}
 <div id="admin-panel-view" style="display:none">
   <div class="admin-tabs">
     <button class="admin-tab active" data-admin-tab="settings">⚙️ Nastavení</button>
+    <button class="admin-tab" data-admin-tab="tasks">📋 Úkoly</button>
     <button class="admin-tab" data-admin-tab="dashboard">📊 Přehled</button>
   </div>
   <div class="admin-panel-wrap" id="admin-tab-settings">
@@ -5231,6 +5255,25 @@ svg.jar{width:52px;height:72px;}
     <button class="admin-logout" id="admin-logout-btn">Odhlásit se z administrace</button>
   </div>
 
+  <!-- ══════════════ KROK 17 – ŠABLONA ÚKOLŮ (3. tab, Fáze 3a) ══════════════ -->
+  <div class="admin-panel-wrap" id="admin-tab-tasks" style="display:none">
+    <div class="admin-card">
+      <div class="admin-card-title">💸 Týdenní kapesné</div>
+      <div class="admin-input-row">
+        <input type="number" class="admin-inp" id="weekly-allowance-inp" placeholder="0" min="0" step="1" inputmode="decimal"/>
+      </div>
+      <div class="report-desc">Maximální částka za týden při 100 % splněných úkolů. Vyplácí se poměrně podle splněno/celkem.</div>
+      <button class="admin-btn dep" id="save-weekly-allowance-btn">Uložit částku</button>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-title">📋 Šablona týdenních úkolů</div>
+      <div id="task-tmpl-empty" class="task-tmpl-empty" style="display:none">Zatím žádné úkoly. Přidej první!</div>
+      <div id="task-tmpl-list"></div>
+      <button class="admin-btn dep" id="add-task-btn" style="margin-top:10px;">➕ Přidat úkol</button>
+    </div>
+  </div>
+
   <!-- ══════════════ KROK 9 – DASHBOARD (druhý tab) ══════════════ -->
   <div class="admin-panel-wrap" id="admin-tab-dashboard" style="display:none">
     <div class="admin-card dash-card">
@@ -5341,6 +5384,27 @@ svg.jar{width:52px;height:72px;}
     <div class="modal-btns">
       <button class="modal-btn cancel" id="new-profile-cancel-btn">Zrušit</button>
       <button class="modal-btn confirm" id="new-profile-confirm-btn">Vytvořit ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ NEW TASK MODAL (KROK 17, Fáze 3a) ══════════════ -->
+<div class="modal-overlay hidden" id="modal-add-task">
+  <div class="modal-box">
+    <div class="modal-title">📋 Nový úkol</div>
+    <input type="text" class="modal-inp" id="task-name-inp" placeholder="Název úkolu (např. Ustlat postel)" maxlength="40"/>
+    <div class="task-days-row">
+      <button class="task-day-btn" data-day="po">Po</button>
+      <button class="task-day-btn" data-day="ut">Út</button>
+      <button class="task-day-btn" data-day="st">St</button>
+      <button class="task-day-btn" data-day="ct">Čt</button>
+      <button class="task-day-btn" data-day="pa">Pá</button>
+      <button class="task-day-btn" data-day="so">So</button>
+      <button class="task-day-btn" data-day="ne">Ne</button>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" id="task-cancel-btn">Zrušit</button>
+      <button class="modal-btn confirm" id="task-confirm-btn">Přidat úkol ✨</button>
     </div>
   </div>
 </div>
@@ -5703,9 +5767,10 @@ const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DEFAULT_STATE = () => ({
   user: { name: '', created_at: new Date().toISOString() },
   balances: { living_80: 0, dreams_10: 0, forever_10: 0 },
-  settings: { monthly_interest: 1, admin_pin: '1234' },
+  settings: { monthly_interest: 1, admin_pin: '1234', weekly_allowance: 0 },
   progression: { unlocked_stories: [], unlocked_secrets: [] },
   wishlist: [],
+  tasks: { template: [] },
   history: [],
   last_interest_applied: null,
   // ═══ KROK 1 – Moudrost (body) ═══
@@ -5900,7 +5965,7 @@ function loadLocal() {
       state = Object.assign(DEFAULT_STATE(), p.state || {});
       // Deep merge balances
       if (p.state?.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, p.state.balances);
-      if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234'}, p.state.settings);
+      if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},p.state.settings);
       if (p.state?.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, p.state.progression);
       // KROK 1 – Moudrost: zpětná kompatibilita pro stará data
       if (typeof state.wisdom !== 'number') state.wisdom = 0;
@@ -6063,7 +6128,7 @@ async function loadFromDrive() {
     if (data?.state) {
       state = Object.assign(DEFAULT_STATE(), data.state);
       if (data.state.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, data.state.balances);
-      if (data.state.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234'}, data.state.settings);
+      if (data.state.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},data.state.settings);
       if (data.state.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, data.state.progression);
       saveLocal(); renderAll();
     }
@@ -6347,6 +6412,57 @@ function removeWish(idx) {
   }
 }
 
+/* ═══ KROK 17 – Šablona týdenních úkolů (Fáze 3a) ═══ */
+const TASK_DAY_LABELS = {po:'Po',ut:'Út',st:'St',ct:'Čt',pa:'Pá',so:'So',ne:'Ne'};
+
+function renderTaskTemplate() {
+  const list = document.getElementById('task-tmpl-list');
+  const empty = document.getElementById('task-tmpl-empty');
+  if (!list || !empty) return;
+  const tmpl = state.tasks.template;
+  empty.style.display = tmpl.length ? 'none' : 'block';
+  list.innerHTML = tmpl.map((t,i) => `
+    <div class="task-tmpl-item">
+      <div class="task-tmpl-name">${t.nazev}</div>
+      <div class="task-tmpl-days">${t.dny.map(d=>TASK_DAY_LABELS[d]).join(', ')}</div>
+      <button class="task-tmpl-del" onclick="removeTaskFromTemplate(${i})">Smazat</button>
+    </div>`).join('');
+}
+
+let _newTaskDays = [];
+function showAddTaskModal() {
+  document.getElementById('task-name-inp').value = '';
+  _newTaskDays = [];
+  document.querySelectorAll('.task-day-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('modal-add-task').classList.remove('hidden');
+  setTimeout(() => document.getElementById('task-name-inp').focus(), 100);
+}
+function hideAddTaskModal() { document.getElementById('modal-add-task').classList.add('hidden'); }
+
+function addTaskToTemplate() {
+  const name = document.getElementById('task-name-inp').value.trim();
+  if (!name) { toast('⚠️ Zadej název úkolu!'); return; }
+  if (!_newTaskDays.length) { toast('⚠️ Vyber aspoň jeden den!'); return; }
+  state.tasks.template.push({ id: Date.now().toString(), nazev: name, dny: [..._newTaskDays] });
+  scheduleSave(); hideAddTaskModal(); renderTaskTemplate();
+  toast(`📋 Úkol přidán: ${name}`);
+}
+function removeTaskFromTemplate(idx) {
+  if (confirm('Smazat tento úkol ze šablony?')) {
+    state.tasks.template.splice(idx,1);
+    scheduleSave(); renderTaskTemplate();
+  }
+}
+
+function saveWeeklyAllowance() {
+  const inp = document.getElementById('weekly-allowance-inp');
+  const val = parseFloat(inp.value);
+  if (isNaN(val) || val < 0) { toast('⚠️ Zadej platnou částku!'); return; }
+  state.settings.weekly_allowance = val;
+  scheduleSave();
+  toast('💸 Týdenní kapesné uloženo!');
+}
+
 function renderStories() {
   const list = document.getElementById('stories-list');
   if (!list) return;
@@ -6509,6 +6625,10 @@ function renderAdminPanel() {
   if (lit) lit.textContent = state.last_interest_applied
     ? 'Naposledy připsáno: ' + new Date(state.last_interest_applied).toLocaleDateString('cs-CZ')
     : 'Naposledy připsáno: nikdy';
+
+  const wa = document.getElementById('weekly-allowance-inp');
+  if (wa) wa.value = state.settings.weekly_allowance || 0;
+  renderTaskTemplate();
 }
 
 /* ═══ DEPOSIT LOGIC ═══ */
@@ -7145,6 +7265,21 @@ document.getElementById('add-wish-btn').addEventListener('click', showWishModal)
 document.getElementById('wish-cancel-btn').addEventListener('click', hideWishModal);
 document.getElementById('wish-confirm-btn').addEventListener('click', addWish);
 document.getElementById('modal-wish').addEventListener('click', e=>{ if(e.target===e.currentTarget) hideWishModal(); });
+
+// Šablona úkolů (KROK 17, Fáze 3a)
+document.querySelectorAll('.task-day-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const day = btn.dataset.day;
+    btn.classList.toggle('active');
+    if (_newTaskDays.includes(day)) _newTaskDays = _newTaskDays.filter(d=>d!==day);
+    else _newTaskDays.push(day);
+  });
+});
+document.getElementById('add-task-btn').addEventListener('click', showAddTaskModal);
+document.getElementById('task-cancel-btn').addEventListener('click', hideAddTaskModal);
+document.getElementById('task-confirm-btn').addEventListener('click', addTaskToTemplate);
+document.getElementById('modal-add-task').addEventListener('click', e=>{ if(e.target===e.currentTarget) hideAddTaskModal(); });
+document.getElementById('save-weekly-allowance-btn').addEventListener('click', saveWeeklyAllowance);
 
 /* ════════════════════════════════════
    FÁZE 4 – Secret modal listeners
@@ -9667,10 +9802,13 @@ function switchAdminTab(tabId) {
     t.classList.toggle('active', t.getAttribute('data-admin-tab') === tabId);
   });
   const settings = document.getElementById('admin-tab-settings');
+  const tasks = document.getElementById('admin-tab-tasks');
   const dashboard = document.getElementById('admin-tab-dashboard');
   if (settings) settings.style.display = (tabId === 'settings') ? '' : 'none';
+  if (tasks) tasks.style.display = (tabId === 'tasks') ? '' : 'none';
   if (dashboard) dashboard.style.display = (tabId === 'dashboard') ? '' : 'none';
   if (tabId === 'dashboard') renderDashboard();
+  if (tabId === 'tasks') renderTaskTemplate();
 }
 
 /** Pomocné: první den aktuálního týdne jako YYYY-MM-DD. */

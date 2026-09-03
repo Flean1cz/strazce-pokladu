@@ -49,8 +49,16 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
 
 - **`state`** (ř. 5727, `let state = DEFAULT_STATE()`) — centrální objekt, tvar
   definován v `DEFAULT_STATE()` (ř. 5652–5726): `user, balances{living_80,dreams_10,
-  forever_10}, settings, progression, wishlist, history, wisdom*, streak, rank,
-  seals, tree, custom, challenges, collections, report, minigames`.
+  forever_10}, settings, progression, wishlist, tasks, history, wisdom*, streak,
+  rank, seals, tree, custom, challenges, collections, report, minigames`.
+- **`state.tasks.template`** (od Fáze 3a) — pole `{id, nazev, dny}` (šablona
+  týdenních úkolů, `dny` = podmnožina `['po','ut','st','ct','pa','so','ne']`),
+  plus `state.settings.weekly_allowance` (Kč, max. týdenní kapesné). Obojí
+  nastavuje rodič v novém 3. tabu adminu (`data-admin-tab="tasks"`,
+  `renderTaskTemplate()`, `addTaskToTemplate()`, `removeTaskFromTemplate()`,
+  `saveWeeklyAllowance()` — KROK 17). Plně per-profil, stejně jako `wishlist`.
+  Zatím jen šablona a částka — týdenní výjimky, denní zaškrtávání dítětem a
+  vyhodnocení/výplata jsou další podkroky Fáze 3 (3b–3d, viz „Plánované změny").
 - **Persistence (multi-user, od Fáze 1; UI přepínání od Fáze 2)**: `state` se
   ukládá per-profil pod `localStorage['babylon_v3_user_' + currentUserId]`
   (čtení v `loadLocal()`, zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`)
