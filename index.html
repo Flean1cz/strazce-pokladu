@@ -1869,6 +1869,7 @@ svg.jar{width:52px;height:72px;}
 .task-grid-off{color:rgba(245,166,35,.15);}
 .task-grid-check{cursor:pointer;font-size:26px;border-radius:10px;background:rgba(0,0,0,.2);min-height:44px;}
 .task-grid-check.done{background:rgba(76,175,80,.15);}
+.week-eval-row{font-family:'Cinzel',serif;font-size:13px;color:var(--sand);margin-bottom:8px;text-align:center;}
 .admin-logout{
   display:block;margin:8px auto;
   background:transparent;border:1px solid rgba(245,166,35,.18);
@@ -5463,6 +5464,17 @@ svg.jar{width:52px;height:72px;}
   </div>
 </div>
 
+<!-- ══════════════ WEEKLY EVALUATION MODAL (KROK 20, Fáze 3d) ══════════════ -->
+<div class="modal-overlay hidden" id="modal-week-eval">
+  <div class="modal-box">
+    <div class="modal-title">🏺 Týdenní vyhodnocení</div>
+    <div id="week-eval-body" class="week-eval-body"></div>
+    <div class="modal-btns">
+      <button class="modal-btn confirm" id="week-eval-close-btn">Skvěle! ✨</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ KROK 3 – CEREMONY MODAL ══════════════ -->
 <div class="ceremony-overlay hidden" id="modal-ceremony">
   <div class="ceremony-stars"></div>
@@ -5824,7 +5836,7 @@ const DEFAULT_STATE = () => ({
   settings: { monthly_interest: 1, admin_pin: '1234', weekly_allowance: 0 },
   progression: { unlocked_stories: [], unlocked_secrets: [] },
   wishlist: [],
-  tasks: { template: [], exceptions: {}, done: {} },
+  tasks: { template: [], exceptions: {}, done: {}, history: [], last_evaluated_week: null },
   history: [],
   last_interest_applied: null,
   // ═══ KROK 1 – Moudrost (body) ═══
@@ -5967,6 +5979,7 @@ function switchToProfile(id) {
   if (state.user.name) {
     showScreen('nadvorí');
     renderAll();
+    checkWeeklyTaskEvaluation();
   } else {
     showScreen('setup', true);
   }
@@ -5989,6 +6002,7 @@ function createProfile(jmeno) {
   renderProfileMenu();
   showScreen('nadvorí');
   renderAll();
+  checkWeeklyTaskEvaluation();
   toast('✨ Profil „' + jmeno + '" vytvořen!');
 }
 
@@ -6020,7 +6034,7 @@ function loadLocal() {
       // Deep merge balances
       if (p.state?.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, p.state.balances);
       if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},p.state.settings);
-      if (p.state?.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{}},p.state.tasks);
+      if (p.state?.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{},history:[],last_evaluated_week:null},p.state.tasks);
       if (p.state?.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, p.state.progression);
       // KROK 1 – Moudrost: zpětná kompatibilita pro stará data
       if (typeof state.wisdom !== 'number') state.wisdom = 0;
@@ -6184,7 +6198,7 @@ async function loadFromDrive() {
       state = Object.assign(DEFAULT_STATE(), data.state);
       if (data.state.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, data.state.balances);
       if (data.state.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},data.state.settings);
-      if (data.state.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{}},data.state.tasks);
+      if (data.state.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{},history:[],last_evaluated_week:null},data.state.tasks);
       if (data.state.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, data.state.progression);
       saveLocal(); renderAll();
     }
@@ -6564,18 +6578,7 @@ function isTaskActiveOnDay(task, dayCode, weekKey) {
 }
 
 function getCurrentWeekDates() {
-  const now = new Date();
-  const dow = now.getDay() || 7; // Po=1..Ne=7
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (dow - 1));
-  return DOW_CODES.map((code, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return {
-      code, dayNum: d.getDate(),
-      dateKey: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
-    };
-  });
+  return getDatesForWeekKey(_getWeekKey());
 }
 
 function renderTaskChecklist() {
@@ -6610,6 +6613,83 @@ function toggleTaskDone(taskId, dateKey) {
   if (idx === -1) state.tasks.done[dateKey].push(taskId); else state.tasks.done[dateKey].splice(idx, 1);
   scheduleSave();
   renderTaskChecklist();
+}
+
+/* ═══ KROK 20 – Týdenní vyhodnocení a výplata (Fáze 3d) ═══ */
+function getDatesForWeekKey(weekKey) {
+  const [y, w] = weekKey.split('-W').map(Number);
+  const jan4 = new Date(Date.UTC(y, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7;
+  const week1Monday = new Date(jan4);
+  week1Monday.setUTCDate(jan4.getUTCDate() - (jan4Day - 1));
+  const monday = new Date(week1Monday);
+  monday.setUTCDate(week1Monday.getUTCDate() + (w - 1) * 7);
+  return DOW_CODES.map((code, i) => {
+    const d = new Date(monday);
+    d.setUTCDate(monday.getUTCDate() + i);
+    return {
+      code, dayNum: d.getUTCDate(),
+      dateKey: d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0')
+    };
+  });
+}
+
+function nextWeekKey(weekKey) {
+  const dates = getDatesForWeekKey(weekKey);
+  const [y, m, d] = dates[0].dateKey.split('-').map(Number);
+  return _getWeekKey(new Date(y, m - 1, d + 7));
+}
+
+function evaluateWeek(weekKey) {
+  const weekDates = getDatesForWeekKey(weekKey);
+  const rows = state.tasks.template.filter(t => t.dny.some(d => isTaskActiveOnDay(t, d, weekKey)));
+  let total = 0, done = 0;
+  rows.forEach(t => {
+    weekDates.forEach(wd => {
+      if (!isTaskActiveOnDay(t, wd.code, weekKey)) return;
+      total++;
+      if ((state.tasks.done[wd.dateKey] || []).includes(t.id)) done++;
+    });
+  });
+  if (total === 0) return null; // žádné naplánované úkoly ten týden – nic k vyhodnocení
+  const ratio = done / total;
+  const payout = Math.round((state.settings.weekly_allowance || 0) * ratio * 100) / 100;
+  state.tasks.history.unshift({ weekKey, done, total, payout, evaluated_at: new Date().toISOString() });
+  if (state.tasks.history.length > 52) state.tasks.history.pop();
+  if (payout > 0) doDeposit(payout);
+  return { weekKey, done, total, payout };
+}
+
+function checkWeeklyTaskEvaluation() {
+  const currentWeekKey = _getWeekKey();
+  if (!state.tasks.last_evaluated_week) {
+    state.tasks.last_evaluated_week = currentWeekKey;
+    scheduleSave();
+    return;
+  }
+  if (state.tasks.last_evaluated_week === currentWeekKey) return;
+  let wk = state.tasks.last_evaluated_week;
+  const results = [];
+  let guard = 0;
+  while (wk !== currentWeekKey && guard < 52) {
+    const r = evaluateWeek(wk);
+    if (r) results.push(r);
+    wk = nextWeekKey(wk);
+    guard++;
+  }
+  state.tasks.last_evaluated_week = currentWeekKey;
+  scheduleSave();
+  if (results.length) showWeeklyEvaluationModal(results);
+}
+
+function showWeeklyEvaluationModal(results) {
+  const body = document.getElementById('week-eval-body');
+  if (body) {
+    body.innerHTML = results.map(r =>
+      `<div class="week-eval-row">Týden ${r.weekKey}: splněno ${r.done}/${r.total} úkolů → <strong>${fmt(r.payout)}</strong></div>`
+    ).join('');
+  }
+  document.getElementById('modal-week-eval').classList.remove('hidden');
 }
 
 function renderStories() {
@@ -7215,6 +7295,7 @@ if (state.user.name) {
   showScreen('nadvorí');
   document.getElementById('bottom-nav').classList.remove('hidden');
   renderAll();
+  checkWeeklyTaskEvaluation();
 } else {
   showScreen('setup', true);
 }
@@ -7443,6 +7524,9 @@ document.getElementById('task-grid').addEventListener('click', e => {
   if (!cell) return;
   toggleTaskDone(cell.dataset.taskId, cell.dataset.date);
 });
+document.getElementById('week-eval-close-btn').addEventListener('click', () =>
+  document.getElementById('modal-week-eval').classList.add('hidden')
+);
 
 /* ════════════════════════════════════
    FÁZE 4 – Secret modal listeners

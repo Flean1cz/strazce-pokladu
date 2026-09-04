@@ -28,22 +28,23 @@ Jeden monolitický soubor: `<style>` blok (ř. 19–4539), pak HTML obrazovky
 (ř. 4569–5049+), pak **jediný `<script>` blok** (ř. 5394–14429) — veškerá JS logika
 appky je inline, žádné externí JS soubory se nenačítají za běhu.
 
-### Obrazovky (`<div id="screen-*" class="screen">`, přepínané `showScreen()`, ř. 5944)
+### Obrazovky (`<div id="screen-*" class="screen">`, přepínané `showScreen()`, ř. 6238)
 
 | ID | Řádek | Popis | V `NAV_SCREENS`? |
 |---|---|---|---|
-| `screen-setup` | 4569 | první spuštění / jméno dítěte | ano |
-| `screen-nadvorí` | 4604 | Nádvoří (domovská obrazovka, strom, streak) | ano |
-| `screen-pokladnice` | 4742 | Pokladnice (vklady, zůstatky 80/10/10) | ano |
-| `screen-pribehy` | 4950 | seznam příběhů | ano |
-| `screen-reader` | 4962 | čtečka konkrétního příběhu | ano |
-| `screen-tajemstvi` | 4994 | „Tajemství" — rozcestník na mini-hry | ano |
-| `screen-minigame` | 5008 | kontejner pro mini-hru (`#minigame-canvas-wrap`) | ano |
-| `screen-seals` | 5019 | přehled pečetí | ne (mimo nav) |
-| `screen-vitrine` | 5034 | vitrína sbírek | ne (mimo nav) |
-| `screen-admin` | 5049 | rodičovský admin panel | ano |
+| `screen-setup` | 4650 | první spuštění / jméno dítěte | ano |
+| `screen-nadvorí` | 4685 | Nádvoří (domovská obrazovka, strom, streak) | ano |
+| `screen-pokladnice` | 4823 | Pokladnice (vklady, zůstatky 80/10/10) | ano |
+| `screen-pribehy` | 5031 | seznam příběhů | ano |
+| `screen-reader` | 5043 | čtečka konkrétního příběhu | ano |
+| `screen-tajemstvi` | 5075 | „Tajemství" — rozcestník na mini-hry | ano |
+| `screen-minigame` | 5089 | kontejner pro mini-hru (`#minigame-canvas-wrap`) | ano |
+| `screen-seals` | 5100 | přehled pečetí | ne (mimo nav) |
+| `screen-vitrine` | 5115 | vitrína sbírek | ne (mimo nav) |
+| `screen-ukoly` | 5130 | Úkoly tento týden (týdenní mřížka, od Fáze 3c) | ano |
+| `screen-admin` | 5144 | rodičovský admin panel | ano |
 
-`NAV_SCREENS` (ř. 5943): `['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','minigame','admin']`.
+`NAV_SCREENS` (ř. 6237): `['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','ukoly','minigame','admin']`.
 
 ### Globální stav
 
@@ -64,16 +65,30 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
   v adminu (`renderTaskExceptions()`, `toggleTaskException()` — KROK 18)
   s date-pickerem `#task-exc-week-inp`. Plně per-profil.
 - **`state.tasks.done`** (od Fáze 3c) — `{ [dateKey]: [taskId, ...] }`
-  (`dateKey` = `_todayKey()`, `"YYYY-MM-DD"`), co dítě který den zaškrtlo.
-  Nová obrazovka `screen-ukoly` (📋 „Úkoly", 5. tlačítko v `#bottom-nav`,
-  v `NAV_SCREENS`) zobrazuje denní checklist: `getTodaysEffectiveTasks()`
-  spočítá efektivní seznam pro dnešek (šablona ∩ dnešní den v týdnu, minus
-  aktivní výjimka), `renderTaskChecklist()` ho vykreslí, `toggleTaskDone()`
-  zaškrtává (KROK 19). `showScreen()` re-renderuje checklist při každém
-  vstupu na obrazovku, aby se okamžitě projevila případná úprava šablony/
-  výjimek v adminu. Plně per-profil.
-  Zatím jen šablona, kapesné, výjimky a zaškrtávání — týdenní vyhodnocení
-  a výplata je poslední podkrok Fáze 3 (3d, viz „Plánované změny").
+  (`dateKey` = `"YYYY-MM-DD"`), co dítě který den zaškrtlo. Nová obrazovka
+  `screen-ukoly` (📋 „Úkoly tento týden", 5. tlačítko v `#bottom-nav`, v
+  `NAV_SCREENS`) zobrazuje **týdenní mřížku** (CSS Grid, řádky = úkoly,
+  sloupce = Po–Ne s daty aktuálního týdne, přes celou šířku obrazovky):
+  `isTaskActiveOnDay(task, dayCode, weekKey)` řeší, jestli je úkol daný den
+  aktivní (šablona ∩ den, minus výjimka), `getCurrentWeekDates()` vrátí 7
+  dat aktuálního týdne, `renderTaskChecklist()` vykreslí mřížku,
+  `toggleTaskDone(taskId, dateKey)` zaškrtává KTERÝKOLI den v týdnu
+  (minulý i budoucí, ne jen dnešek) — KROK 19. `showScreen()` re-renderuje
+  mřížku při každém vstupu na obrazovku, aby se okamžitě projevila
+  případná úprava šablony/výjimek v adminu. Plně per-profil.
+- **`state.tasks.history`** a **`state.tasks.last_evaluated_week`** (od
+  Fáze 3d) — `history` je pole `{weekKey, done, total, payout, evaluated_at}`
+  (nejnovější první, cap 52), `last_evaluated_week` je `"YYYY-Www"`
+  posledního vyhodnoceného týdne. `checkWeeklyTaskEvaluation()` (ř. 6663,
+  volaná z boot sekvence, `switchToProfile()` a `createProfile()` — vždy
+  hned po `renderAll()`) porovná aktuální týden s `last_evaluated_week`;
+  při přechodu vyhodnotí KAŽDÝ přeskočený týden zvlášť přes `evaluateWeek()`
+  (ř. 6643, počítá splněno/celkem z efektivní šablony toho týdne a spouští
+  `doDeposit()` s poměrnou částí `weekly_allowance`). `getDatesForWeekKey()`
+  (ř. 6619) je obecná inverze `_getWeekKey()` (týden→7 dat), sdílená mřížkou
+  i vyhodnocením. Při prvním setkání s funkcí (starý profil bez
+  `last_evaluated_week`) se nevyplácí nic zpětně, jen se nastaví baseline.
+  Plně per-profil.
 - **Persistence (multi-user, od Fáze 1; UI přepínání od Fáze 2)**: `state` se
   ukládá per-profil pod `localStorage['babylon_v3_user_' + currentUserId]`
   (čtení v `loadLocal()`, zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`)
@@ -162,17 +177,19 @@ napojený na appku.** Pokud práce vyžaduje ho zapojit, je potřeba nastavit
    přepíná, který z nich je „aktivní" a ukládá se pod který klíč v `localStorage`
    (dnes jediný pevný klíč `babylon_v3`).
 
-3. **Nová domovská obrazovka: týdenní přehled úkolů**
+3. **Nová domovská obrazovka: týdenní přehled úkolů** — ✅ HOTOVO (Fáze
+   3a–3d, viz „Globální stav" výše pro aktuální implementaci).
    - **Šablona úkolů**: rodič nastaví jednou v adminu; každý úkol má seznam dní
      v týdnu, kdy je normálně aktivní.
    - **Týdenní výjimky**: rodič může po odemčení pro konkrétní týden vypnout
      konkrétní úkol na konkrétní den (např. „jít do školy" během prázdnin).
      Toto se neukládá do šablony, ale zvlášť per týden (šablona zůstává
      nedotčená, výjimky jsou vedlejší časově vázaná struktura).
-   - Dítě denně zaškrtává splněné úkoly.
+   - Dítě zaškrtává splněné úkoly v týdenní mřížce (libovolný den v týdnu,
+     ne jen dnešek).
    - Týdenní vyhodnocení počítá ze šablony minus aktivní výjimky pro daný
-     týden; výsledek spouští `doDeposit()` (ř. 6353) pro rozdělení kapesného
-     80/10/10.
+     týden; výsledek spouští `doDeposit()` pro rozdělení kapesného 80/10/10.
 
 4. **Pořadí implementace**: 1) multi-user state model → 2) UI přepínání účtů
-   → 3) týdenní úkoly → 4) Android/landscape. (Viz předchozí diskuze.)
+   → 3) týdenní úkoly → 4) Android/landscape. Body 1–3 jsou hotové; zbývá
+   Fáze 4 (Android/landscape redesign).
