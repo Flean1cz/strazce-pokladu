@@ -63,8 +63,17 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
   v daném týdnu (šablona zůstává nedotčená, výjimka jen odečítá). Editor
   v adminu (`renderTaskExceptions()`, `toggleTaskException()` — KROK 18)
   s date-pickerem `#task-exc-week-inp`. Plně per-profil.
-  Zatím jen šablona, kapesné a výjimky — denní zaškrtávání dítětem a
-  vyhodnocení/výplata jsou další podkroky Fáze 3 (3c–3d, viz „Plánované změny").
+- **`state.tasks.done`** (od Fáze 3c) — `{ [dateKey]: [taskId, ...] }`
+  (`dateKey` = `_todayKey()`, `"YYYY-MM-DD"`), co dítě který den zaškrtlo.
+  Nová obrazovka `screen-ukoly` (📋 „Úkoly", 5. tlačítko v `#bottom-nav`,
+  v `NAV_SCREENS`) zobrazuje denní checklist: `getTodaysEffectiveTasks()`
+  spočítá efektivní seznam pro dnešek (šablona ∩ dnešní den v týdnu, minus
+  aktivní výjimka), `renderTaskChecklist()` ho vykreslí, `toggleTaskDone()`
+  zaškrtává (KROK 19). `showScreen()` re-renderuje checklist při každém
+  vstupu na obrazovku, aby se okamžitě projevila případná úprava šablony/
+  výjimek v adminu. Plně per-profil.
+  Zatím jen šablona, kapesné, výjimky a zaškrtávání — týdenní vyhodnocení
+  a výplata je poslední podkrok Fáze 3 (3d, viz „Plánované změny").
 - **Persistence (multi-user, od Fáze 1; UI přepínání od Fáze 2)**: `state` se
   ukládá per-profil pod `localStorage['babylon_v3_user_' + currentUserId]`
   (čtení v `loadLocal()`, zápis v `saveLocal()` přes `scheduleSave()`→`saveLocal()`)

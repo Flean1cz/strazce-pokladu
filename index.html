@@ -1847,6 +1847,28 @@ svg.jar{width:52px;height:72px;}
   background:rgba(229,57,53,.12);border:1px solid rgba(229,57,53,.35);color:rgba(229,57,53,.85);
   border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;
 }
+
+/* ═══ KROK 19 – Denní checklist úkolů (Fáze 3c) ═══ */
+.task-checklist-wrap{padding:14px;}
+.task-grid-scroll{overflow-x:auto;}
+.task-grid{
+  display:grid;grid-template-columns:minmax(70px,1.6fr) repeat(7,minmax(44px,1fr));
+  gap:4px;width:100%;
+}
+.task-grid-cell{display:flex;align-items:center;justify-content:center;padding:8px 4px;font-size:11px;text-align:center;}
+.task-grid-corner{position:sticky;left:0;background:var(--bg2);z-index:2;}
+.task-grid-daylabel{
+  flex-direction:column;font-family:'Cinzel',serif;color:var(--gold);font-size:16px;font-weight:700;
+}
+.task-grid-daylabel.today{color:var(--lgold);text-shadow:0 0 6px rgba(255,215,0,.4);}
+.task-grid-daynum{font-size:12px;opacity:.6;}
+.task-grid-name{
+  justify-content:flex-start;text-align:left;font-family:'Cinzel',serif;font-size:12px;color:var(--sand);
+  position:sticky;left:0;background:var(--bg2);z-index:1;padding-right:8px;
+}
+.task-grid-off{color:rgba(245,166,35,.15);}
+.task-grid-check{cursor:pointer;font-size:26px;border-radius:10px;background:rgba(0,0,0,.2);min-height:44px;}
+.task-grid-check.done{background:rgba(76,175,80,.15);}
 .admin-logout{
   display:block;margin:8px auto;
   background:transparent;border:1px solid rgba(245,166,35,.18);
@@ -5103,6 +5125,20 @@ svg.jar{width:52px;height:72px;}
 </div>
 </div>
 
+<!-- ══════════════ ÚKOLY – denní checklist (Fáze 3c) ══════════════ -->
+<div id="screen-ukoly" class="screen hidden">
+<div class="sec-hdr">
+  <button class="back-btn" data-back="nadvorí">‹</button>
+  <div class="sec-title">📋 Úkoly tento týden</div>
+</div>
+<div class="task-checklist-wrap">
+  <div id="task-checklist-empty" class="task-tmpl-empty" style="display:none">Tento týden nemáš žádné úkoly. 🎉</div>
+  <div class="task-grid-scroll">
+    <div class="task-grid" id="task-grid"></div>
+  </div>
+</div>
+</div>
+
 <!-- ══════════════ ADMIN ══════════════ -->
 <div id="screen-admin" class="screen hidden">
 <div class="sec-hdr">
@@ -5365,6 +5401,10 @@ svg.jar{width:52px;height:72px;}
   <button class="nav-btn" data-nav="tajemstvi">
     <div class="nav-icon">🌟</div>
     <div class="nav-label">Tajemství</div>
+  </button>
+  <button class="nav-btn" data-nav="ukoly">
+    <div class="nav-icon">📋</div>
+    <div class="nav-label">Úkoly</div>
   </button>
 </div>
 
@@ -5784,7 +5824,7 @@ const DEFAULT_STATE = () => ({
   settings: { monthly_interest: 1, admin_pin: '1234', weekly_allowance: 0 },
   progression: { unlocked_stories: [], unlocked_secrets: [] },
   wishlist: [],
-  tasks: { template: [], exceptions: {} },
+  tasks: { template: [], exceptions: {}, done: {} },
   history: [],
   last_interest_applied: null,
   // ═══ KROK 1 – Moudrost (body) ═══
@@ -5980,7 +6020,7 @@ function loadLocal() {
       // Deep merge balances
       if (p.state?.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, p.state.balances);
       if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},p.state.settings);
-      if (p.state?.tasks) state.tasks = Object.assign({template:[],exceptions:{}}, p.state.tasks);
+      if (p.state?.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{}},p.state.tasks);
       if (p.state?.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, p.state.progression);
       // KROK 1 – Moudrost: zpětná kompatibilita pro stará data
       if (typeof state.wisdom !== 'number') state.wisdom = 0;
@@ -6144,7 +6184,7 @@ async function loadFromDrive() {
       state = Object.assign(DEFAULT_STATE(), data.state);
       if (data.state.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, data.state.balances);
       if (data.state.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},data.state.settings);
-      if (data.state.tasks) state.tasks = Object.assign({template:[],exceptions:{}}, data.state.tasks);
+      if (data.state.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{}},data.state.tasks);
       if (data.state.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, data.state.progression);
       saveLocal(); renderAll();
     }
@@ -6180,7 +6220,7 @@ function scheduleSave() {
 function saveToDrive() { saveLocal(); if (accessToken) saveToDriveNow(); }
 /* ═══ SCREEN NAVIGATION ═══ */
 // setup musí být v seznamu, aby se správně schoval při přechodu na nádvoří
-const NAV_SCREENS = ['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','minigame','admin'];
+const NAV_SCREENS = ['setup','nadvorí','pokladnice','pribehy','reader','tajemstvi','ukoly','minigame','admin'];
 function showScreen(id, hideNav=false) {
   // KROK 14 – Pokud opouštíme obrazovku mini-hry, spusť cleanup
   if (currentScreen === 'minigame' && id !== 'minigame') {
@@ -6209,6 +6249,7 @@ function showScreen(id, hideNav=false) {
   const profileMenu = document.getElementById('profile-menu');
   if (profileMenu) profileMenu.classList.toggle('hidden', id === 'setup');
   closeProfileMenu();
+  if (id === 'ukoly') renderTaskChecklist();
   // Update nav active state
   document.querySelectorAll('.nav-btn[data-nav]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.nav === id);
@@ -6274,6 +6315,7 @@ function renderAll() {
   renderPokladnice();
   renderStories();
   renderSecrets();
+  renderTaskChecklist();
   renderAdminPanel();
   updateTataBanka();
   // Krok 4 – pečeti: aktualizace počítadla na pilíři
@@ -6510,6 +6552,64 @@ function toggleTaskException(weekKey, taskId, day) {
   state.tasks.exceptions[weekKey][taskId] = arr;
   scheduleSave();
   renderTaskExceptions();
+}
+
+/* ═══ KROK 19 – Denní checklist úkolů (Fáze 3c) ═══ */
+const DOW_CODES = ['po','ut','st','ct','pa','so','ne'];
+
+function isTaskActiveOnDay(task, dayCode, weekKey) {
+  if (!task.dny.includes(dayCode)) return false;
+  const excForWeek = state.tasks.exceptions[weekKey] || {};
+  return !(excForWeek[task.id] || []).includes(dayCode);
+}
+
+function getCurrentWeekDates() {
+  const now = new Date();
+  const dow = now.getDay() || 7; // Po=1..Ne=7
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (dow - 1));
+  return DOW_CODES.map((code, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return {
+      code, dayNum: d.getDate(),
+      dateKey: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
+    };
+  });
+}
+
+function renderTaskChecklist() {
+  const grid = document.getElementById('task-grid');
+  const empty = document.getElementById('task-checklist-empty');
+  if (!grid || !empty) return;
+  const weekKey = _getWeekKey();
+  const weekDates = getCurrentWeekDates();
+  const todayKey = _todayKey();
+  const rows = state.tasks.template.filter(t => t.dny.some(d => isTaskActiveOnDay(t, d, weekKey)));
+  empty.style.display = rows.length ? 'none' : 'block';
+  if (!rows.length) { grid.innerHTML = ''; return; }
+
+  let html = '<div class="task-grid-cell task-grid-corner"></div>';
+  weekDates.forEach(wd => {
+    html += `<div class="task-grid-cell task-grid-daylabel${wd.dateKey===todayKey?' today':''}">${TASK_DAY_LABELS[wd.code]}<br><span class="task-grid-daynum">${wd.dayNum}.</span></div>`;
+  });
+  rows.forEach(t => {
+    html += `<div class="task-grid-cell task-grid-name">${t.nazev}</div>`;
+    weekDates.forEach(wd => {
+      if (!isTaskActiveOnDay(t, wd.code, weekKey)) { html += '<div class="task-grid-cell task-grid-off">—</div>'; return; }
+      const done = (state.tasks.done[wd.dateKey] || []).includes(t.id);
+      html += `<div class="task-grid-cell task-grid-check${done?' done':''}" data-task-id="${t.id}" data-date="${wd.dateKey}">${done?'✅':'⬜'}</div>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function toggleTaskDone(taskId, dateKey) {
+  if (!state.tasks.done[dateKey]) state.tasks.done[dateKey] = [];
+  const idx = state.tasks.done[dateKey].indexOf(taskId);
+  if (idx === -1) state.tasks.done[dateKey].push(taskId); else state.tasks.done[dateKey].splice(idx, 1);
+  scheduleSave();
+  renderTaskChecklist();
 }
 
 function renderStories() {
@@ -7337,6 +7437,11 @@ document.getElementById('task-exc-list').addEventListener('click', e => {
   const taskId = btn.closest('[data-task-id]')?.dataset.taskId;
   const weekKey = document.getElementById('task-exc-week-inp').value;
   if (taskId && weekKey) toggleTaskException(weekKey, taskId, btn.dataset.day);
+});
+document.getElementById('task-grid').addEventListener('click', e => {
+  const cell = e.target.closest('.task-grid-check');
+  if (!cell) return;
+  toggleTaskDone(cell.dataset.taskId, cell.dataset.date);
 });
 
 /* ════════════════════════════════════
