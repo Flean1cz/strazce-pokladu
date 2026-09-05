@@ -1850,6 +1850,21 @@ svg.jar{width:52px;height:72px;}
 
 /* ═══ KROK 19 – Denní checklist úkolů (Fáze 3c) ═══ */
 .task-checklist-wrap{padding:14px;}
+
+/* ═══ KROK 21 – Landscape gate pro Úkoly (Fáze 4a) ═══ */
+.task-rotate-overlay{
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:40px 24px;min-height:50vh;text-align:center;
+}
+.task-rotate-icon{font-size:52px;animation:rotateHint 1.6s ease-in-out infinite;}
+@keyframes rotateHint{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-90deg);}}
+.task-rotate-text{font-family:'Cinzel',serif;font-size:15px;color:var(--gold);max-width:280px;line-height:1.5;}
+
+@media (min-width: 768px) and (orientation: portrait) {
+  #screen-ukoly .task-rotate-overlay{display:flex;}
+  #screen-ukoly .task-checklist-wrap{display:none;}
+}
 .task-grid-scroll{overflow-x:auto;}
 .task-grid{
   display:grid;grid-template-columns:minmax(70px,1.6fr) repeat(7,minmax(44px,1fr));
@@ -5131,6 +5146,10 @@ svg.jar{width:52px;height:72px;}
 <div class="sec-hdr">
   <button class="back-btn" data-back="nadvorí">‹</button>
   <div class="sec-title">📋 Úkoly tento týden</div>
+</div>
+<div class="task-rotate-overlay" id="task-rotate-overlay">
+  <div class="task-rotate-icon">🔄</div>
+  <div class="task-rotate-text">Otoč tablet na šířku,<br>ať vidíš celý týden</div>
 </div>
 <div class="task-checklist-wrap">
   <div id="task-checklist-empty" class="task-tmpl-empty" style="display:none">Tento týden nemáš žádné úkoly. 🎉</div>

@@ -76,6 +76,13 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
   (minulý i budoucí, ne jen dnešek) — KROK 19. `showScreen()` re-renderuje
   mřížku při každém vstupu na obrazovku, aby se okamžitě projevila
   případná úprava šablony/výjimek v adminu. Plně per-profil.
+  **Landscape gate (od Fáze 4a)**: čisté CSS, žádný JS — `@media
+  (min-width: 768px) and (orientation: portrait)` (KROK 21) schová
+  `.task-checklist-wrap` a zobrazí `.task-rotate-overlay` („Otoč tablet
+  na šířku") místo mřížky. `min-width` schválně omezuje efekt jen na
+  tabletové šířky — telefon v portraitu (šířka pod 768px) mřížku
+  zobrazuje normálně (ověřeno na reálném telefonu ve Fázi 3c/3d, gate se
+  ho netýká).
 - **`state.tasks.history`** a **`state.tasks.last_evaluated_week`** (od
   Fáze 3d) — `history` je pole `{weekKey, done, total, payout, evaluated_at}`
   (nejnovější první, cap 52), `last_evaluated_week` je `"YYYY-Www"`
@@ -167,8 +174,15 @@ napojený na appku.** Pokud práce vyžaduje ho zapojit, je potřeba nastavit
 
 ## Plánované změny
 
-1. **Android tablet, orientace na šířku** — cílová platforma se posouvá z
-   současného portrait/mobile designu na landscape tablet.
+1. **Android tablet, orientace na šířku** — upřesněný rozsah (po diskuzi):
+   zbytek appky (Nádvoří, Pokladnice, Příběhy, Admin) zůstává beze změny,
+   jen portrait — žádný redesign. Rozděleno na 2 podkroky:
+   - **4a — landscape gate na obrazovce Úkoly** — ✅ HOTOVO. Viz „Globální
+     stav" výše (`.task-rotate-overlay`, KROK 21).
+   - **4b — tablet touch-target review napříč celou appkou** — zbývá.
+     Kontrola velikosti dotykových cílů/tlačítek s ohledem na tablet
+     použití dětmi 6–12 let (větší displej, jiná hustota pixelů, jiné
+     držení v rukou), ne jen telefon.
 
 2. **Přepínání účtů (děti)** — čistě lokální na zařízení, přes `localStorage`.
    Žádná cloud synchronizace mezi zařízeními, žádný server účet rodiče. Dnešní
@@ -191,5 +205,5 @@ napojený na appku.** Pokud práce vyžaduje ho zapojit, je potřeba nastavit
      týden; výsledek spouští `doDeposit()` pro rozdělení kapesného 80/10/10.
 
 4. **Pořadí implementace**: 1) multi-user state model → 2) UI přepínání účtů
-   → 3) týdenní úkoly → 4) Android/landscape. Body 1–3 jsou hotové; zbývá
-   Fáze 4 (Android/landscape redesign).
+   → 3) týdenní úkoly → 4) Android/landscape. Body 1–3 a podkrok 4a jsou
+   hotové; zbývá 4b (tablet touch-target review).
