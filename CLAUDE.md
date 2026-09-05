@@ -174,15 +174,24 @@ napojený na appku.** Pokud práce vyžaduje ho zapojit, je potřeba nastavit
 
 ## Plánované změny
 
-1. **Android tablet, orientace na šířku** — upřesněný rozsah (po diskuzi):
-   zbytek appky (Nádvoří, Pokladnice, Příběhy, Admin) zůstává beze změny,
-   jen portrait — žádný redesign. Rozděleno na 2 podkroky:
-   - **4a — landscape gate na obrazovce Úkoly** — ✅ HOTOVO. Viz „Globální
-     stav" výše (`.task-rotate-overlay`, KROK 21).
-   - **4b — tablet touch-target review napříč celou appkou** — zbývá.
-     Kontrola velikosti dotykových cílů/tlačítek s ohledem na tablet
-     použití dětmi 6–12 let (větší displej, jiná hustota pixelů, jiné
-     držení v rukou), ne jen telefon.
+1. **Android tablet, orientace na šířku** — ✅ HOTOVO. Upřesněný rozsah
+   (po diskuzi): zbytek appky (Nádvoří, Pokladnice, Příběhy, Admin)
+   zůstává beze změny, jen portrait — žádný redesign. Rozděleno na
+   2 podkroky, oba hotové:
+   - **4a — landscape gate na obrazovce Úkoly**. Viz „Globální stav"
+     výše (`.task-rotate-overlay`, KROK 21).
+   - **4b — tablet touch-target review napříč celou appkou**. 23 CSS
+     úprav (padding/font-size/explicitní width-height) napříč appkou —
+     bottom-nav, back-btn, wishlist tlačítka, audio tlačítka, profile
+     menu, Úkoly mřížka, a napříč adminem (taby, tlačítka, editor
+     úkolů/výjimek, data/zálohy, report). Žádná nová HTML struktura ani
+     JS, jen zvětšení existujících dotykových cílů na tabletovou míru.
+     Vedlejší zjištění (neopravováno, mimo rozsah 4b — možný budoucí
+     drobný úkol): několik modálů (`modal-secret`, `modal-seal`,
+     `modal-artifact`, `modal-customize`, `modal-arkad`, `modal-tree-name`,
+     `modal-week-eval`) nemá klik-na-pozadí-zavře handler, na rozdíl od
+     `modal-wish`/`modal-add-profile`/`modal-add-task`, které ho mají —
+     nekonzistence v chování, ne ve velikosti dotykového cíle.
 
 2. **Přepínání účtů (děti)** — čistě lokální na zařízení, přes `localStorage`.
    Žádná cloud synchronizace mezi zařízeními, žádný server účet rodiče. Dnešní
@@ -205,5 +214,6 @@ napojený na appku.** Pokud práce vyžaduje ho zapojit, je potřeba nastavit
      týden; výsledek spouští `doDeposit()` pro rozdělení kapesného 80/10/10.
 
 4. **Pořadí implementace**: 1) multi-user state model → 2) UI přepínání účtů
-   → 3) týdenní úkoly → 4) Android/landscape. Body 1–3 a podkrok 4a jsou
-   hotové; zbývá 4b (tablet touch-target review).
+   → 3) týdenní úkoly → 4) Android/landscape. **Všechny 4 fáze jsou hotové
+   — celý původní plán je tímto dokončen.** Případné další změny už budou
+   nová samostatná zadání, ne pokračování tohoto seznamu.
