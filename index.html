@@ -5991,6 +5991,7 @@ function syncProfileName() {
 function switchToProfile(id) {
   closeProfileMenu();
   if (id === currentUserId) return;
+  lockAdmin();
   try { localStorage.setItem('babylon_v3_last_user', id); } catch(e) {}
   loadLocal();
   document.getElementById('name-input').value = state.user.name || '';
@@ -6006,6 +6007,7 @@ function switchToProfile(id) {
 }
 
 function createProfile(jmeno) {
+  lockAdmin();
   const profiles = listProfiles();
   const profile = { id: generateUserId(), jmeno: jmeno, vytvoreno: new Date().toISOString() };
   profiles.push(profile);
@@ -6978,10 +6980,24 @@ function resetAdminView() {
   pinBuffer=''; updatePinDots();
   const err = document.getElementById('pin-error');
   if (err) err.textContent = '';
+  // Úklid rozdělané práce v rodičovské sekci (změna PINu, potvrzení resetu)
+  const np1 = document.getElementById('new-pin-1');
+  if (np1) np1.value = '';
+  const np2 = document.getElementById('new-pin-2');
+  if (np2) np2.value = '';
+  const pcw = document.getElementById('pin-change-wrap');
+  if (pcw) pcw.classList.remove('visible');
+  const rc = document.getElementById('adm-reset-confirm');
+  if (rc) rc.classList.remove('show');
   // Krok 9: reset tabů zpět na Nastavení
   if (typeof switchAdminTab === 'function') {
     try { switchAdminTab('settings'); } catch(e) {}
   }
+}
+// Zamkne rodičovskou sekci (např. při přepnutí/založení profilu)
+function lockAdmin() {
+  adminUnlocked = false;
+  resetAdminView();
 }
 
 /* ═══ COIN ANIMATION ═══ */

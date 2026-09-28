@@ -1,0 +1,12 @@
+{
+  "name": "strazce-pokladu",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Strážce pokladu — PWA pro finanční gramotnost dětí",
+  "scripts": {
+    "test": "node tests/test-admin-lock.js"
+  },
+  "devDependencies": {
+    "jsdom": "^27.0.0"
+  }
+}
