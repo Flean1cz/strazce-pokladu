@@ -31,7 +31,7 @@ function extractDefaultState() {
   return src.slice(start, end + 4);
 }
 
-const FNS = ['fmt', 'isValidSplit', 'normalizeSplit', 'doDeposit', 'loadLocal', 'importData', 'loadFromDrive'];
+const FNS = ['fmt', 'isValidSplit', 'normalizeSplit', 'computeSplitAmounts', 'doDeposit', 'loadLocal', 'importData', 'loadFromDrive'];
 
 function makeEnv() {
   const dom = new JSDOM('<body></body>', { url: 'http://localhost/' });

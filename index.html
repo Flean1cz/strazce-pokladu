@@ -1820,6 +1820,25 @@ svg.jar{width:52px;height:72px;}
 .admin-btn.interest{background:linear-gradient(135deg,var(--gold),var(--dgold));color:var(--dbrown);margin-bottom:7px;}
 .admin-btn.changepin{background:rgba(255,255,255,.04);border:1px solid rgba(245,166,35,.2);color:rgba(245,166,35,.55);font-size:12px;}
 
+/* ═══ S2 – Editor poměru rozdělení ═══ */
+.split-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.split-row-label{flex:1;font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+.split-step-btn{
+  width:52px;height:52px;border-radius:50%;flex-shrink:0;
+  background:rgba(0,0,0,.35);border:1px solid rgba(245,166,35,.4);color:#FFD700;
+  font-family:'Cinzel',serif;font-size:24px;font-weight:700;line-height:1;cursor:pointer;
+}
+.split-step-btn:active{transform:scale(.93);}
+.split-val{min-width:64px;text-align:center;font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:#FFD700;}
+.split-sum{margin:6px 0 4px;text-align:center;font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--sand);}
+.split-sum.invalid{color:#E53935;}
+.split-sum-err{margin-bottom:8px;text-align:center;font-size:13px;font-weight:700;color:#E53935;}
+.split-preview{margin:8px 0;text-align:center;font-size:13px;line-height:1.5;color:var(--sand);min-height:20px;}
+.split-note{margin-bottom:10px;padding:9px 11px;border-radius:9px;font-size:12px;line-height:1.5;color:var(--sand);
+  background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);}
+#split-save-btn:disabled{opacity:.4;cursor:not-allowed;}
+.split-preview.muted{color:rgba(255,255,255,.4);}
+
 /* ═══ KROK 17 – Šablona týdenních úkolů (Fáze 3a) ═══ */
 .task-days-row{display:flex;gap:5px;margin:10px 0;}
 .task-day-btn{
@@ -5232,6 +5251,36 @@ svg.jar{width:52px;height:72px;}
       <button class="admin-btn with" id="admin-withdraw-btn">➖ Vybrat z nádoby TEĎ</button>
     </div>
 
+    <!-- S2 – Poměr rozdělení -->
+    <div class="admin-card" id="admin-split-card">
+      <div class="admin-card-title">⚖️ Poměr rozdělení</div>
+      <div class="report-desc">Platí pro ruční vklad i týdenní kapesné.</div>
+      <div class="split-row">
+        <div class="split-row-label">TEĎ</div>
+        <button class="split-step-btn" id="split-dec-ted" aria-label="TEĎ −5 %">−</button>
+        <div class="split-val" id="split-val-ted">80 %</div>
+        <button class="split-step-btn" id="split-inc-ted" aria-label="TEĎ +5 %">+</button>
+      </div>
+      <div class="split-row">
+        <div class="split-row-label">POTOM</div>
+        <button class="split-step-btn" id="split-dec-potom" aria-label="POTOM −5 %">−</button>
+        <div class="split-val" id="split-val-potom">10 %</div>
+        <button class="split-step-btn" id="split-inc-potom" aria-label="POTOM +5 %">+</button>
+      </div>
+      <div class="split-row">
+        <div class="split-row-label">NAVŽDY</div>
+        <button class="split-step-btn" id="split-dec-navzdy" aria-label="NAVŽDY −5 %">−</button>
+        <div class="split-val" id="split-val-navzdy">10 %</div>
+        <button class="split-step-btn" id="split-inc-navzdy" aria-label="NAVŽDY +5 %">+</button>
+      </div>
+      <div class="split-sum" id="split-sum">Součet: 100 %</div>
+      <div class="split-sum-err" id="split-sum-err" hidden>Součet musí být 100 %</div>
+      <div class="split-preview" id="split-preview"></div>
+      <div class="split-note" id="split-note" hidden>Při 0 % NAVŽDY nebudou dosažitelné milníky pokladu (1000 a 2000 Kč).</div>
+      <button class="admin-btn dep" id="split-save-btn">Uložit</button>
+      <button class="admin-btn changepin" id="split-default-btn">Obnovit 80/10/10</button>
+    </div>
+
     <!-- Interest -->
     <div class="admin-card">
       <div class="admin-card-title">🌱 Síla stromu – Úrok NAVŽDY</div>
@@ -5930,6 +5979,8 @@ let adminUnlocked = false;
 let currentStoryIdx = null;
 let currentScreen = 'setup';
 let currentUserId = null;
+let splitDraft = null;
+let splitDraftBase = null;
 
 // Drive
 let tokenClient = null, accessToken = null, driveFileId = null;
@@ -6893,25 +6944,103 @@ function renderAdminPanel() {
 
   const wa = document.getElementById('weekly-allowance-inp');
   if (wa) wa.value = state.settings.weekly_allowance || 0;
+  renderSplitEditor();
   renderTaskTemplate();
   renderTaskExceptions();
 }
 
-/* ═══ DEPOSIT LOGIC ═══ */
-function doDeposit(val) {
-  if (!val || val<=0 || isNaN(val)) { toast('⚠️ Zadej platnou částku!'); return; }
-  // Výpočet v celých haléřích; zaokrouhlovací rozdíl dostane nádoba s největším podílem
-  // (při shodě první z TEĎ, POTOM, NAVŽDY), součet je vždy přesně vklad.
+/* ═══ SPLIT – výpočet a editor poměru (S2) ═══ */
+// Čistá funkce: rozdělí částku (Kč) podle poměru v %. Výpočet v celých haléřích;
+// zaokrouhlovací rozdíl dostane nádoba s největším podílem (při shodě první z
+// TEĎ, POTOM, NAVŽDY), součet je vždy přesně částka. Nemění vstup.
+function computeSplitAmounts(val, sp) {
   const cents = Math.round(val*100);
-  if (cents<1) { toast('⚠️ Zadej platnou částku!'); return; }
-  val = cents/100;
-  const sp = state.settings.split;
   const keys = ['ted','potom','navzdy'];
   const parts = keys.map(k => Math.round(cents*sp[k]/100));
   let big = 0;
   keys.forEach((k,i) => { if (sp[k] > sp[keys[big]]) big = i; });
   parts[big] += cents - parts.reduce((a,b)=>a+b, 0);
-  const t80 = parts[0]/100, p10 = parts[1]/100, n10 = parts[2]/100;
+  return { ted: parts[0]/100, potom: parts[1]/100, navzdy: parts[2]/100 };
+}
+
+// splitDraft / splitDraftBase (deklarace u ostatních globálů výše): rozpracovaná kopie
+// poměru v editoru a poměr profilu, ze kterého vznikla. Když se state.settings.split změní
+// jinak než uložením editoru (import, reset, Drive), kopie se zahodí.
+function ensureSplitDraft() {
+  const cur = state.settings.split;
+  const stale = !splitDraft || !splitDraftBase ||
+    ['ted','potom','navzdy'].some(k => splitDraftBase[k] !== cur[k]);
+  if (stale) {
+    splitDraft = { ted: cur.ted, potom: cur.potom, navzdy: cur.navzdy };
+    splitDraftBase = { ted: cur.ted, potom: cur.potom, navzdy: cur.navzdy };
+  }
+  return splitDraft;
+}
+function discardSplitDraft() { splitDraft = null; splitDraftBase = null; }
+
+function renderSplitEditor() {
+  if (!document.getElementById('admin-split-card')) return;
+  const d = ensureSplitDraft();
+  const keys = ['ted','potom','navzdy'];
+  keys.forEach(k => { document.getElementById('split-val-'+k).textContent = d[k] + ' %'; });
+  const valid = isValidSplit(d);
+  const sum = d.ted + d.potom + d.navzdy;
+  const sumEl = document.getElementById('split-sum');
+  sumEl.textContent = 'Součet: ' + sum + ' %';
+  sumEl.classList.toggle('invalid', !valid);
+  document.getElementById('split-sum-err').hidden = valid;
+  document.getElementById('split-save-btn').disabled = !valid;
+  const pv = document.getElementById('split-preview');
+  if (valid) {
+    const a = computeSplitAmounts(100, d);
+    pv.textContent = 'Ze 100 Kč půjde ' + a.ted + ' Kč TEĎ · ' + a.potom + ' Kč POTOM · ' + a.navzdy + ' Kč NAVŽDY';
+  } else {
+    pv.textContent = 'Náhled se ukáže, až bude součet 100 %.';
+  }
+  pv.classList.toggle('muted', !valid);
+  document.getElementById('split-note').hidden = d.navzdy !== 0;
+}
+
+function stepSplit(key, delta) {
+  const d = ensureSplitDraft();
+  d[key] = Math.max(0, Math.min(100, d[key] + delta));
+  renderSplitEditor();
+}
+
+function restoreDefaultSplit() {
+  ensureSplitDraft();
+  splitDraft = { ted: 80, potom: 10, navzdy: 10 };
+  renderSplitEditor();
+}
+
+function saveSplit() {
+  const d = ensureSplitDraft();
+  if (!isValidSplit(d)) return;
+  state.settings.split = { ted: d.ted, potom: d.potom, navzdy: d.navzdy };
+  splitDraftBase = { ted: d.ted, potom: d.potom, navzdy: d.navzdy };
+  scheduleSave();
+  renderSplitEditor();
+  toast('⚖️ Poměr rozdělení uložen!');
+}
+
+function bindSplitEditor() {
+  ['ted','potom','navzdy'].forEach(k => {
+    document.getElementById('split-dec-'+k).addEventListener('click', () => stepSplit(k, -5));
+    document.getElementById('split-inc-'+k).addEventListener('click', () => stepSplit(k, 5));
+  });
+  document.getElementById('split-save-btn').addEventListener('click', saveSplit);
+  document.getElementById('split-default-btn').addEventListener('click', restoreDefaultSplit);
+}
+
+/* ═══ DEPOSIT LOGIC ═══ */
+function doDeposit(val) {
+  if (!val || val<=0 || isNaN(val)) { toast('⚠️ Zadej platnou částku!'); return; }
+  const cents = Math.round(val*100);
+  if (cents<1) { toast('⚠️ Zadej platnou částku!'); return; }
+  val = cents/100;
+  const sp = state.settings.split;
+  const amounts = computeSplitAmounts(val, sp);
+  const t80 = amounts.ted, p10 = amounts.potom, n10 = amounts.navzdy;
   state.balances.living_80 = Math.round((state.balances.living_80+t80)*100)/100;
   state.balances.dreams_10 = Math.round((state.balances.dreams_10+p10)*100)/100;
   state.balances.forever_10 = Math.round((state.balances.forever_10+n10)*100)/100;
@@ -7014,6 +7143,8 @@ function resetAdminView() {
   if (pcw) pcw.classList.remove('visible');
   const rc = document.getElementById('adm-reset-confirm');
   if (rc) rc.classList.remove('show');
+  // S2: neuložená rozpracovaná změna poměru rozdělení se zahodí
+  if (typeof discardSplitDraft === 'function') discardSplitDraft();
   // Krok 9: reset tabů zpět na Nastavení
   if (typeof switchAdminTab === 'function') {
     try { switchAdminTab('settings'); } catch(e) {}
@@ -7464,6 +7595,8 @@ document.getElementById('deposit-input').addEventListener('keydown', e=>{ if(e.k
     showScreen('admin', true);
   });
 })();
+
+bindSplitEditor();
 
 // Admin deposits/withdrawals
 document.getElementById('admin-deposit-btn').addEventListener('click', ()=>{
