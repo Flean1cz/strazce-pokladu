@@ -5852,7 +5852,7 @@ const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DEFAULT_STATE = () => ({
   user: { name: '', created_at: new Date().toISOString() },
   balances: { living_80: 0, dreams_10: 0, forever_10: 0 },
-  settings: { monthly_interest: 1, admin_pin: '1234', weekly_allowance: 0 },
+  settings: { monthly_interest: 1, admin_pin: '1234', weekly_allowance: 0, split: { ted: 80, potom: 10, navzdy: 10 } },
   progression: { unlocked_stories: [], unlocked_secrets: [] },
   wishlist: [],
   tasks: { template: [], exceptions: {}, done: {}, history: [], last_evaluated_week: null },
@@ -6045,6 +6045,19 @@ function openProfileMenu() { document.getElementById('profile-menu-dropdown').cl
 function closeProfileMenu() { document.getElementById('profile-menu-dropdown')?.classList.add('hidden'); }
 
 /* ═══ PERSISTENCE ═══ */
+// Platný split = celá čísla 0–100, násobky 5, součet 100.
+function isValidSplit(sp) {
+  return !!sp && typeof sp === 'object' &&
+    ['ted','potom','navzdy'].every(k => Number.isInteger(sp[k]) && sp[k] >= 0 && sp[k] <= 100 && sp[k] % 5 === 0) &&
+    sp.ted + sp.potom + sp.navzdy === 100;
+}
+// Kontrola proti ORIGINÁLNÍM datům (raw), ne proti sloučenému state —
+// Object.assign(DEFAULT_STATE(), raw) split přepisuje/maskuje.
+function normalizeSplit(raw) {
+  const sp = raw && raw.settings && raw.settings.split;
+  if (!state.settings || typeof state.settings !== 'object') state.settings = DEFAULT_STATE().settings;
+  state.settings.split = isValidSplit(sp) ? { ted: sp.ted, potom: sp.potom, navzdy: sp.navzdy } : DEFAULT_STATE().settings.split;
+}
 function loadLocal() {
   ensureActiveProfile();
   try {
@@ -6055,6 +6068,7 @@ function loadLocal() {
       // Deep merge balances
       if (p.state?.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, p.state.balances);
       if (p.state?.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},p.state.settings);
+      normalizeSplit(p.state);
       if (p.state?.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{},history:[],last_evaluated_week:null},p.state.tasks);
       if (p.state?.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, p.state.progression);
       // KROK 1 – Moudrost: zpětná kompatibilita pro stará data
@@ -6219,6 +6233,7 @@ async function loadFromDrive() {
       state = Object.assign(DEFAULT_STATE(), data.state);
       if (data.state.balances) state.balances = Object.assign({living_80:0,dreams_10:0,forever_10:0}, data.state.balances);
       if (data.state.settings) state.settings = Object.assign({monthly_interest:1,admin_pin:'1234',weekly_allowance:0},data.state.settings);
+      normalizeSplit(data.state);
       if (data.state.tasks) state.tasks = Object.assign({template:[],exceptions:{},done:{},history:[],last_evaluated_week:null},data.state.tasks);
       if (data.state.progression) state.progression = Object.assign({unlocked_stories:[],unlocked_secrets:[]}, data.state.progression);
       saveLocal(); renderAll();
@@ -6885,14 +6900,24 @@ function renderAdminPanel() {
 /* ═══ DEPOSIT LOGIC ═══ */
 function doDeposit(val) {
   if (!val || val<=0 || isNaN(val)) { toast('⚠️ Zadej platnou částku!'); return; }
-  const n10 = Math.round(val*0.10*100)/100;
-  const p10 = Math.round(val*0.10*100)/100;
-  const t80 = Math.round((val-n10-p10)*100)/100;
+  // Výpočet v celých haléřích; zaokrouhlovací rozdíl dostane nádoba s největším podílem
+  // (při shodě první z TEĎ, POTOM, NAVŽDY), součet je vždy přesně vklad.
+  const cents = Math.round(val*100);
+  if (cents<1) { toast('⚠️ Zadej platnou částku!'); return; }
+  val = cents/100;
+  const sp = state.settings.split;
+  const keys = ['ted','potom','navzdy'];
+  const parts = keys.map(k => Math.round(cents*sp[k]/100));
+  let big = 0;
+  keys.forEach((k,i) => { if (sp[k] > sp[keys[big]]) big = i; });
+  parts[big] += cents - parts.reduce((a,b)=>a+b, 0);
+  const t80 = parts[0]/100, p10 = parts[1]/100, n10 = parts[2]/100;
   state.balances.living_80 = Math.round((state.balances.living_80+t80)*100)/100;
   state.balances.dreams_10 = Math.round((state.balances.dreams_10+p10)*100)/100;
   state.balances.forever_10 = Math.round((state.balances.forever_10+n10)*100)/100;
   state.history.unshift({
     amount:val, ted:t80, potom:p10, navzdy:n10,
+    split:{ ted:sp.ted, potom:sp.potom, navzdy:sp.navzdy },
     date: new Date().toLocaleDateString('cs-CZ'),
     type:'deposit'
   });
@@ -7061,7 +7086,7 @@ function importData(file) {
   reader.onload = e => {
     try {
       const d = JSON.parse(e.target.result);
-      if (d.state) { state=Object.assign(DEFAULT_STATE(), d.state); saveToDrive(); renderAll(); toast('📥 Data importována!'); }
+      if (d.state) { state=Object.assign(DEFAULT_STATE(), d.state); normalizeSplit(d.state); saveToDrive(); renderAll(); toast('📥 Data importována!'); }
       else toast('⚠️ Neplatný soubor!');
     } catch(err) { toast('⚠️ Chyba čtení souboru'); }
   };

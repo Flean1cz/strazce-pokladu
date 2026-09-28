@@ -4,7 +4,7 @@
   "private": true,
   "description": "Strážce pokladu — PWA pro finanční gramotnost dětí",
   "scripts": {
-    "test": "node tests/test-admin-lock.js"
+    "test": "node tests/test-admin-lock.js && node tests/test-split.js"
   },
   "devDependencies": {
     "jsdom": "^27.0.0"
