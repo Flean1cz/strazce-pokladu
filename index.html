@@ -5373,6 +5373,7 @@ svg.jar{width:52px;height:72px;}
         <input type="number" class="admin-inp" id="weekly-allowance-inp" placeholder="0" min="0" step="1" inputmode="decimal"/>
       </div>
       <div class="report-desc">Maximální částka za týden při 100 % splněných úkolů. Vyplácí se poměrně podle splněno/celkem.</div>
+      <div class="report-desc" id="weekly-split-info"></div>
       <button class="admin-btn dep" id="save-weekly-allowance-btn">Uložit částku</button>
     </div>
 
@@ -6418,6 +6419,7 @@ function renderAll() {
   renderSecrets();
   renderTaskChecklist();
   renderAdminPanel();
+  renderSplitLabels();
   updateTataBanka();
   // Krok 4 – pečeti: aktualizace počítadla na pilíři
   if (typeof renderSealsPillar === 'function') renderSealsPillar();
@@ -7020,7 +7022,34 @@ function saveSplit() {
   splitDraftBase = { ted: d.ted, potom: d.potom, navzdy: d.navzdy };
   scheduleSave();
   renderSplitEditor();
+  renderSplitLabels();
   toast('⚖️ Poměr rozdělení uložen!');
+}
+
+// S3: popisky v UI podle uloženého poměru profilu (banner a nádoby v Pokladnici,
+// zůstatky a tlačítko vkladu v adminu, věta v tabu Úkoly). Texty jen přes textContent.
+// Texty příběhů, Arkádovy fráze a minihry záměrně zůstávají u babylonského 80/10/10.
+function renderSplitLabels() {
+  const sp = state && state.settings && state.settings.split;
+  if (!isValidSplit(sp)) return;
+  const setTxt = (el, txt) => { if (el) el.textContent = txt; };
+  const isGolden = sp.ted === 80 && sp.potom === 10 && sp.navzdy === 10;
+  const dot = '\u00a0·\u00a0';
+  setTxt(document.querySelector('.golden-rule'),
+    '⚖️ ' + (isGolden ? 'Zlaté pravidlo' : 'Naše pravidlo') + ' · ' +
+    sp.ted + ' % TEĎ' + dot + sp.potom + ' % POTOM' + dot + sp.navzdy + ' % NAVŽDY');
+  setTxt(document.querySelector('.jar-card.ted .jar-sublabel'), 'ÚTRATA ' + sp.ted + ' %');
+  setTxt(document.querySelector('.jar-card.potom .jar-sublabel'), 'SPOŘENÍ ' + sp.potom + ' %');
+  setTxt(document.querySelector('.jar-card.navzdy .jar-sublabel'), 'POKLAD ' + sp.navzdy + ' %');
+  [['ted','TEĎ'],['potom','POTOM'],['navzdy','NAVŽDY']].forEach(([k, name]) => {
+    const bal = document.getElementById('adm-' + k);
+    const box = bal && bal.closest('.admin-bal');
+    setTxt(box && box.querySelector('.admin-bal-label'), name + ' (' + sp[k] + ' %)');
+  });
+  const ratio = sp.ted + '/' + sp.potom + '/' + sp.navzdy;
+  setTxt(document.getElementById('admin-deposit-btn'), '➕ Vložit a rozdělit (' + ratio + ')');
+  setTxt(document.getElementById('weekly-split-info'),
+    'Kapesné se rozdělí ' + ratio.split('/').join(' / ') + ' (změníš v Nastavení).');
 }
 
 function bindSplitEditor() {
