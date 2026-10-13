@@ -31,11 +31,19 @@ function extractDefaultState() {
   return src.slice(start, end + 4);
 }
 
-const FNS = ['fmt', 'isValidSplit', 'normalizeSplit', 'computeSplitAmounts', 'doDeposit', 'loadLocal', 'importData', 'loadFromDrive'];
+// importData prochází přes KROK 22 (parseBackupFile → confirmRestore → applyRestore → loadLocal)
+const FNS = ['fmt', 'isValidSplit', 'normalizeSplit', 'computeSplitAmounts', 'doDeposit', 'loadLocal', 'importData', 'loadFromDrive',
+  'listProfiles', 'saveProfiles', 'getProfileStateForBackup', 'isPlausibleState', 'parseBackupFile', 'snapshotKey',
+  'listSnapshots', 'writeSnapshots', 'takeSnapshot', 'isPristineState', 'confirmRestore', 'applyRestore'];
+const VARS = ['BACKUP_FORMAT', 'BACKUP_SCHEMA', 'SNAP_MAX_WEEKLY', 'SNAP_MAX_RESTORE'];
+function extractVar(name) {
+  const m = src.match(new RegExp('^var ' + name + ' = [^\\n]*;', 'm'));
+  return m ? m[0] : null;
+}
 
 function makeEnv() {
   const dom = new JSDOM('<body></body>', { url: 'http://localhost/' });
-  const ctx = vm.createContext({ localStorage: dom.window.localStorage, console: { log() {}, error() {} } });
+  const ctx = vm.createContext({ localStorage: dom.window.localStorage, document: dom.window.document, console: { log() {}, error() {} }, confirm: () => true });
   vm.runInContext(`
     var calls = [];
     let currentUserId = 'A', driveFileId = 'F', clientId = null, accessToken = 'T';
@@ -54,12 +62,17 @@ function makeEnv() {
     function updateDriveSettingsLabel() {}
     async function findFile() { return 'F'; }
     function ensureActiveProfile() {}
+    function renderProfileMenu() {}
+    function lockAdmin() {}
+    function showScreen() {}
+    function checkWeeklyTaskEvaluation() {}
     function userStorageKey(id) { return 'k_' + id; }
     async function fetch() { return { ok: true, json: async () => __drive }; }
     class FileReader { readAsText(text) { this.onload({ target: { result: text } }); } }
   `, ctx);
   vm.runInContext(extractDefaultState(), ctx);
   vm.runInContext('let state = DEFAULT_STATE();', ctx);
+  for (const v of VARS) { const c = extractVar(v); if (c) vm.runInContext(c, ctx); }
   for (const f of FNS) {
     const code = extractFn(f);
     if (code) vm.runInContext(code, ctx);

@@ -5315,15 +5315,26 @@ svg.jar{width:52px;height:72px;}
       </div>
       <div class="admin-drive-row">
         <span class="admin-drive-ico">📤</span>
-        <span class="admin-drive-lbl">Export dat (JSON soubor)</span>
+        <span class="admin-drive-lbl">Export dat tohoto profilu (JSON soubor)</span>
         <button class="admin-drive-btn" id="adm-export-btn">Export</button>
       </div>
       <div class="admin-drive-row">
+        <span class="admin-drive-ico">🗂️</span>
+        <span class="admin-drive-lbl">Export všech profilů (jedna záloha celého zařízení)</span>
+        <button class="admin-drive-btn" id="adm-export-all-btn">Export</button>
+      </div>
+      <div class="admin-drive-row">
         <span class="admin-drive-ico">📥</span>
-        <span class="admin-drive-lbl">Import dat ze souboru</span>
+        <span class="admin-drive-lbl">Obnova ze souboru (profil nebo všechny profily)</span>
         <button class="admin-drive-btn" id="adm-import-btn">Import</button>
         <input type="file" id="adm-import-input" accept=".json" style="display:none"/>
       </div>
+      <div class="admin-drive-row">
+        <span class="admin-drive-ico">🕘</span>
+        <span class="admin-drive-lbl">Body obnovy (týdenní zálohy uložené v zařízení)</span>
+        <button class="admin-drive-btn" id="adm-snap-btn">Zobrazit</button>
+      </div>
+      <div id="adm-snap-list" style="display:none"></div>
       <div class="admin-drive-row">
         <span class="admin-drive-ico">🗑️</span>
         <span class="admin-drive-lbl">Smazat všechna data</span>
@@ -6051,6 +6062,7 @@ function switchToProfile(id) {
   if (state.user.name) {
     showScreen('nadvorí');
     renderAll();
+    if (typeof ensureWeeklySnapshot === 'function') ensureWeeklySnapshot(); // před týdenní výplatou
     checkWeeklyTaskEvaluation();
   } else {
     showScreen('setup', true);
@@ -6949,6 +6961,9 @@ function renderAdminPanel() {
   renderSplitEditor();
   renderTaskTemplate();
   renderTaskExceptions();
+  // otevřený seznam bodů obnovy musí patřit aktuálnímu profilu
+  const snapBox = document.getElementById('adm-snap-list');
+  if (snapBox && snapBox.style.display !== 'none' && typeof renderSnapshotList === 'function') renderSnapshotList();
 }
 
 /* ═══ SPLIT – výpočet a editor poměru (S2) ═══ */
@@ -7234,24 +7249,377 @@ function initStars() {
   draw();
 }
 
-/* ═══ EXPORT / IMPORT ═══ */
-function exportData() {
-  const blob = new Blob([JSON.stringify({state, savedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+/* ═══════════════════════════════════════════════════════
+   KROK 22 – ZÁLOHA A OBNOVA
+   Soubor zálohy (schemaVersion 1):
+     profil:  { format, schemaVersion, kind:'profile', createdAt, savedAt, profile:{id,jmeno,vytvoreno}, state }
+     všichni: { format, schemaVersion, kind:'all', createdAt, lastUser, profiles:[{id,jmeno,vytvoreno,state}] }
+   Starý tvar { state, savedAt } ('legacy') se pořád čte; nemá ID dítěte, takže
+   přepíše AKTIVNÍ profil (po potvrzení).
+   Pravidla: před každým přepsáním se uloží bod obnovy (snapshot) a když se to
+   nepovede, obnova se zruší; zápis je všechno-nebo-nic (rollback);
+   načtení stavu jde vždy přes loadLocal() = jediná cesta migrace.
+   Týdenní snapshot (max 3) se bere při prvním otevření v novém týdnu, PŘED
+   týdenním vyhodnocením úkolů (výplatou). Zálohy nikam neodcházejí.
+═══════════════════════════════════════════════════════ */
+var BACKUP_FORMAT = 'strazce-pokladu-backup';
+var BACKUP_SCHEMA = 1;
+var SNAP_MAX_WEEKLY = 3;
+var SNAP_MAX_RESTORE = 2;
+
+/** Jméno do názvu souboru: bez diakritiky, mezer a symbolů. */
+function slugName(s) {
+  const t = String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return t || 'profil';
+}
+
+/** Aktivní profil = živý state, ostatní = uložená data; nic = null. */
+function getProfileStateForBackup(id) {
+  if (id === currentUserId && state) return state;
+  try {
+    const raw = JSON.parse(localStorage.getItem(userStorageKey(id)));
+    return raw && raw.state && typeof raw.state === 'object' ? raw.state : null;
+  } catch(e) { return null; }
+}
+
+function buildProfileBackup(id) {
+  const st = getProfileStateForBackup(id);
+  if (!st) return null;
+  const p = listProfiles().find(x => x.id === id) || {};
+  const now = new Date().toISOString();
+  return {
+    format: BACKUP_FORMAT, schemaVersion: BACKUP_SCHEMA, kind: 'profile',
+    createdAt: now, savedAt: now, // savedAt + state nahoře: umí je přečíst i starší verze aplikace
+    profile: { id: id, jmeno: p.jmeno || (st.user && st.user.name) || '', vytvoreno: p.vytvoreno || null },
+    state: st
+  };
+}
+
+function buildAllBackup() {
+  const items = [];
+  listProfiles().forEach(p => {
+    const st = getProfileStateForBackup(p.id);
+    if (st) items.push({ id: p.id, jmeno: p.jmeno || (st.user && st.user.name) || '', vytvoreno: p.vytvoreno || null, state: st });
+  });
+  return { format: BACKUP_FORMAT, schemaVersion: BACKUP_SCHEMA, kind: 'all',
+           createdAt: new Date().toISOString(), lastUser: currentUserId, profiles: items };
+}
+
+function downloadJson(obj, filename) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='babylon_'+new Date().toISOString().slice(0,10)+'.json';
+  a.href = URL.createObjectURL(blob); a.download = filename;
   a.click(); URL.revokeObjectURL(a.href);
+}
+
+/** Export aktivního profilu. */
+function exportData() {
+  const b = buildProfileBackup(currentUserId);
+  if (!b) { toast('⚠️ Není co exportovat'); return; }
+  downloadJson(b, 'babylon_' + slugName(b.profile.jmeno) + '_' + _localDateKey(new Date()) + '.json');
   toast('📤 Data exportována!');
 }
+
+/** Export všech profilů na zařízení do jednoho souboru. */
+function exportAllData() {
+  downloadJson(buildAllBackup(), 'babylon_vsechny-profily_' + _localDateKey(new Date()) + '.json');
+  toast('📤 Všechny profily exportovány!');
+}
+
+/**
+ * Pozitivní rozpoznání stavu aplikace (hrubá kontrola; hlubší validaci řeší Package 2).
+ * Starý profil bez některých polí zůstává povolený, ale musí mít aspoň jedno známé pole
+ * a případné balances musí být konečná čísla.
+ */
+function isPlausibleState(st) {
+  if (!st || typeof st !== 'object' || Array.isArray(st)) return false;
+  const known = ['user', 'balances', 'progression', 'settings', 'wishlist', 'tasks', 'history'];
+  if (!known.some(k => st[k] !== undefined)) return false;
+  if (st.user !== undefined && (st.user === null || typeof st.user !== 'object' || Array.isArray(st.user))) return false;
+  if (st.balances !== undefined) {
+    const b = st.balances;
+    if (!b || typeof b !== 'object' || Array.isArray(b)) return false;
+    for (const k of ['living_80', 'dreams_10', 'forever_10']) {
+      if (b[k] !== undefined && !(typeof b[k] === 'number' && isFinite(b[k]))) return false;
+    }
+  }
+  return true;
+}
+
+/** Rozbalí obsah souboru: { ok, kind:'legacy'|'profile'|'all', savedAt, lastUser, items:[{id,jmeno,vytvoreno,state}] } nebo { ok:false, error }. */
+function parseBackupFile(d) {
+  const fail = msg => ({ ok: false, error: msg });
+  const okId = id => typeof id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(id);
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return fail('Soubor není záloha.');
+  if (d.format !== undefined && d.format !== BACKUP_FORMAT) return fail('Soubor není záloha Strážce pokladu.');
+  if (typeof d.schemaVersion === 'number' && d.schemaVersion > BACKUP_SCHEMA) {
+    return fail('Záloha pochází z novější verze aplikace. Nejdřív aplikaci aktualizujte.');
+  }
+  if (d.kind === 'all') {
+    if (!Array.isArray(d.profiles) || !d.profiles.length) return fail('Záloha neobsahuje žádný profil.');
+    const items = [], seen = {};
+    for (const p of d.profiles) {
+      if (!p || !okId(p.id) || !isPlausibleState(p.state)) return fail('Záloha obsahuje poškozený profil.');
+      if (seen[p.id]) return fail('Záloha obsahuje profil dvakrát.');
+      seen[p.id] = true;
+      items.push({ id: p.id, jmeno: typeof p.jmeno === 'string' ? p.jmeno : '', vytvoreno: typeof p.vytvoreno === 'string' ? p.vytvoreno : null, state: p.state });
+    }
+    return { ok: true, kind: 'all', savedAt: d.createdAt || null, lastUser: typeof d.lastUser === 'string' ? d.lastUser : null, items: items };
+  }
+  if (!isPlausibleState(d.state)) return fail('Neplatný soubor – chybí data aplikace.');
+  const uname = (d.state.user && typeof d.state.user.name === 'string') ? d.state.user.name : '';
+  if (d.kind === 'profile' && d.profile && okId(d.profile.id)) {
+    return { ok: true, kind: 'profile', savedAt: d.createdAt || d.savedAt || null, lastUser: null,
+             items: [{ id: d.profile.id, jmeno: typeof d.profile.jmeno === 'string' ? d.profile.jmeno : uname,
+                       vytvoreno: typeof d.profile.vytvoreno === 'string' ? d.profile.vytvoreno : null, state: d.state }] };
+  }
+  return { ok: true, kind: 'legacy', savedAt: d.savedAt || null, lastUser: null,
+           items: [{ id: null, jmeno: uname, vytvoreno: null, state: d.state }] };
+}
+
+/* ── Snapshoty (body obnovy) ────────────────────────────── */
+function snapshotKey(id) { return 'babylon_v3_snap_' + id; }
+
+/** Snapshoty profilu, nejnovější první. */
+function listSnapshots(id) {
+  try {
+    const a = JSON.parse(localStorage.getItem(snapshotKey(id)));
+    return Array.isArray(a) ? a.filter(s => s && s.at && s.state && typeof s.state === 'object') : [];
+  } catch(e) { return []; }
+}
+
+/** Zapíše seznam; při nedostatku místa zahazuje nejstarší. Nikdy nevyhodí výjimku. */
+function writeSnapshots(id, list) {
+  let l = list.slice();
+  while (l.length) {
+    try { localStorage.setItem(snapshotKey(id), JSON.stringify(l)); return true; }
+    catch(e) { l = l.slice(0, -1); }
+  }
+  return false;
+}
+
+/** reason: 'weekly' | 'pre_restore'. Vrací true/false, nikdy nevyhodí výjimku. */
+function takeSnapshot(id, reason, st, week) {
+  try {
+    const srcState = st || getProfileStateForBackup(id);
+    if (!srcState) return false;
+    const entry = { at: new Date().toISOString(), reason: reason, week: week || null, state: JSON.parse(JSON.stringify(srcState)) };
+    const seen = {};
+    const kept = [entry].concat(listSnapshots(id)).filter(s => {
+      seen[s.reason] = (seen[s.reason] || 0) + 1;
+      return seen[s.reason] <= (s.reason === 'weekly' ? SNAP_MAX_WEEKLY : SNAP_MAX_RESTORE);
+    });
+    return writeSnapshots(id, kept);
+  } catch(e) { return false; }
+}
+
+/** Jeden týdenní snapshot aktivního profilu (první otevření v novém týdnu). */
+function ensureWeeklySnapshot() {
+  try {
+    if (!currentUserId || !state || !state.user || !state.user.name) return false;
+    const wk = _getWeekKey();
+    if (listSnapshots(currentUserId).some(s => s.reason === 'weekly' && s.week === wk)) return false;
+    return takeSnapshot(currentUserId, 'weekly', state, wk);
+  } catch(e) { return false; }
+}
+
+/** Požádá prohlížeč, aby data nemazal při nedostatku místa (tiché, bez dialogu). */
+function requestPersistentStorage() {
+  try {
+    if (navigator.storage && navigator.storage.persist) {
+      const p = navigator.storage.persisted ? navigator.storage.persisted() : Promise.resolve(false);
+      p.then(already => already ? true : navigator.storage.persist()).catch(() => {});
+    }
+  } catch(e) {}
+}
+
+function snapshotLabel(s) {
+  const d = new Date(s.at);
+  const when = isNaN(d.getTime()) ? '' :
+    d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+  if (s.reason === 'weekly') return 'Týdenní záloha' + (s.week ? ' ' + s.week : '') + ' · ' + when;
+  return 'Bod obnovy před přepsáním · ' + when;
+}
+
+/* ── Obnova ─────────────────────────────────────────────── */
+
+/** Čerstvě založený profil: bez jména, bez peněz, historie i Moudrosti. */
+function isPristineState(st) {
+  if (!st || typeof st !== 'object') return true;
+  if (st.user && st.user.name) return false;
+  const b = st.balances || {};
+  if (b.living_80 || b.dreams_10 || b.forever_10) return false;
+  if (st.history && st.history.length) return false;
+  if (st.wisdom > 0) return false;
+  return true;
+}
+
+function confirmRestore(parsed) {
+  const d = parsed.savedAt ? new Date(parsed.savedAt) : null;
+  const stamp = d && !isNaN(d.getTime()) ? ' (uloženo ' + d.toLocaleDateString('cs-CZ') + ')' : '';
+  const profiles = listProfiles();
+  const nameOf = it => it.jmeno || (it.state && it.state.user && it.state.user.name) || 'bez jména';
+  const tail = '\n\nPřed přepsáním se uloží bod obnovy.';
+  let msg;
+  if (parsed.kind === 'all') {
+    const over = parsed.items.filter(it => profiles.some(p => p.id === it.id)).map(nameOf);
+    msg = 'Obnovit ' + parsed.items.length + ' profil(y) ze zálohy' + stamp + ': ' + parsed.items.map(nameOf).join(', ') + '.';
+    if (over.length) msg += '\n\nPřepíšou se data profilů: ' + over.join(', ') + '.' + tail;
+  } else if (parsed.kind === 'profile') {
+    const it = parsed.items[0];
+    const exists = profiles.find(p => p.id === it.id);
+    msg = exists
+      ? 'Přepsat data profilu „' + (exists.jmeno || nameOf(it)) + '" zálohou' + stamp + '?' + tail
+      : 'Přidat profil „' + nameOf(it) + '" ze zálohy' + stamp + '?';
+  } else {
+    msg = 'Záloha ze starší verze nemá označení dítěte' + stamp + '. Přepsat data aktuálního profilu „' +
+      ((state.user && state.user.name) || 'bez jména') + '"?' + tail;
+  }
+  return confirm(msg);
+}
+
+/**
+ * Provede obnovu podle parseBackupFile(). Nejdřív body obnovy, pak zápis všechno-nebo-nic.
+ * Vrací { ok:true } nebo { ok:false, error }.
+ */
+function applyRestore(parsed) {
+  const profiles = listProfiles();
+  const plan = parsed.kind === 'legacy'
+    ? [{ id: currentUserId, jmeno: '', vytvoreno: null, state: parsed.items[0].state, isNew: false }]
+    : parsed.items.map(it => ({ id: it.id, jmeno: it.jmeno, vytvoreno: it.vytvoreno, state: it.state,
+                                isNew: !profiles.some(p => p.id === it.id) }));
+  const activeNow = currentUserId;
+  // Čerstvá instalace: prázdný profil, který si appka vyrobila sama, obnovený profil nahradí.
+  const replacePristine = parsed.kind !== 'legacy' && isPristineState(state) && !plan.some(pl => pl.id === activeNow);
+
+  // 1) Bod obnovy pro každý přepisovaný profil s nějakým postupem; nepovede se → nic se nepřepíše.
+  for (const pl of plan) {
+    if (pl.isNew) continue;
+    const cur = getProfileStateForBackup(pl.id);
+    if (cur && !isPristineState(cur) && !takeSnapshot(pl.id, 'pre_restore', cur)) {
+      return { ok: false, error: 'Nepodařilo se uložit bod obnovy, nic se nepřepsalo.' };
+    }
+  }
+
+  // 2) Zápis všechno-nebo-nic
+  const prevRaw = {};
+  const profilesBefore = localStorage.getItem('babylon_v3_profiles');
+  const lastBefore = localStorage.getItem('babylon_v3_last_user');
+  try {
+    plan.forEach(pl => {
+      const key = userStorageKey(pl.id);
+      if (!(key in prevRaw)) prevRaw[key] = localStorage.getItem(key);
+      let driveId = null;
+      try { const r = JSON.parse(prevRaw[key]); driveId = (r && r.driveFileId) || null; } catch(e) {}
+      localStorage.setItem(key, JSON.stringify({ state: pl.state, driveFileId: driveId }));
+      const name = pl.jmeno || (pl.state.user && pl.state.user.name) || '';
+      if (pl.isNew) profiles.push({ id: pl.id, jmeno: name, vytvoreno: pl.vytvoreno || new Date().toISOString() });
+      else { const p = profiles.find(x => x.id === pl.id); if (p && name) p.jmeno = name; }
+    });
+    if (replacePristine) {
+      const idx = profiles.findIndex(p => p.id === activeNow);
+      if (idx >= 0) profiles.splice(idx, 1);
+      const k = userStorageKey(activeNow);
+      prevRaw[k] = localStorage.getItem(k);
+      localStorage.removeItem(k);
+      const last = (parsed.kind === 'all' && parsed.lastUser && profiles.some(p => p.id === parsed.lastUser))
+        ? parsed.lastUser : plan[0].id;
+      localStorage.setItem('babylon_v3_last_user', last);
+    }
+    localStorage.setItem('babylon_v3_profiles', JSON.stringify(profiles));
+  } catch(e) {
+    const put = (k, v) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch(_) {} };
+    Object.keys(prevRaw).forEach(k => put(k, prevRaw[k]));
+    put('babylon_v3_profiles', profilesBefore);
+    put('babylon_v3_last_user', lastBefore);
+    return { ok: false, error: 'Zápis do úložiště se nezdařil, data zůstala beze změny.' };
+  }
+  if (replacePristine) { try { localStorage.removeItem(snapshotKey(activeNow)); } catch(e) {} }
+
+  // 3) Obnovit aplikaci z uložených dat (loadLocal = jediná migrace)
+  const activeInPlan = plan.some(pl => pl.id === activeNow);
+  if (replacePristine) {
+    lockAdmin();
+    loadLocal();
+    const inp = document.getElementById('name-input');
+    if (inp) inp.value = state.user.name || '';
+    if (state.user.name) { showScreen('nadvorí'); renderAll(); checkWeeklyTaskEvaluation(); }
+    else showScreen('setup', true);
+  } else if (activeInPlan) {
+    loadLocal();
+    const inp = document.getElementById('name-input');
+    if (inp) inp.value = state.user.name || '';
+    if (typeof currentScreen !== 'undefined' && currentScreen === 'setup' && state.user.name) {
+      const nav = document.getElementById('bottom-nav');
+      if (nav) nav.classList.remove('hidden');
+      showScreen('nadvorí'); renderAll(); checkWeeklyTaskEvaluation();
+    } else renderAll();
+    saveToDrive();
+  }
+  renderProfileMenu();
+  return { ok: true };
+}
+
+/** Obnova ze souboru (starý tvar, profil, všechny profily). */
 function importData(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    try {
-      const d = JSON.parse(e.target.result);
-      if (d.state) { state=Object.assign(DEFAULT_STATE(), d.state); normalizeSplit(d.state); saveToDrive(); renderAll(); toast('📥 Data importována!'); }
-      else toast('⚠️ Neplatný soubor!');
-    } catch(err) { toast('⚠️ Chyba čtení souboru'); }
+    let d;
+    try { d = JSON.parse(e.target.result); } catch(err) { toast('⚠️ Chyba čtení souboru'); return; }
+    const parsed = parseBackupFile(d);
+    if (!parsed.ok) { toast('⚠️ ' + parsed.error); return; }
+    if (!confirmRestore(parsed)) return;
+    const r = applyRestore(parsed);
+    if (!r.ok) { toast('⚠️ ' + r.error); return; }
+    toast('📥 Data obnovena!');
   };
   reader.readAsText(file);
+}
+
+/** Obnova profilu z bodu obnovy (idx = pořadí v listSnapshots). */
+function restoreSnapshot(id, idx) {
+  const snap = listSnapshots(id)[idx];
+  if (!snap) return false;
+  const p = listProfiles().find(x => x.id === id) || {};
+  const name = p.jmeno || (snap.state.user && snap.state.user.name) || '';
+  if (!confirm('Obnovit profil „' + (name || 'bez jména') + '" ze stavu: ' + snapshotLabel(snap) +
+               '?\n\nSoučasný stav se předtím uloží jako bod obnovy.')) return false;
+  const r = applyRestore({ ok: true, kind: 'profile', savedAt: snap.at, lastUser: null,
+                           items: [{ id: id, jmeno: name, vytvoreno: p.vytvoreno || null, state: snap.state }] });
+  if (!r.ok) { toast('⚠️ ' + r.error); return false; }
+  toast('🕘 Stav obnoven.');
+  return true;
+}
+
+/** Seznam bodů obnovy aktivního profilu v adminu (jen textContent). */
+function renderSnapshotList() {
+  const box = document.getElementById('adm-snap-list');
+  if (!box) return;
+  while (box.firstChild) box.removeChild(box.firstChild);
+  const pid = currentUserId;
+  const list = listSnapshots(pid);
+  const addRow = (text, onObnovit) => {
+    const row = document.createElement('div');
+    row.className = 'admin-drive-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'admin-drive-lbl';
+    lbl.textContent = text;
+    row.appendChild(lbl);
+    if (onObnovit) {
+      const btn = document.createElement('button');
+      btn.className = 'admin-drive-btn';
+      btn.textContent = 'Obnovit';
+      btn.addEventListener('click', onObnovit);
+      row.appendChild(btn);
+    }
+    box.appendChild(row);
+  };
+  if (!list.length) { addRow('Zatím žádný bod obnovy. První se uloží při otevření aplikace v novém týdnu.'); return; }
+  list.forEach((s, i) => addRow(snapshotLabel(s), () => {
+    if (pid !== currentUserId) { renderSnapshotList(); return; } // mezitím se přepnul profil
+    if (restoreSnapshot(pid, i)) renderSnapshotList();
+  }));
 }
 
 /* ═══ WISHLIST MODAL ═══ */
@@ -7507,6 +7875,7 @@ function finishSetupWithName() {
 loadLocal();
 initStars();
 renderProfileMenu();
+requestPersistentStorage();
 
 // Initialize UI with loaded state
 document.getElementById('name-input').value = state.user.name || '';
@@ -7516,6 +7885,7 @@ if (state.user.name) {
   showScreen('nadvorí');
   document.getElementById('bottom-nav').classList.remove('hidden');
   renderAll();
+  ensureWeeklySnapshot(); // týdenní bod obnovy PŘED týdenní výplatou
   checkWeeklyTaskEvaluation();
 } else {
   showScreen('setup', true);
@@ -7712,7 +8082,11 @@ document.getElementById('toggle-drive-btn').addEventListener('click', ()=>{
 // Export / Import
 document.getElementById('export-btn').addEventListener('click', exportData);
 document.getElementById('import-btn').addEventListener('click', ()=>document.getElementById('import-input').click());
-document.getElementById('import-input').addEventListener('change', e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
+document.getElementById('import-input').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  e.target.value = ''; // aby šel stejný soubor vybrat znovu (např. po zrušení potvrzení)
+  if (f) importData(f);
+});
 
 // Wishlist
 document.getElementById('add-wish-btn').addEventListener('click', showWishModal);
@@ -7775,12 +8149,23 @@ document.getElementById('secrets-grid').addEventListener('click', e => {
    FÁZE 5 – Admin export/drive/reset
 ════════════════════════════════════ */
 document.getElementById('adm-export-btn').addEventListener('click', exportData);
+document.getElementById('adm-export-all-btn').addEventListener('click', exportAllData);
 
 document.getElementById('adm-import-btn').addEventListener('click', () =>
   document.getElementById('adm-import-input').click()
 );
 document.getElementById('adm-import-input').addEventListener('change', e => {
-  if (e.target.files[0]) importData(e.target.files[0]);
+  const f = e.target.files[0];
+  e.target.value = ''; // aby šel stejný soubor vybrat znovu (např. po zrušení potvrzení)
+  if (f) importData(f);
+});
+
+document.getElementById('adm-snap-btn').addEventListener('click', () => {
+  const box = document.getElementById('adm-snap-list');
+  const open = box.style.display === 'none';
+  box.style.display = open ? '' : 'none';
+  document.getElementById('adm-snap-btn').textContent = open ? 'Skrýt' : 'Zobrazit';
+  if (open) renderSnapshotList();
 });
 
 document.getElementById('adm-drive-btn').addEventListener('click', () => {

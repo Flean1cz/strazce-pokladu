@@ -115,6 +115,26 @@ appky je inline, žádné externí JS soubory se nenačítají za běhu.
   zůstávají globální/sdílené napříč profily. Starý jednotný klíč
   `localStorage['babylon_v3']` zůstává na disku jako netknutá legacy záloha
   (appka ho po jednorázové migraci existujících dat už nečte ani nezapisuje).
+- **Záloha a obnova (KROK 22, `index.html` blok „ZÁLOHA A OBNOVA")**:
+  soubor zálohy má `format: 'strazce-pokladu-backup'`, `schemaVersion: 1`
+  (`BACKUP_SCHEMA`) a `kind` = `profile` (jedno dítě, `exportData()`), `all`
+  (všechny profily, `exportAllData()`) nebo starý `legacy` tvar `{state}`
+  (čte se dál, přepíše aktivní profil). `parseBackupFile()` jen validuje a
+  vrací `items[]`, nic nezapisuje; `applyRestore()` zapisuje
+  **všechno-nebo-nic** s rollbackem a před přepsáním vždy vezme bod obnovy
+  (`takeSnapshot()`; když se nepovede, obnova se zruší). Stav se po obnově
+  načítá přes `loadLocal()` (jediná cesta migrace). Snapshoty jsou v
+  `localStorage['babylon_v3_snap_' + id]`: `weekly` (max 3, bere se při
+  prvním otevření v novém týdnu přes `ensureWeeklySnapshot()` — v bootu a
+  v `switchToProfile()` **před** `checkWeeklyTaskEvaluation()`, tedy před
+  výplatou) a `pre_restore` (max 2). `requestPersistentStorage()` jednou
+  požádá prohlížeč o trvalé úložiště. UI: admin → Data & Zálohy
+  (`#adm-export-all-btn`, `#adm-snap-btn`, `#adm-snap-list`,
+  `renderSnapshotList()`, `restoreSnapshot()`). Zálohy nikam neodcházejí
+  (ani na backend) — odeslání týdenní zálohy rodiči je samostatný krok.
+  Testy: `tests/test-backup.js` (28 scénářů) a `tests/test-report-stats.js`
+  (statistiky reportu: vklady nesou `iso`, týden se počítá v místním čase —
+  `_localDateKey`, `_isoDayKey`, `_historyDateKey`, `_weekStartKey`).
 - **`currentUserId`** (ř. ~5731, `let currentUserId = null;`) — globál stejného
   stylu jako `currentScreen`; nastavuje ho `ensureActiveProfile()` na id
   aktivního profilu.
