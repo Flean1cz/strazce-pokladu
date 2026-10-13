@@ -7076,7 +7076,8 @@ function doDeposit(val) {
   state.history.unshift({
     amount:val, ted:t80, potom:p10, navzdy:n10,
     split:{ ted:sp.ted, potom:sp.potom, navzdy:sp.navzdy },
-    date: new Date().toLocaleDateString('cs-CZ'),
+    date: new Date().toLocaleDateString('cs-CZ'),   // jen pro zobrazení
+    iso: new Date().toISOString(),                  // pro výpočty (týdenní report)
     type:'deposit'
   });
   if (state.history.length>60) state.history.pop();
@@ -10280,12 +10281,45 @@ function switchAdminTab(tabId) {
   if (tabId === 'tasks') { renderTaskTemplate(); renderTaskExceptions(); }
 }
 
-/** Pomocné: první den aktuálního týdne jako YYYY-MM-DD. */
+/** Místní den "YYYY-MM-DD" z objektu Date (bez posunu přes UTC). */
+function _localDateKey(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+/** ISO časová značka → místní den "YYYY-MM-DD"; neplatný vstup → null. */
+function _isoDayKey(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : _localDateKey(d);
+}
+
+/**
+ * Den záznamu historie jako místní "YYYY-MM-DD".
+ * Preferuje h.iso; starší záznamy mají jen lokalizované datum
+ * ("14. 10. 2026" z toLocaleDateString('cs-CZ'), případně "14.10.2026").
+ * Nečitelné nebo nemožné datum → null (záznam se do statistik nezapočítá).
+ */
+function _historyDateKey(h) {
+  if (!h) return null;
+  const fromIso = _isoDayKey(h.iso);
+  if (fromIso) return fromIso;
+  if (!h.date) return null;
+  const m = String(h.date).match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10), mon = parseInt(m[2], 10) - 1, yr = parseInt(m[3], 10);
+  const d = new Date(yr, mon, day);
+  if (isNaN(d.getTime()) || d.getDate() !== day || d.getMonth() !== mon) return null;
+  return _localDateKey(d);
+}
+
+/** Pomocné: první den aktuálního týdne (pondělí) jako místní YYYY-MM-DD. */
 function _weekStartKey(date) {
   const d = date ? new Date(date) : new Date();
   const day = d.getDay() || 7; // Po=1..Ne=7
   d.setDate(d.getDate() - (day - 1));
-  return d.toISOString().slice(0, 10);
+  return _localDateKey(d);
 }
 
 /** Počet dnů od daného datumu. */
@@ -10323,21 +10357,14 @@ function _collectWeekStats() {
   }
 
   // Vklady – z history
+  // (záznamy bez čitelného data se nezapočítají; viz _historyDateKey)
   if (Array.isArray(state.history)) {
     state.history.forEach(h => {
-      if (h.type !== 'deposit') return;
-      let dateObj = null;
-      if (h.iso) dateObj = new Date(h.iso);
-      else if (h.date) {
-        const m = String(h.date).match(/(\d+)\.(\d+)\.(\d+)/);
-        if (m) dateObj = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-      }
-      if (dateObj) {
-        const dkey = dateObj.toISOString().slice(0, 10);
-        if (dkey >= weekStart) {
-          stats.deposits++;
-          stats.deposits_total_kc += Math.abs(h.amount || 0);
-        }
+      if (!h || h.type !== 'deposit') return;
+      const dkey = _historyDateKey(h);
+      if (dkey && dkey >= weekStart) {
+        stats.deposits++;
+        stats.deposits_total_kc += Math.abs(h.amount || 0);
       }
     });
   }
@@ -10345,9 +10372,9 @@ function _collectWeekStats() {
   // Moudrost – z wisdom_log
   if (Array.isArray(state.wisdom_log)) {
     state.wisdom_log.forEach(l => {
-      if (!l.date) return;
-      const d = new Date(l.date);
-      if (d.toISOString().slice(0, 10) >= weekStart) {
+      if (!l || !l.date) return;
+      const dkey = _isoDayKey(l.date);
+      if (dkey && dkey >= weekStart) {
         stats.wisdom_gained += l.amount || 0;
       }
     });
@@ -10356,16 +10383,16 @@ function _collectWeekStats() {
   // Nové pečeti — unlocked_at
   if (state.seals && state.seals.unlocked_at) {
     Object.keys(state.seals.unlocked_at).forEach(id => {
-      const iso = state.seals.unlocked_at[id];
-      if (iso && iso.slice(0, 10) >= weekStart) stats.new_seals++;
+      const dkey = _isoDayKey(state.seals.unlocked_at[id]);
+      if (dkey && dkey >= weekStart) stats.new_seals++;
     });
   }
 
   // Nové artefakty
   if (state.collections && state.collections.unlocked_at) {
     Object.keys(state.collections.unlocked_at).forEach(id => {
-      const iso = state.collections.unlocked_at[id];
-      if (iso && iso.slice(0, 10) >= weekStart) stats.new_artifacts++;
+      const dkey = _isoDayKey(state.collections.unlocked_at[id]);
+      if (dkey && dkey >= weekStart) stats.new_artifacts++;
     });
   }
 
@@ -10938,8 +10965,8 @@ function generateWeeklyReport() {
     const weekStart = (typeof _weekStartKey === 'function') ? _weekStartKey() : '';
     if (typeof SEALS !== 'undefined' && SEALS) {
       SEALS.forEach(s => {
-        const got = state.seals.unlocked_at[s.id];
-        if (got && got.slice(0,10) >= weekStart) newSealNames.push(s.name);
+        const gotDay = _isoDayKey(state.seals.unlocked_at[s.id]);
+        if (gotDay && gotDay >= weekStart) newSealNames.push(s.name);
       });
     }
   }
@@ -11108,8 +11135,8 @@ function checkReportReminder() {
 
   // Byl report odeslán tento týden?
   const weekStart = (typeof _weekStartKey === 'function') ? _weekStartKey() : '';
-  const lastSent = state.report && state.report.last_sent;
-  const sentThisWeek = lastSent && lastSent.slice(0,10) >= weekStart;
+  const lastSentDay = _isoDayKey(state.report && state.report.last_sent);
+  const sentThisWeek = !!(lastSentDay && lastSentDay >= weekStart);
 
   if (sentThisWeek) { banner.classList.add('hidden'); return; }
 
