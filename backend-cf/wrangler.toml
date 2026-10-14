@@ -5,10 +5,6 @@ routes = [
   { pattern = "report.scmsignpost.com", custom_domain = true },
   { pattern = "report.scmsignpost.com/*", zone_name = "scmsignpost.com" }
 ]
-# Vlastní doména Workeru (DNS záznam a certifikát vytvoří Cloudflare při deployi)
-routes = [
-  { pattern = "report.scmsignpost.com", custom_domain = true }
-]
 
 # Žádný cron: e-mail s reportem odešle aplikace (POST /v1/report) v neděli.
 
