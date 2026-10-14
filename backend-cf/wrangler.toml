@@ -16,7 +16,7 @@ PUBLIC_URL = "https://babylon-report.VAS-JMENO.workers.dev"
 # Odesílatel: adresa na doméně ověřené v Resend
 FROM_EMAIL = "Babylonská pokladnice <report@mail.scmsignpost.com>"
 # Adresy, ze kterých smí aplikace volat API (oddělené čárkou). Doplníte podle adresy aplikace.
-ALLOWED_ORIGINS = "https://DOPLNTE-ADRESU-APLIKACE"
+ALLOWED_ORIGINS = "https://flean1cz.github.io"
 
 # Tajný klíč se nastavuje zvlášť, NIKDY ne do tohoto souboru:
 #   npx.cmd wrangler secret put RESEND_API_KEY
