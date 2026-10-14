@@ -1,7 +1,10 @@
 name = "babylon-report"
 main = "src/index.js"
 compatibility_date = "2024-09-23"
-
+routes = [
+  { pattern = "report.scmsignpost.com", custom_domain = true },
+  { pattern = "report.scmsignpost.com/*", zone_name = "scmsignpost.com" }
+]
 # Vlastní doména Workeru (DNS záznam a certifikát vytvoří Cloudflare při deployi)
 routes = [
   { pattern = "report.scmsignpost.com", custom_domain = true }
