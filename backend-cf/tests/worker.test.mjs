@@ -2,9 +2,10 @@
 import { test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { Miniflare } from 'miniflare';
 
-const WORKER = new URL('../src/index.js', import.meta.url).pathname;
+const WORKER = fileURLToPath(new URL('../src/index.js', import.meta.url));
 const SCHEMA = readFileSync(new URL('../schema.sql', import.meta.url), 'utf8');
 const BASE = 'https://worker.test';
 const APP = 'https://app.test';
