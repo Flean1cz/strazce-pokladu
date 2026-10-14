@@ -8,7 +8,7 @@ compatibility_date = "2024-09-23"
 [[d1_databases]]
 binding = "DB"
 database_name = "babylon-pokladnice"
-database_id = "DOPLNTE_PO_VYTVORENI"
+database_id = "5ef1cafe-05f5-48dd-b9e0-f06d84683cf0"
 
 [vars]
 # Veřejná adresa Workeru bez lomítka na konci. Doplníte po prvním nasazení.
