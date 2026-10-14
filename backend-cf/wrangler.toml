@@ -2,6 +2,11 @@ name = "babylon-report"
 main = "src/index.js"
 compatibility_date = "2024-09-23"
 
+# Vlastní doména Workeru (DNS záznam a certifikát vytvoří Cloudflare při deployi)
+routes = [
+  { pattern = "report.scmsignpost.com", custom_domain = true }
+]
+
 # Žádný cron: e-mail s reportem odešle aplikace (POST /v1/report) v neděli.
 
 # ── D1 databáze (vytvoření: npx.cmd wrangler d1 create babylon-pokladnice)
@@ -12,7 +17,7 @@ database_id = "5ef1cafe-05f5-48dd-b9e0-f06d84683cf0"
 
 [vars]
 # Veřejná adresa Workeru bez lomítka na konci. Doplníte po prvním nasazení.
-PUBLIC_URL = "https://babylon-report.blazek-jak.workers.dev"
+PUBLIC_URL = "https://report.scmsignpost.com"
 # Odesílatel: adresa na doméně ověřené v Resend
 FROM_EMAIL = "Babylonská pokladnice <report@mail.scmsignpost.com>"
 # Adresy, ze kterých smí aplikace volat API (oddělené čárkou). Doplníte podle adresy aplikace.
