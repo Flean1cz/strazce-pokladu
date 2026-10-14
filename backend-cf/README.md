@@ -1,189 +1,81 @@
-# Babylonská pokladnice — Backend pro týdenní e-mail report
+# Babylonská pokladnice — Worker pro týdenní report (verze 2)
 
-Tento backend přijímá report data z PWA aplikace a každou neděli v 18:05
-automaticky odesílá e-mail rodičům.
+Cloudflare Worker s databází D1, který přijímá přihlášení rodičů a posílá týdenní
+report e-mailem přes Resend. Aplikace odesílání spouští sama, Worker nic neplánuje.
 
-Jsou zde dvě varianty. Doporučuji začít s **Variantou A (Cloudflare Workers)**
-— je zdarma, bez serveru, bez údržby.
+## Tok
 
----
+1. **Přihlášení** — aplikace pošle `POST /v1/subscribe` s e-mailem rodiče a jménem dítěte.
+   Worker pošle potvrzovací e-mail a vrátí `secret` (tajný klíč odběru). Vrací se jen jednou.
+2. **Potvrzení** — rodič klikne na odkaz v e-mailu (platný 48 hodin) a potvrdí tlačítkem.
+   Odběr se aktivuje. Bez potvrzení se nic neodešle.
+3. **Odeslání** — aplikace v neděli pošle `POST /v1/report` s hlavičkou
+   `Authorization: Bearer <secret>`. Worker e-mail odešle hned. Obsah reportu neukládá,
+   jen si zapamatuje týden (`last_sent_week`), takže opakované volání stejného týdne nic neodešle.
+4. **Odhlášení** — odkaz v patičce e-mailu (také `List-Unsubscribe` v hlavičce), nebo
+   `DELETE /v1/subscription` s tajným klíčem z aplikace.
 
-## VARIANTA A: Cloudflare Workers + D1 + Resend (doporučeno)
+| Metoda | Cesta | Autorizace | Účel |
+|---|---|---|---|
+| GET | `/health` | — | kontrola, že Worker běží |
+| POST | `/v1/subscribe` | — (limity) | přihlášení, pošle potvrzovací e-mail |
+| GET / POST | `/v1/confirm?token=` | token z e-mailu | potvrzení odběru |
+| POST | `/v1/report` | Bearer klíč | odeslání reportu (nebo přílohy se zálohou) |
+| DELETE | `/v1/subscription` | Bearer klíč | odhlášení z aplikace |
+| GET / POST | `/v1/unsubscribe?token=` | token z e-mailu | odhlášení z e-mailu |
 
-### Předpoklady
-- Účet na [cloudflare.com](https://cloudflare.com) (zdarma)
-- Účet na [resend.com](https://resend.com) (zdarma, 3 000 e-mailů/měsíc)
-- Node.js 18+
+## Bezpečnost
 
-### 1. Instalace Wrangler CLI
-```bash
-npm install -g wrangler
-wrangler login
-```
+- Tajný klíč, potvrzovací odkaz i čísla pro limity se ukládají jen jako SHA-256 hash.
+- Limity: `subscribe` 10× za hodinu z jedné IP, potvrzovací e-mail 3× denně na adresu,
+  odeslání reportu 3× denně na odběr.
+- CORS povolí jen adresy z `ALLOWED_ORIGINS`.
+- Report se do databáze neukládá. Jediný údaj o odběru je e-mail, jméno dítěte a stav.
 
-### 2. Klonování a instalace
-```bash
+**Známé omezení:** kdo zná tajný klíč (je jen v zařízení rodiče), může spustit odeslání
+až 3× denně a zvolit text. Příjemcem je vždy rodič, který odběr potvrdil. Odhlášení je jedním kliknutím.
+
+## Nasazení (Windows, PowerShell)
+
+Předpoklady: Node.js 22 nebo novější, účet Cloudflare, ověřená doména v Resend, API klíč
+Resend se oprávněním Sending access omezeným na tu doménu.
+
+```powershell
 cd backend-cf
 npm install
+npx.cmd wrangler login
+npx.cmd wrangler d1 create babylon-pokladnice
 ```
 
-### 3. Vytvoření D1 databáze
-```bash
-wrangler d1 create babylon-pokladnice
-```
-Zkopírujte výstupní `database_id` do `wrangler.toml` na řádek:
-```toml
-database_id = "DOPLNTE_PO_VYTVORENI"
-```
+Výstup `d1 create` obsahuje `database_id`. Zkopírujte ho do `wrangler.toml` místo
+`DOPLNTE_PO_VYTVORENI`. Pak:
 
-### 4. Inicializace schématu
-```bash
+```powershell
 npm run db:init:remote
-```
-
-### 5. Nastavení tajných proměnných
-```bash
-# API klíč z resend.com → API Keys → Create API Key
-wrangler secret put RESEND_API_KEY
-
-# Odesílací adresa (musí být ověřená v Resend: Domains → Add Domain)
-wrangler secret put FROM_EMAIL
-```
-
-### 6. Deploy
-```bash
+npx.cmd wrangler secret put RESEND_API_KEY
 npm run deploy
 ```
-Worker bude dostupný na adrese: `https://babylon-report.VAS-JMENO.workers.dev`
 
-### 7. Nastavení v aplikaci
-V souboru `index.html` najděte řádek:
-```js
-var BACKEND_URL = null;
-```
-Změňte na:
-```js
-var BACKEND_URL = 'https://babylon-report.VAS-JMENO.workers.dev';
-```
+Po deployi doplňte do `wrangler.toml`:
+- `PUBLIC_URL` — adresu Workeru, například `https://babylon-report.VAS-JMENO.workers.dev`
+  (bez lomítka na konci). Odkazy v e-mailech se z ní skládají.
+- `ALLOWED_ORIGINS` — adresu, na které běží aplikace. Pokud se změní, zopakujte `npm run deploy`.
+- `FROM_EMAIL` — odesílatel na ověřené doméně. Výchozí `report@mail.scmsignpost.com`.
 
-### Ověření
-```bash
-curl https://babylon-report.VAS-JMENO.workers.dev/health
-# → {"ok":true,"version":"1.0.0","active_subscribers":0}
+Kontrola: `https://<vaše-adresa>/health` vrátí `{"ok":true,...}`.
+
+## Testy
+
+```powershell
+npm test
 ```
 
-### Logy
-```bash
-npm run logs
-```
+Testy běží v simulaci Cloudflare (Miniflare) s reálnou SQLite databází D1. Resend je
+nahrazen falešným serverem, takže se žádný e-mail neodešle. Pokrývají celý tok,
+limity, idempotenci, výpadek Resendu, validaci a CORS.
 
----
+## Co dál
 
-## VARIANTA B: Node.js (Railway / Render / vlastní VPS)
-
-### Předpoklady
-- Účet na [railway.app](https://railway.app) nebo [render.com](https://render.com) (zdarma)
-- Gmail účet (nebo jiný SMTP)
-
-### 1. Instalace
-```bash
-cd backend-node
-npm install
-```
-
-### 2. Konfigurace prostředí
-```bash
-cp .env.example .env
-# Vyplňte hodnoty v .env
-```
-
-**Nastavení Gmail App Password:**
-1. Google účet → Zabezpečení → Dvoufázové ověření (zapněte)
-2. Google účet → Zabezpečení → Hesla aplikací → Vytvořit
-3. Zkopírujte vygenerované heslo do `GMAIL_APP_PASSWORD`
-
-### 3. Lokální spuštění
-```bash
-mkdir -p data
-node server.js
-# Server běží na http://localhost:3000
-```
-
-### 4. Deploy na Railway
-
-1. Pushněte `backend-node/` do GitHub repozitáře
-2. Na [railway.app](https://railway.app): New Project → Deploy from GitHub
-3. V nastavení přidejte proměnné prostředí (z `.env.example`)
-4. Railway automaticky nastaví `PORT`
-
-Po deployi získáte URL typu: `https://babylon-report-xxxx.railway.app`
-
-### 5. Nastavení v aplikaci
-Stejně jako u varianty A — nastavte `BACKEND_URL` v `index.html`.
-
----
-
-## API Reference
-
-### POST /subscribe
-Uloží nebo aktualizuje odběratele.
-
-```json
-{
-  "email": "rodic@example.com",
-  "child_name": "Samuel",
-  "report_text": "Týdenní report z Babylonské pokladnice\n...",
-  "app_version": "2.13.0"
-}
-```
-Odpověď: `{ "ok": true, "message": "Odběr uložen." }`
-
-### DELETE /unsubscribe
-Odhlásí e-mail z automatického zasílání.
-
-```json
-{ "email": "rodic@example.com" }
-```
-
-### GET /health
-Kontrola stavu serveru.
-
----
-
-## Cron plán
-
-| Varianta | Cron výraz | Čas |
-|---|---|---|
-| CF Workers | `5 16 * * 0` | Neděle 18:05 SELČ (letní čas) |
-| CF Workers | `5 17 * * 0` | Neděle 18:05 SEČ (zimní čas) |
-| Node.js | automaticky | Neděle 18:05 (timezone: Europe/Prague) |
-
-> **Pozor (CF Workers):** Cloudflare Workers nezná timezone — cron je vždy v UTC.
-> V létě (SELČ = UTC+2) nastavte `5 16 * * 0`, v zimě (SEČ = UTC+1) `5 17 * * 0`.
-> Node.js varianta timezone řeší automaticky.
-
----
-
-## Soukromí a bezpečnost
-
-- Backend ukládá pouze: e-mail rodiče, jméno dítěte, text reportu, datum
-- **Žádná jiná data z aplikace se na server neposílají**
-- Text reportu je generován přímo v aplikaci z localStorage
-- Uložené reporty jsou přepisovány při každém uložení (jen poslední stav)
-- Uložení selhání nevyvolá žádnou chybu pro uživatele (silent fail)
-
----
-
-## Testování cron jobu
-
-### Cloudflare Workers
-```bash
-# Ruční spuštění v Cloudflare Dashboard:
-# Workers → babylon-report → Triggers → Cron Triggers → Run
-```
-
-### Node.js (lokální test)
-```js
-// Přidejte dočasně na konec server.js:
-sendWeeklyEmails().then(() => console.log('Test hotov'));
-```
+- Aplikace (balíček 3) musí umět: poslat `subscribe`, uložit tajný klíč do zařízení,
+  ukázat stav „čeká na potvrzení" a v neděli poslat `report` s přílohou zálohy profilu.
+- Pokud zařízení v neděli nebude zapnuté, report se odešle při příštím otevření aplikace.
