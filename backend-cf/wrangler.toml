@@ -12,7 +12,7 @@ database_id = "5ef1cafe-05f5-48dd-b9e0-f06d84683cf0"
 
 [vars]
 # Veřejná adresa Workeru bez lomítka na konci. Doplníte po prvním nasazení.
-PUBLIC_URL = "https://babylon-report.VAS-JMENO.workers.dev"
+PUBLIC_URL = "https://babylon-report.blazek-jak.workers.dev"
 # Odesílatel: adresa na doméně ověřené v Resend
 FROM_EMAIL = "Babylonská pokladnice <report@mail.scmsignpost.com>"
 # Adresy, ze kterých smí aplikace volat API (oddělené čárkou). Doplníte podle adresy aplikace.
