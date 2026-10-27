@@ -15,7 +15,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
   --gold:#F5A623;--dgold:#C8860A;--lgold:#FFD700;
@@ -4695,6 +4694,9 @@ svg.jar{width:52px;height:72px;}
     <button class="name-submit-btn" id="name-submit-btn">Vstoupit do pokladnice ✨</button>
   </div>
 
+  <!-- Google Drive záloha je pro 1. vydání (Google Play, Rodinná politika) vypnutá.
+       Blok zůstává v DOM skrytý, aby JS listenery (connect-btn, skip-btn…) nehlásily chybu. -->
+  <div id="drive-setup-block" style="display:none">
   <div class="setup-divider"><span>⚜️</span></div>
   <p style="text-align:center;font-size:11px;color:var(--sand);opacity:.55;margin-bottom:14px;">Volitelně: Připoj Google Drive pro zálohu v cloudu</p>
 
@@ -4712,6 +4714,7 @@ svg.jar{width:52px;height:72px;}
   <input type="text" id="client-id-input" placeholder="123456789-abc...apps.googleusercontent.com" autocomplete="off" autocorrect="off" spellcheck="false"/>
   <button class="connect-btn" id="connect-btn">🔗 Připojit Google Drive</button>
   <button class="skip-btn" id="skip-btn">Přeskočit – ukládat jen lokálně</button>
+  </div><!-- /drive-setup-block -->
 </div>
 </div>
 
@@ -4731,7 +4734,7 @@ svg.jar{width:52px;height:72px;}
     <span class="streak-val" id="streak-val">0</span>
     <span class="streak-shields" id="streak-shields"></span>
   </div>
-  <button class="drive-act-btn" id="drive-btn">⚙️ Drive</button>
+  <button class="drive-act-btn" id="drive-btn" style="display:none">⚙️ Drive</button>
 </div>
 
 <div class="nadvorí-hero">
@@ -5052,7 +5055,7 @@ svg.jar{width:52px;height:72px;}
       <button class="sec-action-btn" id="import-btn">Importovat</button>
       <input type="file" id="import-input" accept=".json" style="display:none"/>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+    <div style="display:none;align-items:center;gap:10px;padding:8px 0;">
       <span style="font-size:19px;">☁️</span>
       <span style="flex:1;font-size:12px;color:var(--sand);opacity:.75;" id="drive-settings-label">Drive nepřipojen</span>
       <button class="sec-action-btn" id="toggle-drive-btn">Připojit</button>
@@ -5308,7 +5311,7 @@ svg.jar{width:52px;height:72px;}
     <!-- Export / Import / Drive / Reset -->
     <div class="admin-card admin-card-drive">
       <div class="admin-card-title">⚙️ Data &amp; Zálohy</div>
-      <div class="admin-drive-row">
+      <div class="admin-drive-row" style="display:none">
         <span class="admin-drive-ico">☁️</span>
         <span class="admin-drive-lbl" id="adm-drive-lbl">Google Drive nepřipojen</span>
         <button class="admin-drive-btn" id="adm-drive-btn">Připojit</button>
@@ -5342,7 +5345,7 @@ svg.jar{width:52px;height:72px;}
       </div>
       <div class="admin-reset-confirm" id="adm-reset-confirm">
         ⚠️ Opravdu smazat vše? Tato akce je nevratná!<br>
-        Záloha na Drive nebude smazána.
+        Exportované soubory záloh nebudou smazány.
         <div class="admin-reset-confirm-btns">
           <button class="admin-reset-no" id="adm-reset-no">Zrušit</button>
           <button class="admin-reset-yes" id="adm-reset-yes">Smazat vše!</button>
@@ -5908,6 +5911,9 @@ const STEP_COLORS = [
 
 const DRIVE_FILENAME = 'babylon_pokladnice_v3.json';
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+// Google Drive záloha je pro 1. vydání na Google Play vypnutá (Rodinná politika, appka pro děti 6–10).
+// Zálohy fungují přes export/import souboru a týdenní body obnovy v zařízení.
+const DRIVE_ENABLED = false;
 
 /* ═══ STATE ═══ */
 const DEFAULT_STATE = () => ({
@@ -6257,6 +6263,7 @@ function setDriveStatus(type, text) {
   if (span) { span.textContent = text; }
 }
 function initTokenClient(cid) {
+  if (!DRIVE_ENABLED) return;
   if (!window.google?.accounts?.oauth2) return;
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: cid, scope: DRIVE_SCOPE,
@@ -7893,7 +7900,7 @@ if (state.user.name) {
 
 // GIS init
 function tryInitGIS() {
-  if (window.google?.accounts?.oauth2 && clientId) {
+  if (DRIVE_ENABLED && window.google?.accounts?.oauth2 && clientId) {
     initTokenClient(clientId);
     tokenClient.requestAccessToken({prompt:''});
   }

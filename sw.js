@@ -3,7 +3,7 @@
 // Network-first pro HTML (vždy čerstvé), cache-first pro assets
 // ═══════════════════════════════════════════════════════
 
-const VERSION = 'v2.32.0'; // ← SW dieta: precache jen shell (atomicky), těžké assety best-effort + runtime cache
+const VERSION = 'v2.33.0'; // ← SW dieta: precache jen shell (atomicky), těžké assety best-effort + runtime cache
 const CACHE = `strazce-${VERSION}`;
 
 // ═══ CORE — kritický shell aplikace ═══
